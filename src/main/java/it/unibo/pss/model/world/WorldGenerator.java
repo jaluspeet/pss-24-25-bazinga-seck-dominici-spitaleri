@@ -17,9 +17,9 @@ public final class WorldGenerator {
 	private static final List<World.Tile> lakeCenters = new ArrayList<>();
 
 	// Water generation parameters
-	private static final double MAP_WATER_RATIO = 0.4;  // fraction of map that should be water
-	private static final double LAKE_WATER_RATIO = 0.7; // fraction of water allocated to lakes (rivers get the remainder)
-	private static final int DEFAULT_NUM_LAKES = 6;       // fixed number of lakes
+	private static final double MAP_WATER_RATIO = 0.4;
+	private static final double LAKE_WATER_RATIO = 0.7;
+	private static final int DEFAULT_NUM_LAKES = 6;
 
 	private WorldGenerator() {}
 
@@ -39,7 +39,6 @@ public final class WorldGenerator {
 		for (int i = 0; i < DEFAULT_NUM_LAKES; i++) {
 			int centerX = random.nextInt(width - 4) + 2;  // avoid edges
 			int centerY = random.nextInt(height - 4) + 2;
-			// Vary lake size a bit around the target
 			int actualLakeSize = (int) (lakeTargetSize * (0.8 + 0.4 * random.nextDouble()));
 			createLake(grid, centerX, centerY, actualLakeSize);
 			lakeCenters.add(grid.getTile(centerX, centerY));

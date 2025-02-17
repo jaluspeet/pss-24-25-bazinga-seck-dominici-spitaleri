@@ -3,6 +3,7 @@ package it.unibo.pss.model;
 import java.util.ArrayList;
 import java.util.List;
 import it.unibo.pss.controller.model.ModelObserver;
+import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.entity.EntityGenerator;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.model.world.WorldGenerator;
@@ -51,9 +52,15 @@ public class Model {
 		observers.forEach(ModelObserver::onModelUpdated);
 	}
 
-	/** Updates the simulation logic and notifies observers. */
 	private void updateSimulation() {
-		// TODO: Implement simulation update logic
+		// Gather and update all entities in the grid.
+		for (int x = 0; x < grid.getWidth(); x++) {
+			for (int y = 0; y < grid.getHeight(); y++) {
+				for (BasicEntity entity : new java.util.ArrayList<>(grid.getTile(x, y).getEntities())) {
+					entity.update();
+				}
+			}
+		}
 		notifyObservers();
 	}
 }
