@@ -8,7 +8,7 @@ import java.util.List;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
-/** A canvas that applies camera transforms and geometry rendering. */
+/** A canvas that delegates camera transformations to the renderer. */
 public class Viewport extends Canvas {
 
 	private final List<Renderable> renderables = new ArrayList<>();
@@ -32,18 +32,15 @@ public class Viewport extends Canvas {
 		this.currentModelDTO = modelDTO;
 	}
 
-	/** Clears the canvas and renders all registered views using camera and geometry renderer. */
+	/** Clears the canvas and renders all registered views. */
 	public void render(ModelDTO modelDTO) {
 		setModelDTO(modelDTO);
 		GraphicsContext gc = getGraphicsContext2D();
 		gc.clearRect(0, 0, getWidth(), getHeight());
-		gc.save();
-		gc.scale(camera.getScale(), camera.getScale());
-		gc.translate(-camera.getPanX(), -camera.getPanY());
+		// Removed gc.save(), scale() and translate() so the viewport stays fixed.
 		for (Renderable r : renderables) {
 			r.render(gc, modelDTO, camera, geometryRenderer);
 		}
-		gc.restore();
 	}
 
 	public Camera getCamera() {

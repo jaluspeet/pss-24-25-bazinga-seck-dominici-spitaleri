@@ -3,26 +3,26 @@ package it.unibo.pss.model;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import it.unibo.pss.model.world.WorldGrid;
-import it.unibo.pss.model.world.WorldGridGenerator;
+import it.unibo.pss.model.world.World;
+import it.unibo.pss.model.world.WorldGenerator;
 
 class WorldGridGeneratorTest {
 
 	@Test
 	void testGridGeneration() {
-		WorldGrid grid = WorldGridGenerator.generateGrid(20, 20);
+		World grid = WorldGenerator.generateGrid(20, 20);
 		assertEquals(20, grid.getWidth());
 		assertEquals(20, grid.getHeight());
 	}
 
 	@Test
 	void testGeneratedTerrainContainsWater() {
-		WorldGrid grid = WorldGridGenerator.generateGrid(20, 20);
+		World grid = WorldGenerator.generateGrid(20, 20);
 		boolean hasWater = false;
 
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
-				if (grid.getTile(x, y).getType() == WorldGrid.Tile.TileType.WATER) {
+				if (grid.getTile(x, y).getType() == World.Tile.TileType.WATER) {
 					hasWater = true;
 					break;
 				}
@@ -34,16 +34,16 @@ class WorldGridGeneratorTest {
 
 	@Test
 	void testGeneratedRivers() {
-		WorldGrid grid = WorldGridGenerator.generateGrid(20, 20);
+		World grid = WorldGenerator.generateGrid(20, 20);
 		boolean hasContinuousWater = false;
 
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
-				WorldGrid.Tile tile = grid.getTile(x, y);
-				if (tile.getType() == WorldGrid.Tile.TileType.WATER) {
+				World.Tile tile = grid.getTile(x, y);
+				if (tile.getType() == World.Tile.TileType.WATER) {
 					// Check if there is at least one adjacent water tile
 					long waterNeighbors = grid.getTilesInRange(x, y, 1).stream()
-							.filter(t -> t.getType() == WorldGrid.Tile.TileType.WATER)
+							.filter(t -> t.getType() == World.Tile.TileType.WATER)
 							.count();
 					if (waterNeighbors > 0) {
 						hasContinuousWater = true;

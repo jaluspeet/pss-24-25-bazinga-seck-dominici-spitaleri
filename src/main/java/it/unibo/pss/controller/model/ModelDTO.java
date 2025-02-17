@@ -1,17 +1,17 @@
 package it.unibo.pss.controller.model;
 
-import it.unibo.pss.model.world.WorldGrid;
+import it.unibo.pss.model.world.World;
 
 /** DTO for transferring model data to the view. */
 public class ModelDTO {
-	private final WorldGrid grid;
+	private final World grid;
 
-	public ModelDTO(WorldGrid grid) {
+	public ModelDTO(World grid) {
 		this.grid = grid;
 	}
 
 	/** Returns the world grid. */
-	public WorldGrid getGrid() {
+	public World getGrid() {
 		return grid;
 	}
 }

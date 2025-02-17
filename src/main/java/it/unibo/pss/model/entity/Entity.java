@@ -2,16 +2,16 @@ package it.unibo.pss.model.entity;
 
 import java.util.List;
 
-import it.unibo.pss.model.world.WorldGrid;
+import it.unibo.pss.model.world.World;
 
 /** Represents an entity in the simulation. */
 public abstract class Entity {
 
 	protected int x;
 	protected int y;
-	protected final WorldGrid grid;
+	protected final World grid;
 
-	public Entity(WorldGrid grid, int x, int y) {
+	public Entity(World grid, int x, int y) {
 		this.grid = grid;
 		this.x = x;
 		this.y = y;
@@ -19,7 +19,7 @@ public abstract class Entity {
 	}
 
 	/** Returns the tiles surrounding this entity within the given range. */
-	public List<WorldGrid.Tile> getSurroundingTiles(int range) {
+	public List<World.Tile> getSurroundingTiles(int range) {
 		return grid.getTilesInRange(x, y, range);
 	}
 

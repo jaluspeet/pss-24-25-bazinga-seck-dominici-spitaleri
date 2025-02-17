@@ -3,7 +3,7 @@ package it.unibo.pss.view;
 import it.unibo.pss.controller.model.ModelDTO;
 import it.unibo.pss.view.components.Viewport;
 import it.unibo.pss.view.views.EntityView;
-import it.unibo.pss.view.views.ModelView;
+import it.unibo.pss.view.views.WorldView;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -19,7 +19,7 @@ public class View {
 		this.modelDTO = modelDTO;
 		stage.setTitle(title);
 		Viewport viewport = new Viewport(width, height);
-		viewport.registerRenderable(new ModelView());
+		viewport.registerRenderable(new WorldView());
 		viewport.registerRenderable(new EntityView());
 
 		StackPane root = new StackPane(viewport);

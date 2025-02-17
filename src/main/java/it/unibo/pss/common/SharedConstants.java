@@ -28,7 +28,7 @@ public final class SharedConstants {
 	public static final int WINDOW_HEIGHT = getInt("window.height", 600);
 	public static final String WINDOW_TITLE = getString("enable.logging", "pss-javafx");
 	public static final int WORLDGRID_WIDTH = getInt("worldgrid.width", 32);
-	public static final int WORLDGRID_HEIGHT = getInt("worldgrid.height", 24);
+	public static final int WORLDGRID_HEIGHT = getInt("worldgrid.height", 32);
 
 	// parsing methods
 	private SharedConstants() {}

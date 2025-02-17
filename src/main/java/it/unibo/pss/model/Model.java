@@ -2,38 +2,41 @@ package it.unibo.pss.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import it.unibo.pss.controller.model.ModelObserver;
 import it.unibo.pss.model.entity.EntityGenerator;
-import it.unibo.pss.model.world.WorldGrid;
-import it.unibo.pss.model.world.WorldGridGenerator;
+import it.unibo.pss.model.world.World;
+import it.unibo.pss.model.world.WorldGenerator;
+import javafx.animation.AnimationTimer;
 
 public class Model {
 
-	private final WorldGrid grid;
+	private final World grid;
 	private final List<ModelObserver> observers = new ArrayList<>();
-	private final Timer timer = new Timer(true); // Daemon timer
 	private static final int ENTITY_COUNT = 20;
+	private AnimationTimer timer;
+	private long lastUpdate = 0;
+	private static final long UPDATE_INTERVAL = 500_000_000; // 500ms in nanoseconds
 
 	public Model(int width, int height) {
-		this.grid = WorldGridGenerator.generateGrid(width, height);
+		this.grid = WorldGenerator.generateGrid(width, height);
 		EntityGenerator.generateEntities(grid, ENTITY_COUNT);
-		// Schedule model updates every 500ms
-		timer.scheduleAtFixedRate(new TimerTask() {
+		timer = new AnimationTimer() {
 			@Override
-			public void run() {
-				updateSimulation();
+			public void handle(long now) {
+				if (now - lastUpdate >= UPDATE_INTERVAL) {
+					updateSimulation();
+					lastUpdate = now;
+				}
 			}
-		}, 0, 500);
+		};
+		timer.start();
 	}
 
-	public WorldGrid getGrid() {
+	public World getGrid() {
 		return grid;
 	}
 
-	/** Adds an observer to listen for model updates. */
+	/** Adds an observer. */
 	public void addObserver(ModelObserver observer) {
 		observers.add(observer);
 	}
@@ -45,9 +48,7 @@ public class Model {
 
 	/** Notifies observers when the model updates. */
 	private void notifyObservers() {
-		for (ModelObserver observer : observers) {
-			observer.onModelUpdated();
-		}
+		observers.forEach(ModelObserver::onModelUpdated);
 	}
 
 	/** Updates the simulation logic and notifies observers. */

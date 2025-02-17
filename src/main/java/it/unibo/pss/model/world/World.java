@@ -6,13 +6,13 @@ import java.util.List;
 import it.unibo.pss.model.entity.Entity;
 
 /** Represents the world grid containing tiles. */
-public class WorldGrid {
+public class World {
 
 	private final int width;
 	private final int height;
 	private final Tile[][] tiles;
 
-	public WorldGrid(int width, int height) {
+	public World(int width, int height) {
 		this.width = width;
 		this.height = height;
 		this.tiles = new Tile[width][height];
