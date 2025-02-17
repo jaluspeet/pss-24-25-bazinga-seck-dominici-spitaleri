@@ -16,10 +16,12 @@ public abstract class Entity {
 		grid.getTile(x, y).addEntity(this);
 	}
 
+	/** Returns the tiles surrounding this entity within the given range. */
 	public List<WorldGrid.Tile> getSurroundingTiles(int range) {
 		return grid.getTilesInRange(x, y, range);
 	}
 
+	/** Moves the entity to the given coordinates. */
 	public void moveTo(int newX, int newY) {
 		grid.getTile(x, y).removeEntity(this);
 		this.x = newX;
