@@ -4,48 +4,48 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * Loads configuration settings from a properties file and defines shared constants.
- */
+/** Loads configuration settings from a properties file. */
 public final class SharedConstants {
 
-	private static final String CONFIG_FILE = "/config.properties";
 	private static final Properties PROPERTIES = new Properties();
 
 	static {
-		try (InputStream input = SharedConstants.class.getResourceAsStream(CONFIG_FILE)) {
+		try (InputStream input = SharedConstants.class.getResourceAsStream("/config.properties")) {
 			if (input == null) {
-				throw new IOException("Configuration file not found: " + CONFIG_FILE);
+				throw new IllegalStateException("Configuration file not found: /config.properties");
 			}
 			PROPERTIES.load(input);
 		} catch (IOException e) {
-			throw new ExceptionInInitializerError("Failed to load configuration: " + e.getMessage());
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 
-	// shared constants
-	public static final int WINDOW_WIDTH = getInt("window.width", 800);
-	public static final int WINDOW_HEIGHT = getInt("window.height", 600);
-	public static final String WINDOW_TITLE = getString("enable.logging", "pss-javafx");
-	public static final int WORLDGRID_WIDTH = getInt("worldgrid.width", 32);
-	public static final int WORLDGRID_HEIGHT = getInt("worldgrid.height", 32);
+	public static final String WINDOW_TITLE = PROPERTIES.getProperty("window.title", "pss-javafx");
+	public static final int WINDOW_WIDTH = Integer.parseInt(PROPERTIES.getProperty("window.width", "800"));
+	public static final int WINDOW_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("window.height", "600"));
+	
+	public static final int WORLD_WIDTH = Integer.parseInt(PROPERTIES.getProperty("world.width", "32"));
+	public static final int WORLD_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("world.height", "32"));
+	public static final double WORLD_WATER_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.water.ratio", "0.4"));
+	public static final double WORLD_LAKE_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.lake.ratio", "0.7"));
+	public static final int WORLD_LAKE_COUNT = Integer.parseInt(PROPERTIES.getProperty("world.lake.count", "6"));
+	
+	public static final int ENTITY_COUNT = Integer.parseInt(PROPERTIES.getProperty("entity.count", "20"));
 
-	// parsing methods
+	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));
+	public static final double CAMERA_FRICTION = Double.parseDouble(PROPERTIES.getProperty("camera.friction", "0.9"));
+	public static final double CAMERA_INERTIA_THRESHOLD = Double.parseDouble(PROPERTIES.getProperty("camera.inertia.threshold", "0.01"));
+	public static final double CAMERA_ZOOM_BASE = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.base", "1.1"));
+	public static final double CAMERA_ZOOM_SMOOTHING = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.smoothing", "0.1"));
+	public static final double CAMERA_MIN_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.min.scale", "0.1"));
+	public static final double CAMERA_MAX_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.max.scale", "10.0"));
+	public static final int CAMERA_FRAMERATE = Integer.parseInt(PROPERTIES.getProperty("camera.framerate", "60"));
+	
+	public static final double TILE_WIDTH = Double.parseDouble(PROPERTIES.getProperty("tile.width", "64"));
+	public static final double TILE_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("tile.height", "32"));
+	public static final double SPRITE_WIDTH = Double.parseDouble(PROPERTIES.getProperty("image.width", "64"));
+	public static final double SPRITE_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("image.height", "64"));
+	public static final double FOOTPRINT_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("footprint.height", "32"));
+
 	private SharedConstants() {}
-
-	protected static int getInt(String key, int defaultValue) {
-		return PROPERTIES.containsKey(key) ? Integer.parseInt(PROPERTIES.getProperty(key)) : defaultValue;
-	}
-
-	protected static double getDouble(String key, double defaultValue) {
-		return PROPERTIES.containsKey(key) ? Double.parseDouble(PROPERTIES.getProperty(key)) : defaultValue;
-	}
-
-	private static boolean getBoolean(String key, boolean defaultValue) {
-		return PROPERTIES.containsKey(key) ? Boolean.parseBoolean(PROPERTIES.getProperty(key)) : defaultValue;
-	}
-
-	private static String getString(String key, String defaultValue) {
-		return PROPERTIES.containsKey(key) ? PROPERTIES.getProperty(key) : defaultValue;
-	}
 }

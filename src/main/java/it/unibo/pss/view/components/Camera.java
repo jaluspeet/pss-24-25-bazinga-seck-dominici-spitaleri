@@ -8,6 +8,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.canvas.Canvas;
 import javafx.util.Duration;
+import it.unibo.pss.common.SharedConstants;
 
 /** Manages camera panning and zooming. */
 public class Camera {
@@ -21,22 +22,13 @@ public class Camera {
 	private final Runnable updateCallback;
 	private final Timeline inertiaTimer;
 
-	private final static double CAMERA_SENSITIVITY = 0.5;
-	private final static double CAMERA_FRICTION = 0.9;
-	private final static double CAMERA_INERTIA_THRESHOLD = 0.01;
-	private final static double CAMERA_ZOOM_BASE = 1.1;
-	private final static double CAMERA_ZOOM_SMOOTHING = 0.1;
-	private final static double CAMERA_MIN_SCALE = 0.1;
-	private final static double CAMERA_MAX_SCALE = 10.0;
-	private final static double CAMERA_FRAME_DURATION = 1000.0 / 60.0;
-
 	public Camera(Canvas target, Runnable updateCallback) {
 		this.target = target;
 		this.updateCallback = updateCallback;
 		this.viewportWidth = target.getWidth();
 		this.viewportHeight = target.getHeight();
 		attachEventHandlers();
-		inertiaTimer = new Timeline(new KeyFrame(Duration.millis(CAMERA_FRAME_DURATION), e -> updateInertia()));
+		inertiaTimer = new Timeline(new KeyFrame(Duration.millis(1000 / SharedConstants.CAMERA_FRAMERATE), e -> updateInertia()));
 		inertiaTimer.setCycleCount(Timeline.INDEFINITE);
 		inertiaTimer.play();
 	}
@@ -49,17 +41,17 @@ public class Camera {
 
 	private void handleScroll(ScrollEvent event) {
 		if (event.isControlDown()) {
-			double zoomFactor = event.getDeltaY() > 0 ? CAMERA_ZOOM_BASE : 1 / CAMERA_ZOOM_BASE;
+			double zoomFactor = event.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
 			targetScale *= zoomFactor;
-			if (targetScale < CAMERA_MIN_SCALE) {
-				targetScale = CAMERA_MIN_SCALE;
-			} else if (targetScale > CAMERA_MAX_SCALE) {
-				targetScale = CAMERA_MAX_SCALE;
+			if (targetScale < SharedConstants.CAMERA_MIN_SCALE) {
+				targetScale = SharedConstants.CAMERA_MIN_SCALE;
+			} else if (targetScale > SharedConstants.CAMERA_MAX_SCALE) {
+				targetScale = SharedConstants.CAMERA_MAX_SCALE;
 			}
 			updateCallback.run();
 		} else {
-			double deltaX = event.getDeltaX() / scale * CAMERA_SENSITIVITY;
-			double deltaY = event.getDeltaY() / scale * CAMERA_SENSITIVITY;
+			double deltaX = event.getDeltaX() / scale * SharedConstants.CAMERA_SENSITIVITY;
+			double deltaY = event.getDeltaY() / scale * SharedConstants.CAMERA_SENSITIVITY;
 			panX += deltaX;
 			panY += deltaY;
 			updateCallback.run();
@@ -80,8 +72,8 @@ public class Camera {
 		if (event.getButton() == MouseButton.MIDDLE) {
 			double dx = event.getX() - lastMouseX;
 			double dy = event.getY() - lastMouseY;
-			double worldDeltaX = (dx / scale) * CAMERA_SENSITIVITY;
-			double worldDeltaY = (dy / scale) * CAMERA_SENSITIVITY;
+			double worldDeltaX = (dx / scale) * SharedConstants.CAMERA_SENSITIVITY;
+			double worldDeltaY = (dy / scale) * SharedConstants.CAMERA_SENSITIVITY;
 			panX += worldDeltaX;
 			panY += worldDeltaY;
 			velocityX = worldDeltaX;
@@ -94,15 +86,15 @@ public class Camera {
 
 	private void updateInertia() {
 		boolean updated = false;
-		if (Math.abs(velocityX) > CAMERA_INERTIA_THRESHOLD || Math.abs(velocityY) > CAMERA_INERTIA_THRESHOLD) {
+		if (Math.abs(velocityX) > SharedConstants.CAMERA_INERTIA_THRESHOLD || Math.abs(velocityY) > SharedConstants.CAMERA_INERTIA_THRESHOLD) {
 			panX += velocityX;
 			panY += velocityY;
-			velocityX *= CAMERA_FRICTION;
-			velocityY *= CAMERA_FRICTION;
+			velocityX *= SharedConstants.CAMERA_FRICTION;
+			velocityY *= SharedConstants.CAMERA_FRICTION;
 			updated = true;
 		}
 		if (Math.abs(targetScale - scale) > 0.001) {
-			scale += (targetScale - scale) * CAMERA_ZOOM_SMOOTHING;
+			scale += (targetScale - scale) * SharedConstants.CAMERA_ZOOM_SMOOTHING;
 			updated = true;
 		}
 		if (updated) {

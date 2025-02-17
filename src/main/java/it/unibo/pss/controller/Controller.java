@@ -19,7 +19,7 @@ public class Controller extends Application implements ModelObserver {
 	public void start(Stage stage) {
 
 		// model initialization
-		this.model = new Model(SharedConstants.WORLDGRID_WIDTH, SharedConstants.WORLDGRID_HEIGHT);
+		this.model = new Model(SharedConstants.WORLD_WIDTH, SharedConstants.WORLD_HEIGHT);
 		this.modelDTO = new ModelDTO(this.model.getGrid());
 		this.model.addObserver(this);
 

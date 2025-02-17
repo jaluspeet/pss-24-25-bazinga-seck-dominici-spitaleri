@@ -8,19 +8,20 @@ import it.unibo.pss.model.entity.EntityGenerator;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.model.world.WorldGenerator;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
+import it.unibo.pss.common.SharedConstants;
 
 public class Model {
 
 	private final World grid;
 	private final List<ModelObserver> observers = new ArrayList<>();
-	private static final int ENTITY_COUNT = 20;
 	private AnimationTimer timer;
 	private long lastUpdate = 0;
 	private static final long UPDATE_INTERVAL = 500_000_000; // 500ms in nanoseconds
 
 	public Model(int width, int height) {
 		this.grid = WorldGenerator.generateGrid(width, height);
-		EntityGenerator.generateEntities(grid, ENTITY_COUNT);
+		EntityGenerator.generateEntities(grid, SharedConstants.ENTITY_COUNT);
 		timer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
@@ -49,11 +50,10 @@ public class Model {
 
 	/** Notifies observers when the model updates. */
 	private void notifyObservers() {
-		observers.forEach(ModelObserver::onModelUpdated);
+		Platform.runLater(() -> observers.forEach(ModelObserver::onModelUpdated));
 	}
 
 	private void updateSimulation() {
-		// Gather and update all entities in the grid.
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
 				for (BasicEntity entity : new java.util.ArrayList<>(grid.getTile(x, y).getEntities())) {

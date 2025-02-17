@@ -1,8 +1,8 @@
 package it.unibo.pss.view.components;
 
 /** Provides methods for computing the visible grid region. */
-public final class CullingHandler {
-	private CullingHandler() { }
+public final class CullingUtil {
+	private CullingUtil() { }
 
 	public static boolean isRectVisible(double left, double top, double width, double height, double canvasWidth, double canvasHeight) {
 		return !(left + width < 0 || left > canvasWidth || top + height < 0 || top > canvasHeight);
