@@ -1,6 +1,6 @@
 package it.unibo.pss.view.views;
 
-import it.unibo.pss.controller.model.ModelDTO;
+import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.view.components.CullingUtil;
 import it.unibo.pss.view.components.Camera;

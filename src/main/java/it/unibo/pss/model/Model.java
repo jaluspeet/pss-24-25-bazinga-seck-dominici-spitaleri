@@ -2,7 +2,7 @@ package it.unibo.pss.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import it.unibo.pss.controller.model.ModelObserver;
+import it.unibo.pss.controller.observer.ModelObserver;
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.entity.EntityGenerator;
 import it.unibo.pss.model.world.World;

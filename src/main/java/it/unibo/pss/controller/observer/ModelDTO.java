@@ -1,4 +1,4 @@
-package it.unibo.pss.controller.model;
+package it.unibo.pss.controller.observer;
 
 import it.unibo.pss.model.world.World;
 

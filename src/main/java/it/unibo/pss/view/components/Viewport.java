@@ -1,6 +1,6 @@
 package it.unibo.pss.view.components;
 
-import it.unibo.pss.controller.model.ModelDTO;
+import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.view.renderer.GeometryRenderer;
 import it.unibo.pss.view.renderer.IsometricRenderer;
 import java.util.ArrayList;

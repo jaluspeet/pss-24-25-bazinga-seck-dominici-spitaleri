@@ -1,8 +1,8 @@
 package it.unibo.pss.controller;
 
 import it.unibo.pss.common.SharedConstants;
-import it.unibo.pss.controller.model.ModelDTO;
-import it.unibo.pss.controller.model.ModelObserver;
+import it.unibo.pss.controller.observer.ModelDTO;
+import it.unibo.pss.controller.observer.ModelObserver;
 import it.unibo.pss.model.Model;
 import it.unibo.pss.view.View;
 import javafx.application.Application;

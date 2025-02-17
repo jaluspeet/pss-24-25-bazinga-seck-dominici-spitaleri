@@ -1,4 +1,4 @@
-package it.unibo.pss.controller.model;
+package it.unibo.pss.controller.observer;
 
 /** Observer interface for model updates. */
 public interface ModelObserver {

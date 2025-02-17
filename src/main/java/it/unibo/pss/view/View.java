@@ -1,6 +1,6 @@
 package it.unibo.pss.view;
 
-import it.unibo.pss.controller.model.ModelDTO;
+import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.view.components.Viewport;
 import it.unibo.pss.view.views.EntityView;
 import it.unibo.pss.view.views.WorldView;
