@@ -3,6 +3,9 @@ package it.unibo.pss.model;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.unibo.pss.model.entity.Entity;
+import it.unibo.pss.model.world.WorldGrid;
+
 class EntityTest {
 
 	static class TestEntity extends Entity {

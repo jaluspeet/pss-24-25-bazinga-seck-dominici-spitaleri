@@ -1,6 +1,8 @@
-package it.unibo.pss.model;
+package it.unibo.pss.model.entity;
 
 import java.util.List;
+
+import it.unibo.pss.model.world.WorldGrid;
 
 /** Represents an entity in the simulation. */
 public abstract class Entity {

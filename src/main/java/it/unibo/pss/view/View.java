@@ -1,9 +1,16 @@
 package it.unibo.pss.view;
 
 import it.unibo.pss.controller.model.ModelDTO;
+import it.unibo.pss.view.components.Viewport;
+import it.unibo.pss.view.views.EntityView;
+import it.unibo.pss.view.views.ModelView;
 import javafx.animation.AnimationTimer;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+/** Initializes the viewport and registers sub-views for rendering. */
 public class View {
 
 	private ModelDTO modelDTO;
@@ -11,19 +18,25 @@ public class View {
 	public View(Stage stage, String title, int width, int height, ModelDTO modelDTO) {
 		this.modelDTO = modelDTO;
 		stage.setTitle(title);
-		stage.setWidth(width);
-		stage.setHeight(height);
+		Viewport viewport = new Viewport(width, height);
+		viewport.registerRenderable(new ModelView());
+		viewport.registerRenderable(new EntityView());
+
+		StackPane root = new StackPane(viewport);
+		Scene scene = new Scene(root, width, height);
+		stage.setScene(scene);
+		scene.setFill(Color.BLACK);
 		stage.show();
 
-		startRendering();
+		startRendering(viewport);
 	}
 
 	/** Starts the AnimationTimer for rendering updates. */
-	private void startRendering() {
+	private void startRendering(Viewport viewport) {
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				refreshView();
+				viewport.render(modelDTO);
 			}
 		}.start();
 	}
@@ -31,11 +44,5 @@ public class View {
 	/** Updates the model data in the view. */
 	public void updateModel(ModelDTO newModelDTO) {
 		this.modelDTO = newModelDTO;
-	}
-
-	/** Refreshes the view based on the latest model data. */
-	private void refreshView() {
-		// TODO: Implement graphical rendering logic
-		System.out.println(modelDTO.getGrid());
 	}
 }

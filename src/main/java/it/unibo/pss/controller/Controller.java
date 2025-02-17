@@ -34,6 +34,11 @@ public class Controller extends Application implements ModelObserver {
 		this.view.updateModel(modelDTO);
 	}
 
+	/* Returns the latest ModelDTO from the model. */
+	public ModelDTO getLatestModelDTO() {
+		return new ModelDTO(model.getGrid());
+	}
+
 	/* main method */
 	public static void main(String[] args) {
 		launch(args);

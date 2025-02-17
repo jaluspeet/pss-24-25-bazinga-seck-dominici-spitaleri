@@ -3,6 +3,9 @@ package it.unibo.pss.model;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.unibo.pss.model.world.WorldGrid;
+import it.unibo.pss.model.world.WorldGridGenerator;
+
 class WorldGridGeneratorTest {
 
 	@Test

@@ -1,7 +1,9 @@
-package it.unibo.pss.model;
+package it.unibo.pss.model.world;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import it.unibo.pss.model.entity.Entity;
 
 /** Represents the world grid containing tiles. */
 public class WorldGrid {

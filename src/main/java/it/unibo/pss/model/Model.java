@@ -1,20 +1,25 @@
 package it.unibo.pss.model;
 
-import it.unibo.pss.controller.model.ModelObserver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import it.unibo.pss.controller.model.ModelObserver;
+import it.unibo.pss.model.entity.EntityGenerator;
+import it.unibo.pss.model.world.WorldGrid;
+import it.unibo.pss.model.world.WorldGridGenerator;
 
 public class Model {
 
 	private final WorldGrid grid;
 	private final List<ModelObserver> observers = new ArrayList<>();
 	private final Timer timer = new Timer(true); // Daemon timer
+	private static final int ENTITY_COUNT = 20;
 
 	public Model(int width, int height) {
 		this.grid = WorldGridGenerator.generateGrid(width, height);
-
+		EntityGenerator.generateEntities(grid, ENTITY_COUNT);
 		// Schedule model updates every 500ms
 		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override

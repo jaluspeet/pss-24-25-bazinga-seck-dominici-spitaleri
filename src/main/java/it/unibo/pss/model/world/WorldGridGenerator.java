@@ -1,6 +1,13 @@
-package it.unibo.pss.model;
+package it.unibo.pss.model.world;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
 
 /** Utility class to generate and initialize the world grid. */
 public final class WorldGridGenerator {
@@ -23,7 +30,7 @@ public final class WorldGridGenerator {
 	private static void initializeLand(WorldGrid grid) {
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
-				grid.setTile(x, y, grid.new Tile(x, y, WorldGrid.Tile.TileType.LAND)); // ✅ FIX: Pass x, y
+				grid.setTile(x, y, grid.new Tile(x, y, WorldGrid.Tile.TileType.LAND));
 			}
 		}
 	}

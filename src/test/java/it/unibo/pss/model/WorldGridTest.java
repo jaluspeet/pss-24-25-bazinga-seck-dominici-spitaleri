@@ -1,7 +1,12 @@
 package it.unibo.pss.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import it.unibo.pss.model.world.WorldGrid;
 
 class WorldGridTest {
 
