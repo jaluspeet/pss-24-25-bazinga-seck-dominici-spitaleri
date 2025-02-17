@@ -17,7 +17,6 @@ public class Model {
 	private final List<ModelObserver> observers = new ArrayList<>();
 	private AnimationTimer timer;
 	private long lastUpdate = 0;
-	private static final long UPDATE_INTERVAL = 500_000_000; // 500ms in nanoseconds
 
 	public Model(int width, int height) {
 		this.grid = WorldGenerator.generateGrid(width, height);
@@ -25,7 +24,7 @@ public class Model {
 		timer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				if (now - lastUpdate >= UPDATE_INTERVAL) {
+				if (now - lastUpdate >= SharedConstants.MODEL_UPDATE_INTERVAL * 1_000_000) {
 					updateSimulation();
 					lastUpdate = now;
 				}

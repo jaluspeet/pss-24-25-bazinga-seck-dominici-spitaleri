@@ -39,7 +39,9 @@ public final class SharedConstants {
 	public static final double CAMERA_ZOOM_SMOOTHING = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.smoothing", "0.1"));
 	public static final double CAMERA_MIN_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.min.scale", "0.1"));
 	public static final double CAMERA_MAX_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.max.scale", "10.0"));
+	
 	public static final int CAMERA_FRAMERATE = Integer.parseInt(PROPERTIES.getProperty("camera.framerate", "60"));
+	public static final int MODEL_UPDATE_INTERVAL = Integer.parseInt(PROPERTIES.getProperty("model.update.interval", "500"));
 	
 	public static final double TILE_WIDTH = Double.parseDouble(PROPERTIES.getProperty("tile.width", "64"));
 	public static final double TILE_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("tile.height", "32"));

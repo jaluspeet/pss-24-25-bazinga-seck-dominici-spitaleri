@@ -17,13 +17,14 @@ public class View {
 
 	public View(Stage stage, String title, int width, int height, ModelDTO modelDTO) {
 		this.modelDTO = modelDTO;
-		stage.setTitle(title);
 		Viewport viewport = new Viewport(width, height);
 		viewport.registerRenderable(new WorldView());
 		viewport.registerRenderable(new EntityView());
 
 		StackPane root = new StackPane(viewport);
 		Scene scene = new Scene(root, width, height);
+
+		stage.setTitle(title);
 		stage.setScene(scene);
 		scene.setFill(Color.BLACK);
 		stage.show();

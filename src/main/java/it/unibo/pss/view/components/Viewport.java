@@ -37,7 +37,6 @@ public class Viewport extends Canvas {
 		setModelDTO(modelDTO);
 		GraphicsContext gc = getGraphicsContext2D();
 		gc.clearRect(0, 0, getWidth(), getHeight());
-		// Removed gc.save(), scale() and translate() so the viewport stays fixed.
 		for (Renderable r : renderables) {
 			r.render(gc, modelDTO, camera, geometryRenderer);
 		}
