@@ -32,6 +32,10 @@ public final class SharedConstants {
 	
 	public static final int ENTITY_COUNT = Integer.parseInt(PROPERTIES.getProperty("entity.count", "20"));
 	public static final int ANIMAL_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("animal.seek.radius", "5"));
+	public static final int ANIMAL_INITIAL_ENERGY = Integer.parseInt(PROPERTIES.getProperty("animal.initial.energy", "40"));
+	public static final int ANIMAL_ENERGY_THRESHOLD = Integer.parseInt(PROPERTIES.getProperty("animal.energy.threshold", "10"));
+	public static final int ANIMAL_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("animal.energy.restore", "20"));
+	public static final int ANIMAL_REPRODUCTION_COST = Integer.parseInt(PROPERTIES.getProperty("animal.reproduction.cost", "15"));
 
 	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));
 	public static final double CAMERA_FRICTION = Double.parseDouble(PROPERTIES.getProperty("camera.friction", "0.9"));

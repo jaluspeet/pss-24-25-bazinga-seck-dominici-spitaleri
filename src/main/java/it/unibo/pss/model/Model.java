@@ -54,12 +54,14 @@ public class Model {
 
 	// iterate over all entities in the grid and calls their update method
 	private void updateSimulation() {
+		List<BasicEntity> allEntities = new ArrayList<>();
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
-				for (BasicEntity entity : new java.util.ArrayList<>(grid.getTile(x, y).getEntities())) {
-					entity.update();
-				}
+				allEntities.addAll(grid.getTile(x, y).getEntities());
 			}
+		}
+		for (BasicEntity entity : allEntities) {
+			entity.update();
 		}
 		notifyObservers();
 	}
