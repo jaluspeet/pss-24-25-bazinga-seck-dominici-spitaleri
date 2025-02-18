@@ -34,7 +34,11 @@ public class EntityView implements Renderable {
 				Rectangle2D rect = renderer.computeTileRect(x, y, cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
 				if (!CullingUtil.isRectVisible(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight(), canvasWidth, canvasHeight))
 					continue;
+
 				for (BasicEntity entity : tile.getEntities()) {
+					if (!entity.isAlive()) {
+						continue; // Skip dead entities
+					}
 					double centerX = rect.getMinX() + rect.getWidth() / 2;
 					double centerY = rect.getMinY() + rect.getHeight() / 2;
 					Image texture = spriteLoader.getEntityTexture(entity);

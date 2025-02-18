@@ -26,7 +26,7 @@ public class View {
 
 		stage.setTitle(title);
 		stage.setScene(scene);
-		scene.setFill(Color.BLACK);
+		scene.setFill(Color.GREY);
 		stage.show();
 
 		startRendering(viewport);

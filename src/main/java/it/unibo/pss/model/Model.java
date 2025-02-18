@@ -52,6 +52,7 @@ public class Model {
 		Platform.runLater(() -> observers.forEach(ModelObserver::onModelUpdated));
 	}
 
+	// iterate over all entities in the grid and calls their update method
 	private void updateSimulation() {
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {

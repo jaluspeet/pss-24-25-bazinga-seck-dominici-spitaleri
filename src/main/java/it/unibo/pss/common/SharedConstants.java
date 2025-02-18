@@ -31,6 +31,7 @@ public final class SharedConstants {
 	public static final int WORLD_LAKE_COUNT = Integer.parseInt(PROPERTIES.getProperty("world.lake.count", "6"));
 	
 	public static final int ENTITY_COUNT = Integer.parseInt(PROPERTIES.getProperty("entity.count", "20"));
+	public static final int ANIMAL_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("animal.seek.radius", "5"));
 
 	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));
 	public static final double CAMERA_FRICTION = Double.parseDouble(PROPERTIES.getProperty("camera.friction", "0.9"));

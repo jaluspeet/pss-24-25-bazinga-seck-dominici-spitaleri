@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import it.unibo.pss.model.world.World;
 
-class WorldGridTest {
+class WorldTest {
 
 	@Test
 	void testGridInitialization() {

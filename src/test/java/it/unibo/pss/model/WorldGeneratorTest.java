@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.model.world.WorldGenerator;
 
-class WorldGridGeneratorTest {
+class WorldGeneratorTest {
 
 	@Test
 	void testGridGeneration() {
