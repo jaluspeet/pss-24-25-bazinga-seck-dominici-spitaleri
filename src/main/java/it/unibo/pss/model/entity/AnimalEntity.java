@@ -8,17 +8,23 @@ import java.util.Map;
 import java.util.HashMap;
 import it.unibo.pss.common.SharedConstants;
 
-/** An animal entity that seeks food when energy is low and mates when energy is sufficient. */
-public class AnimalEntity extends BasicEntity {
-	private static final Random random = new Random();
-	private int energy;
+/** A generalized animal entity with energy, food-seeking, and mating behavior. */
+public abstract class AnimalEntity extends BasicEntity {
+	protected static final Random random = new Random();
+	protected int energy;
+	protected final int speed;
+	protected static final Map<Integer, List<int[]>> offsetsCache = new HashMap<>();
 
-	private static final Class<? extends BasicEntity> FOOD_TYPE = PlantEntity.class;
-	private static final Class<? extends BasicEntity> MATE_TYPE = AnimalEntity.class;
-	private static final Map<Integer, List<int[]>> offsetsCache = new HashMap<>();  // Cache for precomputed relative offsets for a given radius.
-
-	public AnimalEntity(World grid, int x, int y) {
+	/**
+	 * Constructs an AnimalEntity.
+	 * @param grid the world grid
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param speed the movement speed (in tiles per update)
+	 */
+	public AnimalEntity(World grid, int x, int y, int speed) {
 		super(grid, x, y);
+		this.speed = speed;
 		energy = SharedConstants.ANIMAL_INITIAL_ENERGY;
 	}
 
@@ -36,9 +42,9 @@ public class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	/** Handles behavior when energy is low (seeking food). */
-	private void updateFoodBehavior() {
-		BasicEntity targetFood = findNearestTarget(FOOD_TYPE);
+	/** Food behavior: search for target food and move toward it. */
+	protected void updateFoodBehavior() {
+		BasicEntity targetFood = findNearestTarget(getFoodType());
 		if (targetFood != null) {
 			moveTowards(targetFood.getX(), targetFood.getY());
 			if (this.x == targetFood.getX() && this.y == targetFood.getY()) {
@@ -50,20 +56,20 @@ public class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	/** Handles behavior when energy is sufficient (seeking mate). */
-	private void updateMatingBehavior() {
-		BasicEntity targetMate = findNearestTarget(MATE_TYPE);
+	/** Mating behavior: search for a mate and move toward it. */
+	protected void updateMatingBehavior() {
+		BasicEntity targetMate = findNearestTarget(getMateType());
 		if (targetMate != null && targetMate != this) {
 			moveTowards(targetMate.getX(), targetMate.getY());
 			if (this.x == targetMate.getX() && this.y == targetMate.getY()) {
 				AnimalEntity mate = (AnimalEntity) targetMate;
 				if (this.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-						mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-						this.getId() < mate.getId()) {
+				    mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+				    this.getId() < mate.getId()) {
 					this.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
 					mate.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
-					new AnimalEntity(grid, this.x, this.y);
-						}
+					spawnOffspring();
+				}
 			}
 		} else {
 			moveRandomly();
@@ -74,10 +80,10 @@ public class AnimalEntity extends BasicEntity {
 	 * Finds the nearest target entity of the specified type using Manhattan distance.
 	 * Uses precomputed relative offsets for efficiency.
 	 *
-	 * @param type The class type of the target entity.
-	 * @return The nearest target BasicEntity instance or null if none is found.
+	 * @param type the class type of the target entity
+	 * @return the nearest target entity or null if none found
 	 */
-	private BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
+	protected BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
 		List<int[]> offsets = getOffsetsForRadius(SharedConstants.ANIMAL_SEEK_RADIUS);
 		BasicEntity target = null;
 		int minDistance = Integer.MAX_VALUE;
@@ -86,16 +92,15 @@ public class AnimalEntity extends BasicEntity {
 			int tileY = this.y + offset[1];
 			World.Tile tile = grid.getTile(tileX, tileY);
 			if (tile == null || tile.getEntities().isEmpty())
-				continue; // Early skip if tile is out of bounds or empty
+				continue;
 			int distance = Math.abs(offset[0]) + Math.abs(offset[1]);
 			for (BasicEntity entity : tile.getEntities()) {
 				if (type.isInstance(entity) && entity.isAlive() && entity != this) {
 					if (distance < minDistance) {
 						minDistance = distance;
 						target = entity;
-						if (distance == 1) { // adjacent tile is the best we can get.
+						if (distance == 1)
 							return target;
-						}
 					}
 				}
 			}
@@ -104,12 +109,11 @@ public class AnimalEntity extends BasicEntity {
 	}
 
 	/**
-	 * Returns a cached list of relative offsets for the given radius.
-	 *
-	 * @param range The search radius.
-	 * @return A list of int[] arrays representing (dx, dy) offsets.
+	 * Returns a cached list of (dx,dy) offsets for a given radius.
+	 * @param range the search radius
+	 * @return list of offsets
 	 */
-	private static List<int[]> getOffsetsForRadius(int range) {
+	protected static List<int[]> getOffsetsForRadius(int range) {
 		if (!offsetsCache.containsKey(range)) {
 			List<int[]> offsets = new ArrayList<>();
 			for (int dx = -range; dx <= range; dx++) {
@@ -124,15 +128,18 @@ public class AnimalEntity extends BasicEntity {
 		return offsetsCache.get(range);
 	}
 
-	/** Moves one step toward the target coordinates. */
-	private void moveTowards(int targetX, int targetY) {
+	/**
+	 * Moves one step toward the target coordinates.
+	 * The step length is determined by this entity's speed.
+	 */
+	protected void moveTowards(int targetX, int targetY) {
 		int dx = targetX - this.x;
 		int dy = targetY - this.y;
 		int stepX = 0, stepY = 0;
 		if (Math.abs(dx) > Math.abs(dy)) {
-			stepX = Integer.signum(dx);
+			stepX = Integer.signum(dx) * Math.min(speed, Math.abs(dx));
 		} else if (Math.abs(dy) > 0) {
-			stepY = Integer.signum(dy);
+			stepY = Integer.signum(dy) * Math.min(speed, Math.abs(dy));
 		}
 		int newX = this.x + stepX;
 		int newY = this.y + stepY;
@@ -142,10 +149,10 @@ public class AnimalEntity extends BasicEntity {
 		} else {
 			if (stepX != 0) {
 				stepX = 0;
-				stepY = Integer.signum(dy);
+				stepY = Integer.signum(dy) * Math.min(speed, Math.abs(dy));
 			} else if (stepY != 0) {
 				stepY = 0;
-				stepX = Integer.signum(dx);
+				stepX = Integer.signum(dx) * Math.min(speed, Math.abs(dx));
 			}
 			newX = this.x + stepX;
 			newY = this.y + stepY;
@@ -156,13 +163,15 @@ public class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	/** Performs a random movement. */
-	private void moveRandomly() {
-		int[] dx = { -1, 1, 0, 0 };
-		int[] dy = { 0, 0, -1, 1 };
+	/**
+	 * Performs a random movement scaled by the entity's speed.
+	 */
+	protected void moveRandomly() {
+		int[] dxArr = { -1, 1, 0, 0 };
+		int[] dyArr = { 0, 0, -1, 1 };
 		int index = random.nextInt(4);
-		int newX = this.x + dx[index];
-		int newY = this.y + dy[index];
+		int newX = this.x + dxArr[index] * speed;
+		int newY = this.y + dyArr[index] * speed;
 		World.Tile targetTile = grid.getTile(newX, newY);
 		if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
 			moveTo(newX, newY);
@@ -173,4 +182,9 @@ public class AnimalEntity extends BasicEntity {
 	public void kill() {
 		grid.getTile(x, y).removeEntity(this);
 	}
+
+	// Abstract methods to define food type, mate type, and offspring creation.
+	protected abstract Class<? extends BasicEntity> getFoodType();
+	protected abstract Class<? extends BasicEntity> getMateType();
+	protected abstract void spawnOffspring();
 }

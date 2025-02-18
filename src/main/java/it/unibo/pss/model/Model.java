@@ -19,19 +19,19 @@ public class Model {
 	private long lastUpdate = 0;
 
 	public Model(int width, int height) {
-		this.grid = WorldGenerator.generateGrid(width, height);
-		EntityGenerator.generateEntities(grid, SharedConstants.ENTITY_COUNT);
-		timer = new AnimationTimer() {
-			@Override
-			public void handle(long now) {
-				if (now - lastUpdate >= SharedConstants.MODEL_UPDATE_INTERVAL * 1_000_000) {
-					updateSimulation();
-					lastUpdate = now;
-				}
+	this.grid = WorldGenerator.generateGrid(width, height);
+	EntityGenerator.generateEntities(grid);
+	timer = new AnimationTimer() {
+		@Override
+		public void handle(long now) {
+			if (now - lastUpdate >= SharedConstants.MODEL_UPDATE_INTERVAL * 1_000_000) {
+				updateSimulation();
+				lastUpdate = now;
 			}
-		};
-		timer.start();
-	}
+		}
+	};
+	timer.start();
+}
 
 	public World getGrid() {
 		return grid;

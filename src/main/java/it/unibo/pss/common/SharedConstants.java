@@ -30,12 +30,16 @@ public final class SharedConstants {
 	public static final double WORLD_LAKE_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.lake.ratio", "0.7"));
 	public static final int WORLD_LAKE_COUNT = Integer.parseInt(PROPERTIES.getProperty("world.lake.count", "6"));
 	
-	public static final int ENTITY_COUNT = Integer.parseInt(PROPERTIES.getProperty("entity.count", "20"));
 	public static final int ANIMAL_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("animal.seek.radius", "5"));
 	public static final int ANIMAL_INITIAL_ENERGY = Integer.parseInt(PROPERTIES.getProperty("animal.initial.energy", "40"));
 	public static final int ANIMAL_ENERGY_THRESHOLD = Integer.parseInt(PROPERTIES.getProperty("animal.energy.threshold", "10"));
 	public static final int ANIMAL_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("animal.energy.restore", "20"));
 	public static final int ANIMAL_REPRODUCTION_COST = Integer.parseInt(PROPERTIES.getProperty("animal.reproduction.cost", "15"));
+	public static final int PLANT_COUNT = Integer.parseInt(PROPERTIES.getProperty("plant.count", "20"));
+	public static final int PREY_COUNT = Integer.parseInt(PROPERTIES.getProperty("prey.count", "20"));
+	public static final int PREDATOR_COUNT = Integer.parseInt(PROPERTIES.getProperty("predator.count", "20"));
+	public static final int PREDATOR_SPEED = Integer.parseInt(PROPERTIES.getProperty("predator.speed", "2"));
+	public static final int PREY_SPEED = Integer.parseInt(PROPERTIES.getProperty("prey.speed", "1"));
 
 	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));
 	public static final double CAMERA_FRICTION = Double.parseDouble(PROPERTIES.getProperty("camera.friction", "0.9"));
