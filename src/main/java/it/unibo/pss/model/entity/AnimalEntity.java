@@ -3,6 +3,9 @@ package it.unibo.pss.model.entity;
 import it.unibo.pss.model.world.World;
 import java.util.Random;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import it.unibo.pss.common.SharedConstants;
 
 /** An animal entity that seeks food when energy is low and mates when energy is sufficient. */
@@ -10,9 +13,9 @@ public class AnimalEntity extends BasicEntity {
 	private static final Random random = new Random();
 	private int energy;
 
-	// Generalized target types for food and mating.
 	private static final Class<? extends BasicEntity> FOOD_TYPE = PlantEntity.class;
 	private static final Class<? extends BasicEntity> MATE_TYPE = AnimalEntity.class;
+	private static final Map<Integer, List<int[]>> offsetsCache = new HashMap<>();  // Cache for precomputed relative offsets for a given radius.
 
 	public AnimalEntity(World grid, int x, int y) {
 		super(grid, x, y);
@@ -55,12 +58,12 @@ public class AnimalEntity extends BasicEntity {
 			if (this.x == targetMate.getX() && this.y == targetMate.getY()) {
 				AnimalEntity mate = (AnimalEntity) targetMate;
 				if (this.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-					mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-					this.getId() < mate.getId()) {
+						mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+						this.getId() < mate.getId()) {
 					this.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
 					mate.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
 					new AnimalEntity(grid, this.x, this.y);
-				}
+						}
 			}
 		} else {
 			moveRandomly();
@@ -69,26 +72,56 @@ public class AnimalEntity extends BasicEntity {
 
 	/**
 	 * Finds the nearest target entity of the specified type using Manhattan distance.
+	 * Uses precomputed relative offsets for efficiency.
 	 *
 	 * @param type The class type of the target entity.
 	 * @return The nearest target BasicEntity instance or null if none is found.
 	 */
 	private BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
-		List<World.Tile> surroundingTiles = getSurroundingTiles(SharedConstants.ANIMAL_SEEK_RADIUS);
+		List<int[]> offsets = getOffsetsForRadius(SharedConstants.ANIMAL_SEEK_RADIUS);
 		BasicEntity target = null;
 		int minDistance = Integer.MAX_VALUE;
-		for (World.Tile tile : surroundingTiles) {
+		for (int[] offset : offsets) {
+			int tileX = this.x + offset[0];
+			int tileY = this.y + offset[1];
+			World.Tile tile = grid.getTile(tileX, tileY);
+			if (tile == null || tile.getEntities().isEmpty())
+				continue; // Early skip if tile is out of bounds or empty
+			int distance = Math.abs(offset[0]) + Math.abs(offset[1]);
 			for (BasicEntity entity : tile.getEntities()) {
 				if (type.isInstance(entity) && entity.isAlive() && entity != this) {
-					int distance = Math.abs(entity.getX() - this.x) + Math.abs(entity.getY() - this.y);
 					if (distance < minDistance) {
 						minDistance = distance;
 						target = entity;
+						if (distance == 1) { // adjacent tile is the best we can get.
+							return target;
+						}
 					}
 				}
 			}
 		}
 		return target;
+	}
+
+	/**
+	 * Returns a cached list of relative offsets for the given radius.
+	 *
+	 * @param range The search radius.
+	 * @return A list of int[] arrays representing (dx, dy) offsets.
+	 */
+	private static List<int[]> getOffsetsForRadius(int range) {
+		if (!offsetsCache.containsKey(range)) {
+			List<int[]> offsets = new ArrayList<>();
+			for (int dx = -range; dx <= range; dx++) {
+				for (int dy = -range; dy <= range; dy++) {
+					if (dx == 0 && dy == 0)
+						continue;
+					offsets.add(new int[] { dx, dy });
+				}
+			}
+			offsetsCache.put(range, offsets);
+		}
+		return offsetsCache.get(range);
 	}
 
 	/** Moves one step toward the target coordinates. */
