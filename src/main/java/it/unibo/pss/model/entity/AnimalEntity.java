@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.HashMap;
 import it.unibo.pss.common.SharedConstants;
 
-/** A generalized animal entity with energy, food-seeking, and mating behavior. */
 public abstract class AnimalEntity extends BasicEntity {
 	protected static final Random random = new Random();
 	protected int energy;
@@ -20,7 +19,7 @@ public abstract class AnimalEntity extends BasicEntity {
 	 * @param grid the world grid
 	 * @param x the x coordinate
 	 * @param y the y coordinate
-	 * @param speed the movement speed (in tiles per update)
+	 * @param speed the movement speed (in tiles per move)
 	 */
 	public AnimalEntity(World grid, int x, int y, int speed) {
 		super(grid, x, y);
@@ -28,61 +27,31 @@ public abstract class AnimalEntity extends BasicEntity {
 		energy = SharedConstants.ANIMAL_INITIAL_ENERGY;
 	}
 
+	/**
+	 * The update method sets the state based on energy (if unlocked) then delegates to the current state.
+	 */
 	@Override
 	public void update() {
-		energy--;
-		if (energy <= 0) {
-			kill();
-			return;
-		}
-		if (energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD) {
-			updateFoodBehavior();
-		} else {
-			updateMatingBehavior();
-		}
-	}
-
-	/** Food behavior: search for target food and move toward it. */
-	protected void updateFoodBehavior() {
-		BasicEntity targetFood = findNearestTarget(getFoodType());
-		if (targetFood != null) {
-			moveTowards(targetFood.getX(), targetFood.getY());
-			if (this.x == targetFood.getX() && this.y == targetFood.getY()) {
-				targetFood.kill();
-				energy += SharedConstants.ANIMAL_ENERGY_RESTORE;
+		if(stateLock == 0) {
+			if(energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD) {
+				setState(new EatingState());
+			} else {
+				setState(new MatingState());
 			}
-		} else {
-			moveRandomly();
 		}
-	}
-
-	/** Mating behavior: search for a mate and move toward it. */
-	protected void updateMatingBehavior() {
-		BasicEntity targetMate = findNearestTarget(getMateType());
-		if (targetMate != null && targetMate != this) {
-			moveTowards(targetMate.getX(), targetMate.getY());
-			if (this.x == targetMate.getX() && this.y == targetMate.getY()) {
-				AnimalEntity mate = (AnimalEntity) targetMate;
-				if (this.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-				    mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-				    this.getId() < mate.getId()) {
-					this.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
-					mate.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
-					spawnOffspring();
-				}
-			}
-		} else {
-			moveRandomly();
-		}
+		super.update();
 	}
 
 	/**
-	 * Finds the nearest target entity of the specified type using Manhattan distance.
-	 * Uses precomputed relative offsets for efficiency.
-	 *
-	 * @param type the class type of the target entity
-	 * @return the nearest target entity or null if none found
+	 * Overrides moveTo to deduct movement energy.
 	 */
+	@Override
+	public void moveTo(int newX, int newY) {
+		super.moveTo(newX, newY);
+		energy--;
+	}
+
+	/** Finds the nearest target entity of the given type using Manhattan distance. */
 	protected BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
 		List<int[]> offsets = getOffsetsForRadius(SharedConstants.ANIMAL_SEEK_RADIUS);
 		BasicEntity target = null;
@@ -108,11 +77,7 @@ public abstract class AnimalEntity extends BasicEntity {
 		return target;
 	}
 
-	/**
-	 * Returns a cached list of (dx,dy) offsets for a given radius.
-	 * @param range the search radius
-	 * @return list of offsets
-	 */
+	/** Returns a cached list of (dx,dy) offsets for a given radius. */
 	protected static List<int[]> getOffsetsForRadius(int range) {
 		if (!offsetsCache.containsKey(range)) {
 			List<int[]> offsets = new ArrayList<>();
@@ -128,10 +93,7 @@ public abstract class AnimalEntity extends BasicEntity {
 		return offsetsCache.get(range);
 	}
 
-	/**
-	 * Moves one step toward the target coordinates.
-	 * The step length is determined by this entity's speed.
-	 */
+	/** Moves one step toward the target coordinates. */
 	protected void moveTowards(int targetX, int targetY) {
 		int dx = targetX - this.x;
 		int dy = targetY - this.y;
@@ -163,9 +125,7 @@ public abstract class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	/**
-	 * Performs a random movement scaled by the entity's speed.
-	 */
+	/** Performs a random movement scaled by speed. */
 	protected void moveRandomly() {
 		int[] dxArr = { -1, 1, 0, 0 };
 		int[] dyArr = { 0, 0, -1, 1 };
@@ -178,13 +138,61 @@ public abstract class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	@Override
-	public void kill() {
-		grid.getTile(x, y).removeEntity(this);
-	}
-
-	// Abstract methods to define food type, mate type, and offspring creation.
+	/** Abstract methods to define food type, mate type, and offspring creation. */
 	protected abstract Class<? extends BasicEntity> getFoodType();
 	protected abstract Class<? extends BasicEntity> getMateType();
 	protected abstract void spawnOffspring();
+
+	/** EATING state. */
+	public static class EatingState implements EntityState {
+		@Override
+		public void execute(BasicEntity entity) {
+			AnimalEntity a = (AnimalEntity) entity;
+			BasicEntity targetFood = a.findNearestTarget(a.getFoodType());
+			if (targetFood != null) {
+				a.moveTowards(targetFood.getX(), targetFood.getY());
+				if (a.x == targetFood.getX() && a.y == targetFood.getY()) {
+					targetFood.kill();
+					a.energy += SharedConstants.ANIMAL_ENERGY_RESTORE;
+				}
+			} else {
+				a.moveRandomly();
+			}
+			a.setState(new IdleState());
+		}
+		@Override
+		public String getName() {
+			return "EATING";
+		}
+	}
+
+	/** MATING state. */
+	public static class MatingState implements EntityState {
+		@Override
+		public void execute(BasicEntity entity) {
+			AnimalEntity a = (AnimalEntity) entity;
+			BasicEntity mateEntity = a.findNearestTarget(a.getMateType());
+			if(mateEntity != null && mateEntity != a) {
+				a.moveTowards(mateEntity.getX(), mateEntity.getY());
+				if(a.x == mateEntity.getX() && a.y == mateEntity.getY()) {
+					AnimalEntity mate = (AnimalEntity) mateEntity;
+					if(a.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+							mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+							a.getId() < mate.getId()) {
+						a.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
+						mate.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
+						a.spawnOffspring();
+						mate.spawnOffspring();
+							}
+				}
+			} else {
+				a.moveRandomly();
+			}
+			a.setState(new IdleState());
+		}
+		@Override
+		public String getName() {
+			return "MATING";
+		}
+	}
 }

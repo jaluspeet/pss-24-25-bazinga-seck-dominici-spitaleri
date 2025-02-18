@@ -1,60 +1,29 @@
 package it.unibo.pss.model.entity;
 
 import it.unibo.pss.model.world.World;
-import java.util.List;
 import it.unibo.pss.common.SharedConstants;
 
-/** A prey entity that uses PlantEntity as food, reproduces with other PreyEntity, and flees from predators. */
 public class PreyEntity extends AnimalEntity {
 
+	/**
+	 * Constructs a PreyEntity.
+	 * @param grid the world grid
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
 	public PreyEntity(World grid, int x, int y) {
-		// Use a speed specific to prey.
 		super(grid, x, y, SharedConstants.PREY_SPEED);
 	}
 
 	@Override
 	public void update() {
-		AnimalEntity predator = findNearestPredator();
-		if (predator != null) {
-			fleeFrom(predator);
-			return;
+		AnimalEntity predator = findNearestTarget(PredatorEntity.class) instanceof AnimalEntity ? (AnimalEntity) findNearestTarget(PredatorEntity.class) : null;
+		if(predator != null && !(state instanceof FleeingState)) {
+			setState(new FleeingState(predator));
 		}
 		super.update();
 	}
 
-	/**
-	 * Searches for the nearest predator.
-	 * @return the nearest PredatorEntity, or null if none is found.
-	 */
-	private AnimalEntity findNearestPredator() {
-		List<int[]> offsets = getOffsetsForRadius(SharedConstants.ANIMAL_SEEK_RADIUS);
-		AnimalEntity predator = null;
-		int minDistance = Integer.MAX_VALUE;
-		for (int[] offset : offsets) {
-			int tileX = this.x + offset[0];
-			int tileY = this.y + offset[1];
-			World.Tile tile = grid.getTile(tileX, tileY);
-			if (tile == null || tile.getEntities().isEmpty())
-				continue;
-			int distance = Math.abs(offset[0]) + Math.abs(offset[1]);
-			for (BasicEntity entity : tile.getEntities()) {
-				if (entity instanceof PredatorEntity && entity.isAlive()) {
-					if (distance < minDistance) {
-						minDistance = distance;
-						predator = (AnimalEntity) entity;
-						if (distance == 1)
-							return predator;
-					}
-				}
-			}
-		}
-		return predator;
-	}
-
-	/**
-	 * Flees from the given predator by moving in the opposite direction.
-	 * @param predator the predator to flee from.
-	 */
 	private void fleeFrom(AnimalEntity predator) {
 		int dx = this.x - predator.getX();
 		int dy = this.y - predator.getY();
@@ -83,5 +52,23 @@ public class PreyEntity extends AnimalEntity {
 	@Override
 	protected void spawnOffspring() {
 		new PreyEntity(grid, this.x, this.y);
+	}
+
+	/** FLEEING state specific to PreyEntity. */
+	public static class FleeingState implements EntityState {
+		private final AnimalEntity predator;
+		public FleeingState(AnimalEntity predator) {
+			this.predator = predator;
+		}
+		@Override
+		public void execute(BasicEntity entity) {
+			PreyEntity prey = (PreyEntity) entity;
+			prey.fleeFrom(predator);
+			prey.setState(new IdleState());
+		}
+		@Override
+		public String getName() {
+			return "FLEEING";
+		}
 	}
 }
