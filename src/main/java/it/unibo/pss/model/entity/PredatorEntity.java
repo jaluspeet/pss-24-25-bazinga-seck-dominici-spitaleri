@@ -5,28 +5,26 @@ import it.unibo.pss.common.SharedConstants;
 
 public class PredatorEntity extends AnimalEntity {
 
-	/**
-	 * Constructs a PredatorEntity.
-	 * @param grid the world grid
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 */
+	/* Constructor for PredatorEntity. */
 	public PredatorEntity(World grid, int x, int y) {
 		super(grid, x, y, SharedConstants.PREDATOR_SPEED);
 	}
 
+	/* spawn a new predator */
 	@Override
-	protected Class<? extends BasicEntity> getFoodType() {
+	public void spawnOffspring() {
+		new PredatorEntity(grid, this.x, this.y);
+	}
+
+	/* return the predator's energy */
+	@Override
+	public Class<? extends BasicEntity> getFoodType() {
 		return PreyEntity.class;
 	}
 
+	/* return the predator's mate type */
 	@Override
-	protected Class<? extends BasicEntity> getMateType() {
+	public Class<? extends BasicEntity> getMateType() {
 		return PredatorEntity.class;
-	}
-
-	@Override
-	protected void spawnOffspring() {
-		new PredatorEntity(grid, this.x, this.y);
 	}
 }

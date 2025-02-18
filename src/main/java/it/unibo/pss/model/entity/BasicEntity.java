@@ -9,17 +9,12 @@ public class BasicEntity {
 	protected final World grid;
 	private static int nextId = 0;
 	private final int id;
-	private static final int ENTITY_STATE_TIME = 3;
+	private static final int ENTITY_STATE_TIME = 3; // duration for state lock
 
 	protected EntityState state;
 	protected int stateLock;
 
-	/**
-	 * Constructs a BasicEntity.
-	 * @param grid the world grid
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 */
+	/** Constructor for BasicEntity. */
 	public BasicEntity(World grid, int x, int y) {
 		this.grid = grid;
 		this.x = x;
@@ -30,32 +25,28 @@ public class BasicEntity {
 		this.stateLock = 0;
 	}
 
-	/**
-	 * Updates the entity. When not IDLE, the state is locked for ENTITY_STATE_TIME updates.
-	 */
-	public void update() {
-		if(stateLock > 0) {
+	/** Updates the entity state and behavior. */
+	public final void update() {
+		updateState();
+		if (stateLock > 0) {
 			stateLock--;
-		} else if(!(state instanceof IdleState) && !(state instanceof DeadState)) {
+		} else if (!(state instanceof IdleState) && !(state instanceof DeadState)) {
 			setState(new IdleState());
 		}
 		state.execute(this);
 	}
 
-	/**
-	 * Changes the entity state and locks it for SharedConstants.ENTITY_STATE_TIME updates.
-	 * @param newState the new state
-	 */
+	/** Override this method to set the default behavior for the entity. */
+	protected void updateState() { }
+
+	/** Sets the entity state. */
 	public void setState(EntityState newState) {
 		this.state = newState;
 		this.stateLock = ENTITY_STATE_TIME;
 	}
 
-	/**
-	 * Moves the entity to the given coordinates.
-	 * @param newX the new x coordinate
-	 * @param newY the new y coordinate
-	 */
+
+	/** Moves the entity to the new position. */
 	public void moveTo(int newX, int newY) {
 		grid.getTile(x, y).removeEntity(this);
 		this.x = newX;
@@ -63,8 +54,10 @@ public class BasicEntity {
 		grid.getTile(newX, newY).addEntity(this);
 	}
 
+	/** Kills the entity. */
 	public void kill() { }
 
+	/** Returns true if the entity is alive. */
 	public boolean isAlive() {
 		return true;
 	}
@@ -74,16 +67,24 @@ public class BasicEntity {
 		return grid.getTilesInRange(x, y, range);
 	}
 
+	/** Returns the entity's ID. */
 	public int getId() {
 		return id;
 	}
 
+	/** Returns the entity's X position. */
 	public int getX() {
 		return x;
 	}
 
+	/** Returns the entity's Y position. */
 	public int getY() {
 		return y;
+	}
+
+	/** Returns the entity's grid. */
+	public World getGrid() {
+		return grid;
 	}
 
 	/** Base state interface. */
@@ -92,7 +93,7 @@ public class BasicEntity {
 		String getName();
 	}
 
-	/** default IDLE state. */
+	/** IDLE state. */
 	public static class IdleState implements EntityState {
 		@Override
 		public void execute(BasicEntity entity) { }

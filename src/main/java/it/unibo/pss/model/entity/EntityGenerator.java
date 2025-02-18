@@ -17,6 +17,7 @@ public final class EntityGenerator {
 		generatePredators(grid, SharedConstants.PREDATOR_COUNT);
 	}
 	
+	/** Generates a specified number of plants. */
 	private static void generatePlants(World grid, int count) {
 		int width = grid.getWidth();
 		int height = grid.getHeight();
@@ -30,6 +31,7 @@ public final class EntityGenerator {
 		}
 	}
 	
+	/** Generates a specified number of preys. */
 	private static void generatePreys(World grid, int count) {
 		int width = grid.getWidth();
 		int height = grid.getHeight();
@@ -43,6 +45,7 @@ public final class EntityGenerator {
 		}
 	}
 	
+	/** Generates a specified number of predators. */
 	private static void generatePredators(World grid, int count) {
 		int width = grid.getWidth();
 		int height = grid.getHeight();

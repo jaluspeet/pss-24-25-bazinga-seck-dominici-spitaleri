@@ -6,32 +6,30 @@ public class PlantEntity extends BasicEntity {
 	private int revivalTimer = 0;
 	private static final int REVIVAL_TIME = 10;
 
-	/**
-	 * Constructs a PlantEntity.
-	 * @param grid the world grid
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 */
+	/* Constructor for PlantEntity. */
 	public PlantEntity(World grid, int x, int y) {
 		super(grid, x, y);
 	}
 
+
+	/* Override updateState() for resurrection */
 	@Override
-	public void update() {
-		if(state instanceof DeadState) {
-			if(revivalTimer-- <= 0) {
+	protected void updateState() {
+		if (state instanceof DeadState) {
+			if (revivalTimer-- <= 0) {
 				setState(new IdleState());
 			}
 		}
-		super.update();
 	}
 
+	/* Override kill() to set the entity to dead and start the revival timer */
 	@Override
 	public void kill() {
 		revivalTimer = REVIVAL_TIME;
 		setState(new DeadState());
 	}
 
+	/* check if the entity is alive */
 	@Override
 	public boolean isAlive() {
 		return !(state instanceof DeadState);

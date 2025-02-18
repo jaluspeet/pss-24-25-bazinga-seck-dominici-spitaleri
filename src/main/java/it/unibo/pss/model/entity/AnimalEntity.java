@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import it.unibo.pss.common.SharedConstants;
+import it.unibo.pss.model.entity.states.EatingState;
+import it.unibo.pss.model.entity.states.MatingState;
 
 public abstract class AnimalEntity extends BasicEntity {
 	protected static final Random random = new Random();
@@ -14,52 +16,46 @@ public abstract class AnimalEntity extends BasicEntity {
 	protected final int speed;
 	protected static final Map<Integer, List<int[]>> offsetsCache = new HashMap<>();
 
-	/**
-	 * Constructs an AnimalEntity.
-	 * @param grid the world grid
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param speed the movement speed (in tiles per move)
-	 */
+	/* Constructor for AnimalEntity. */
 	public AnimalEntity(World grid, int x, int y, int speed) {
 		super(grid, x, y);
 		this.speed = speed;
 		energy = SharedConstants.ANIMAL_INITIAL_ENERGY;
 	}
 
-	/**
-	 * The update method sets the state based on energy (if unlocked) then delegates to the current state.
-	 */
+	/* Override updateState() to set the default behavior for AnimalEntity */
 	@Override
-	public void update() {
-		if(stateLock == 0) {
-			if(energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD) {
+	protected void updateState() {
+		if (stateLock == 0) {
+			if (energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD) {
 				setState(new EatingState());
 			} else {
 				setState(new MatingState());
 			}
 		}
-		super.update();
 	}
 
-	/**
-	 * Overrides moveTo to deduct movement energy.
-	 */
+	/* Overrides moveTo to deduct movement energy */
 	@Override
 	public void moveTo(int newX, int newY) {
 		super.moveTo(newX, newY);
 		energy--;
 	}
 
-	/** Finds the nearest target entity of the given type using Manhattan distance. */
-	protected BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
+	/** Public getter for speed. */
+	public int getSpeed() {
+		return speed;
+	}
+
+	/* Finds the nearest target entity of the given type using Manhattan distance. */
+	public BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
 		List<int[]> offsets = getOffsetsForRadius(SharedConstants.ANIMAL_SEEK_RADIUS);
 		BasicEntity target = null;
 		int minDistance = Integer.MAX_VALUE;
 		for (int[] offset : offsets) {
 			int tileX = this.x + offset[0];
 			int tileY = this.y + offset[1];
-			World.Tile tile = grid.getTile(tileX, tileY);
+			World.Tile tile = getGrid().getTile(tileX, tileY);
 			if (tile == null || tile.getEntities().isEmpty())
 				continue;
 			int distance = Math.abs(offset[0]) + Math.abs(offset[1]);
@@ -77,7 +73,7 @@ public abstract class AnimalEntity extends BasicEntity {
 		return target;
 	}
 
-	/** Returns a cached list of (dx,dy) offsets for a given radius. */
+	/* Returns a cached list of (dx,dy) offsets for a given radius. */
 	protected static List<int[]> getOffsetsForRadius(int range) {
 		if (!offsetsCache.containsKey(range)) {
 			List<int[]> offsets = new ArrayList<>();
@@ -93,8 +89,8 @@ public abstract class AnimalEntity extends BasicEntity {
 		return offsetsCache.get(range);
 	}
 
-	/** Moves one step toward the target coordinates. */
-	protected void moveTowards(int targetX, int targetY) {
+	/* Moves one step toward the target coordinates. */
+	public void moveTowards(int targetX, int targetY) {
 		int dx = targetX - this.x;
 		int dy = targetY - this.y;
 		int stepX = 0, stepY = 0;
@@ -105,7 +101,7 @@ public abstract class AnimalEntity extends BasicEntity {
 		}
 		int newX = this.x + stepX;
 		int newY = this.y + stepY;
-		World.Tile targetTile = grid.getTile(newX, newY);
+		World.Tile targetTile = getGrid().getTile(newX, newY);
 		if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
 			moveTo(newX, newY);
 		} else {
@@ -118,81 +114,38 @@ public abstract class AnimalEntity extends BasicEntity {
 			}
 			newX = this.x + stepX;
 			newY = this.y + stepY;
-			targetTile = grid.getTile(newX, newY);
+			targetTile = getGrid().getTile(newX, newY);
 			if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
 				moveTo(newX, newY);
 			}
 		}
 	}
 
-	/** Performs a random movement scaled by speed. */
-	protected void moveRandomly() {
+	/* Performs a random movement scaled by speed. */
+	public void moveRandomly() {
 		int[] dxArr = { -1, 1, 0, 0 };
 		int[] dyArr = { 0, 0, -1, 1 };
 		int index = random.nextInt(4);
 		int newX = this.x + dxArr[index] * speed;
 		int newY = this.y + dyArr[index] * speed;
-		World.Tile targetTile = grid.getTile(newX, newY);
+		World.Tile targetTile = getGrid().getTile(newX, newY);
 		if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
 			moveTo(newX, newY);
 		}
 	}
 
-	/** Abstract methods to define food type, mate type, and offspring creation. */
-	protected abstract Class<? extends BasicEntity> getFoodType();
-	protected abstract Class<? extends BasicEntity> getMateType();
-	protected abstract void spawnOffspring();
-
-	/** EATING state. */
-	public static class EatingState implements EntityState {
-		@Override
-		public void execute(BasicEntity entity) {
-			AnimalEntity a = (AnimalEntity) entity;
-			BasicEntity targetFood = a.findNearestTarget(a.getFoodType());
-			if (targetFood != null) {
-				a.moveTowards(targetFood.getX(), targetFood.getY());
-				if (a.x == targetFood.getX() && a.y == targetFood.getY()) {
-					targetFood.kill();
-					a.energy += SharedConstants.ANIMAL_ENERGY_RESTORE;
-				}
-			} else {
-				a.moveRandomly();
-			}
-			a.setState(new IdleState());
-		}
-		@Override
-		public String getName() {
-			return "EATING";
-		}
+	/* Public getter for energy. */
+	public int getEnergy() {
+		return energy;
 	}
 
-	/** MATING state. */
-	public static class MatingState implements EntityState {
-		@Override
-		public void execute(BasicEntity entity) {
-			AnimalEntity a = (AnimalEntity) entity;
-			BasicEntity mateEntity = a.findNearestTarget(a.getMateType());
-			if(mateEntity != null && mateEntity != a) {
-				a.moveTowards(mateEntity.getX(), mateEntity.getY());
-				if(a.x == mateEntity.getX() && a.y == mateEntity.getY()) {
-					AnimalEntity mate = (AnimalEntity) mateEntity;
-					if(a.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-							mate.energy >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-							a.getId() < mate.getId()) {
-						a.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
-						mate.energy -= SharedConstants.ANIMAL_REPRODUCTION_COST;
-						a.spawnOffspring();
-						mate.spawnOffspring();
-							}
-				}
-			} else {
-				a.moveRandomly();
-			}
-			a.setState(new IdleState());
-		}
-		@Override
-		public String getName() {
-			return "MATING";
-		}
+	/* Public setter for energy. */
+	public void setEnergy(int energy) {
+		this.energy = energy;
 	}
+
+	/* Abstract methods to define food type, mate type, and offspring creation. */
+	public abstract Class<? extends BasicEntity> getFoodType();
+	public abstract Class<? extends BasicEntity> getMateType();
+	public abstract void spawnOffspring();
 }
