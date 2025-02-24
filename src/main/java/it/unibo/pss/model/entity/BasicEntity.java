@@ -9,7 +9,7 @@ public class BasicEntity {
 	protected final World grid;
 	private static int nextId = 0;
 	private final int id;
-	private static final int ENTITY_STATE_TIME = 3; // duration for state lock
+	private static final int ENTITY_STATE_TIME = 5;
 
 	protected EntityState state;
 	protected int stateLock;

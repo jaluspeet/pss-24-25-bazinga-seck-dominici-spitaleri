@@ -13,13 +13,12 @@ public class PreyEntity extends AnimalEntity {
 	/* check for nearby predators, and switch to FleeingState if one is detected. */
 	@Override
 	protected void updateState() {
+		super.updateState();
+		if (!isAlive())
+			return;
 		BasicEntity predatorCandidate = findNearestTarget(PredatorEntity.class);
-		AnimalEntity predator = (predatorCandidate instanceof AnimalEntity)
-			? (AnimalEntity) predatorCandidate : null;
-		if (predator != null && !(state instanceof it.unibo.pss.model.entity.states.FleeingState)) {
-			setState(new it.unibo.pss.model.entity.states.FleeingState(predator));
-		} else {
-			super.updateState();
+		if (predatorCandidate != null && !(state instanceof it.unibo.pss.model.entity.states.FleeingState)) {
+			setState(new it.unibo.pss.model.entity.states.FleeingState((AnimalEntity) predatorCandidate));
 		}
 	}
 
@@ -27,6 +26,11 @@ public class PreyEntity extends AnimalEntity {
 	@Override
 	public void spawnOffspring() {
 		new PreyEntity(grid, this.x, this.y);
+	}
+
+	@Override
+	public int getSeekRadius() {
+		return SharedConstants.PREY_SEEK_RADIUS;
 	}
 
 	/* return the prey's food type */

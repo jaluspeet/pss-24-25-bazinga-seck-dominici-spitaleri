@@ -18,7 +18,7 @@ public class EatingState implements BasicEntity.EntityState {
 		} else {
 			a.moveRandomly();
 		}
-		a.setState(new BasicEntity.IdleState());
+		a.finalizeAction();
 	}
 
 	@Override

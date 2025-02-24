@@ -30,7 +30,9 @@ public final class SharedConstants {
 	public static final double WORLD_LAKE_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.lake.ratio", "0.7"));
 	public static final int WORLD_LAKE_COUNT = Integer.parseInt(PROPERTIES.getProperty("world.lake.count", "6"));
 	
-	public static final int ANIMAL_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("animal.seek.radius", "5"));
+	public static final int PREY_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("prey.seek.radius", "5"));
+	public static final int PREDATOR_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("predator.seek.radius", "20"));
+	public static final int ANIMAL_MATING_COOLDOWN = Integer.parseInt(PROPERTIES.getProperty("animal.mating.cooldown", "10"));
 	public static final int ANIMAL_INITIAL_ENERGY = Integer.parseInt(PROPERTIES.getProperty("animal.initial.energy", "40"));
 	public static final int ANIMAL_ENERGY_THRESHOLD = Integer.parseInt(PROPERTIES.getProperty("animal.energy.threshold", "10"));
 	public static final int ANIMAL_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("animal.energy.restore", "20"));

@@ -1,5 +1,6 @@
 package it.unibo.pss.model.entity;
 
+import it.unibo.pss.model.entity.states.EatingState;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.common.SharedConstants;
 
@@ -26,5 +27,23 @@ public class PredatorEntity extends AnimalEntity {
 	@Override
 	public Class<? extends BasicEntity> getMateType() {
 		return PredatorEntity.class;
+	}
+
+	@Override
+	public int getSeekRadius() {
+		return SharedConstants.PREDATOR_SEEK_RADIUS;
+	}
+
+	@Override
+	protected void updateState() {
+		super.updateState();
+		if (!isAlive())
+			return;
+		BasicEntity preyCandidate = findNearestTarget(PreyEntity.class);
+		if (preyCandidate != null) {
+			setState(new EatingState());
+		} else {
+			setState(defaultState());
+		}
 	}
 }

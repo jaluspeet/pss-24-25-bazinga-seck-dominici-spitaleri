@@ -14,15 +14,10 @@ public class FleeingState implements BasicEntity.EntityState {
 	@Override
 	public void execute(BasicEntity entity) {
 		AnimalEntity prey = (AnimalEntity) entity;
-		int dx = prey.getX() - predator.getX();
-		int dy = prey.getY() - predator.getY();
-		int fleeStepX = (dx == 0 ? 0 : Integer.signum(dx) * Math.min(prey.getSpeed(), Math.abs(dx)));
-		int fleeStepY = (dy == 0 ? 0 : Integer.signum(dy) * Math.min(prey.getSpeed(), Math.abs(dy)));
-		int newX = prey.getX() + fleeStepX;
-		int newY = prey.getY() + fleeStepY;
-		World.Tile targetTile = prey.getGrid().getTile(newX, newY);
+		int[] newPos = prey.calculateNextPosition(predator.getX(), predator.getY(), false);
+		World.Tile targetTile = prey.getGrid().getTile(newPos[0], newPos[1]);
 		if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
-			prey.moveTo(newX, newY);
+			prey.moveTo(newPos[0], newPos[1]);
 		} else {
 			prey.moveRandomly();
 		}

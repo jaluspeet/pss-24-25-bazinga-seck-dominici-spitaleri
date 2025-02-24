@@ -23,23 +23,33 @@ public abstract class AnimalEntity extends BasicEntity {
 		energy = SharedConstants.ANIMAL_INITIAL_ENERGY;
 	}
 
-	/* Override updateState() to set the default behavior for AnimalEntity */
+	// Centralized energy management: subtract energy each update.
 	@Override
 	protected void updateState() {
+		energy--;
+		if (energy <= 0) {
+			kill();
+			return;
+		}
 		if (stateLock == 0) {
-			if (energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD) {
-				setState(new EatingState());
-			} else {
-				setState(new MatingState());
-			}
+			setState(defaultState());
 		}
 	}
 
-	/* Overrides moveTo to deduct movement energy */
+	/** Returns the default state based on energy level. */
+	protected BasicEntity.EntityState defaultState() {
+		return energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD ? new EatingState() : new MatingState();
+	}
+
+	/** Finalizes the action by resetting the state to idle. */
+	public void finalizeAction() {
+		setState(new BasicEntity.IdleState());
+	}
+
+	/* moveTo no longer subtracts energy */
 	@Override
 	public void moveTo(int newX, int newY) {
 		super.moveTo(newX, newY);
-		energy--;
 	}
 
 	/** Public getter for speed. */
@@ -47,9 +57,27 @@ public abstract class AnimalEntity extends BasicEntity {
 		return speed;
 	}
 
+	/**
+	 * Centralized mating: if both entities have sufficient energy,
+	 * deduct reproduction cost from both and spawn offspring.
+	 */
+	public boolean performMating(AnimalEntity mate) {
+		if (this.getEnergy() >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+				mate.getEnergy() >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+				this.getId() < mate.getId()) {
+			this.setEnergy(this.getEnergy() - SharedConstants.ANIMAL_REPRODUCTION_COST);
+			mate.setEnergy(mate.getEnergy() - SharedConstants.ANIMAL_REPRODUCTION_COST);
+			this.spawnOffspring();
+			mate.spawnOffspring();
+			return true;
+				}
+		return false;
+	}
+
 	/* Finds the nearest target entity of the given type using Manhattan distance. */
 	public BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
-		List<int[]> offsets = getOffsetsForRadius(SharedConstants.ANIMAL_SEEK_RADIUS);
+		int seekRadius = getSeekRadius();
+		List<int[]> offsets = getOffsetsForRadius(seekRadius);
 		BasicEntity target = null;
 		int minDistance = Integer.MAX_VALUE;
 		for (int[] offset : offsets) {
@@ -73,6 +101,9 @@ public abstract class AnimalEntity extends BasicEntity {
 		return target;
 	}
 
+	/** Returns the seek radius for this animal. */
+	public abstract int getSeekRadius();
+
 	/* Returns a cached list of (dx,dy) offsets for a given radius. */
 	protected static List<int[]> getOffsetsForRadius(int range) {
 		if (!offsetsCache.containsKey(range)) {
@@ -89,35 +120,24 @@ public abstract class AnimalEntity extends BasicEntity {
 		return offsetsCache.get(range);
 	}
 
-	/* Moves one step toward the target coordinates. */
-	public void moveTowards(int targetX, int targetY) {
-		int dx = targetX - this.x;
-		int dy = targetY - this.y;
+	public int[] calculateNextPosition(int targetX, int targetY, boolean towards) {
+		int dx = (towards ? (targetX - this.x) : (this.x - targetX));
+		int dy = (towards ? (targetY - this.y) : (this.y - targetY));
 		int stepX = 0, stepY = 0;
-		if (Math.abs(dx) > Math.abs(dy)) {
+		if (Math.abs(dx) >= Math.abs(dy) && Math.abs(dx) > 0) {
 			stepX = Integer.signum(dx) * Math.min(speed, Math.abs(dx));
 		} else if (Math.abs(dy) > 0) {
 			stepY = Integer.signum(dy) * Math.min(speed, Math.abs(dy));
 		}
-		int newX = this.x + stepX;
-		int newY = this.y + stepY;
-		World.Tile targetTile = getGrid().getTile(newX, newY);
+		return new int[] { this.x + stepX, this.y + stepY };
+	}
+
+	/* Moves one step toward the target coordinates. */
+	public void moveTowards(int targetX, int targetY) {
+		int[] newPos = calculateNextPosition(targetX, targetY, true);
+		World.Tile targetTile = getGrid().getTile(newPos[0], newPos[1]);
 		if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
-			moveTo(newX, newY);
-		} else {
-			if (stepX != 0) {
-				stepX = 0;
-				stepY = Integer.signum(dy) * Math.min(speed, Math.abs(dy));
-			} else if (stepY != 0) {
-				stepY = 0;
-				stepX = Integer.signum(dx) * Math.min(speed, Math.abs(dx));
-			}
-			newX = this.x + stepX;
-			newY = this.y + stepY;
-			targetTile = getGrid().getTile(newX, newY);
-			if (targetTile != null && targetTile.getType() == World.Tile.TileType.LAND) {
-				moveTo(newX, newY);
-			}
+			moveTo(newPos[0], newPos[1]);
 		}
 	}
 
@@ -134,14 +154,27 @@ public abstract class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	/* Public getter for energy. */
+	/** Public getter for energy. */
 	public int getEnergy() {
 		return energy;
 	}
 
-	/* Public setter for energy. */
+	/** Public setter for energy. */
 	public void setEnergy(int energy) {
 		this.energy = energy;
+	}
+
+	/* Overrides kill() to mark the animal as dead and remove it from the grid */
+	@Override
+	public void kill() {
+		setState(new DeadState());
+		getGrid().getTile(x, y).removeEntity(this);
+	}
+
+	/* Overrides isAlive() to return false if the animal is dead */
+	@Override
+	public boolean isAlive() {
+		return !(state instanceof DeadState);
 	}
 
 	/* Abstract methods to define food type, mate type, and offspring creation. */
