@@ -33,22 +33,22 @@ public class Model {
 		timer.start();
 	}
 	
-	/* returns the initialized grid */
+	// returns the initialized grid
 	public World getGrid() {
 		return grid;
 	}
 
-	/** Adds an observer. */
+	// Adds an observer
 	public void addObserver(ModelObserver observer) {
 		observers.add(observer);
 	}
 
-	/** Removes an observer. */
+	// Removes an observer
 	public void removeObserver(ModelObserver observer) {
 		observers.remove(observer);
 	}
 
-	/** Notifies observers when the model updates. */
+	// notifies observers when the model updates
 	private void notifyObservers() {
 		Platform.runLater(() -> observers.forEach(ModelObserver::onModelUpdated));
 	}

@@ -16,7 +16,7 @@ public abstract class AnimalEntity extends BasicEntity {
 	protected final int speed;
 	protected static final Map<Integer, List<int[]>> offsetsCache = new HashMap<>();
 
-	/* Constructor for AnimalEntity. */
+	// Constructor for AnimalEntity
 	public AnimalEntity(World grid, int x, int y, int speed) {
 		super(grid, x, y);
 		this.speed = speed;
@@ -36,31 +36,28 @@ public abstract class AnimalEntity extends BasicEntity {
 		}
 	}
 
-	/** Returns the default state based on energy level. */
+	// Returns the default state based on energy level
 	protected BasicEntity.EntityState defaultState() {
 		return energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD ? new EatingState() : new MatingState();
 	}
 
-	/** Finalizes the action by resetting the state to idle. */
+	// Finalizes the action by resetting the state to idle
 	public void finalizeAction() {
 		setState(new BasicEntity.IdleState());
 	}
 
-	/* moveTo no longer subtracts energy */
+	// moveTo no longer subtracts energy
 	@Override
 	public void moveTo(int newX, int newY) {
 		super.moveTo(newX, newY);
 	}
 
-	/** Public getter for speed. */
+	// Public getter for speed.
 	public int getSpeed() {
 		return speed;
 	}
 
-	/**
-	 * Centralized mating: if both entities have sufficient energy,
-	 * deduct reproduction cost from both and spawn offspring.
-	 */
+	// if both entities have sufficient energy deduct reproduction cost from both and spawn offspring.
 	public boolean performMating(AnimalEntity mate) {
 		if (this.getEnergy() >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
 				mate.getEnergy() >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
@@ -74,7 +71,7 @@ public abstract class AnimalEntity extends BasicEntity {
 		return false;
 	}
 
-	/* Finds the nearest target entity of the given type using Manhattan distance. */
+	// Finds the nearest target entity of the given type using Manhattan distance
 	public BasicEntity findNearestTarget(Class<? extends BasicEntity> type) {
 		int seekRadius = getSeekRadius();
 		List<int[]> offsets = getOffsetsForRadius(seekRadius);

@@ -1,5 +1,6 @@
 package it.unibo.pss.view.sprites;
 
+import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.model.world.World;
 import javafx.scene.image.Image;
 import java.util.List;
@@ -8,59 +9,58 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Random;
 
-/** Loads and caches world tile sprites from a given path.
-    Land textures are cached, while water textures are rotated sequentially.
-    For water tiles, the texture index is computed by shifting the global cycle
-    and adding an offset based on the tile's coordinates. */
+// load and cache world sprites from a given path
 public class WorldSpriteLoader {
-	private final List<Image> landTextures;
-	private final List<Image> waterTextures;
+	private final List<Image> landSprites;
+	private final List<Image> waterSprites;
 	private final Map<World.Tile, Image> cache = new IdentityHashMap<>();
 	private final Random random = new Random();
 	
-	private static final long WATER_ANIMATION_PERIOD = 500;
-
+	// constructor for WorldSpriteLoader
 	public WorldSpriteLoader(String basePath) {
-		landTextures = loadTextures(basePath, "land");
-		waterTextures = loadTextures(basePath, "water");
+		landSprites = loadSprites(basePath, "land");
+		waterSprites = loadSprites(basePath, "water");
 	}
 
-	private List<Image> loadTextures(String basePath, String prefix) {
-		List<Image> textures = new ArrayList<>();
+	// load sprites from a given path
+	private List<Image> loadSprites(String basePath, String prefix) {
+		List<Image> sprites = new ArrayList<>();
 		int index = 0;
 		while (true) {
 			String imagePath = basePath + "/" + prefix + "_" + index + ".png";
 			try {
 				Image img = new Image(getClass().getResourceAsStream(imagePath));
 				if (img.getWidth() == 0) break;
-				textures.add(img);
+				sprites.add(img);
 				index++;
 			} catch (Exception e) {
 				break;
 			}
 		}
-		return textures;
+		return sprites;
 	}
 
-	public Image getTileTexture(World.Tile tile) {
+	// get sprite for a given tile
+	public Image getTileSprite(World.Tile tile) {
 		if (tile.getType() == World.Tile.TileType.LAND) {
 			if (cache.containsKey(tile)) {
 				return cache.get(tile);
 			}
-			Image texture = getRandomTexture(landTextures);
-			cache.put(tile, texture);
-			return texture;
+			Image sprite = getRandomSprite(landSprites);
+			cache.put(tile, sprite);
+			return sprite;
 		} else {
-			if (waterTextures.isEmpty()) return null;
-			int globalIndex = (int) ((System.currentTimeMillis() / WATER_ANIMATION_PERIOD) % waterTextures.size());
-			int offset = (tile.getX() + tile.getY()) % waterTextures.size();
-			int waterIndex = (globalIndex + offset) % waterTextures.size();
-			return waterTextures.get(waterIndex);
+			if (waterSprites.isEmpty()) return null;
+			int globalIndex = (int) ((System.currentTimeMillis() / SharedConstants.CAMERA_FRAMERATE * 10) % waterSprites.size());
+			int offset = (tile.getX() + tile.getY()) % waterSprites.size();
+			int waterIndex = (globalIndex + offset) % waterSprites.size();
+			return waterSprites.get(waterIndex);
 		}
 	}
 
-	private Image getRandomTexture(List<Image> textures) {
-		if (textures.isEmpty()) return null;
-		return textures.get(random.nextInt(textures.size()));
+	// get a random sprite from a list of sprites
+	private Image getRandomSprite(List<Image> sprites) {
+		if (sprites.isEmpty()) return null;
+		return sprites.get(random.nextInt(sprites.size()));
 	}
 }

@@ -11,22 +11,24 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Random;
 
-/** Loads and caches entity sprites from a given path. **/
+// load and cache entity sprites from a given path
 public class EntitySpriteLoader {
-	private final List<Image> predatorTextures;
-	private final List<Image> preyTextures;
-	private final List<Image> plantTextures;
+	private final List<Image> wolfSprites;
+	private final List<Image> sheepSprites;
+	private final List<Image> plantSprites;
 	private final Map<BasicEntity, Image> cache = new IdentityHashMap<>();
 	private final Random random = new Random();
 
+	// constructor for EntitySpriteLoader
 	public EntitySpriteLoader(String basePath) {
-		predatorTextures = loadTextures(basePath, "predator");
-		preyTextures = loadTextures(basePath, "prey");
-		plantTextures = loadTextures(basePath, "plant");
+		wolfSprites = loadSprites(basePath, "wolf");
+		sheepSprites = loadSprites(basePath, "sheep");
+		plantSprites = loadSprites(basePath, "plant");
 	}
 
-	private List<Image> loadTextures(String basePath, String prefix) {
-		List<Image> textures = new ArrayList<>();
+	// load sprites from a given path
+	private List<Image> loadSprites(String basePath, String prefix) {
+		List<Image> sprites = new ArrayList<>();
 		int index = 0;
 		while (true) {
 			String imagePath = basePath + "/" + prefix + "_" + index + ".png";
@@ -34,34 +36,36 @@ public class EntitySpriteLoader {
 				Image img = new Image(getClass().getResourceAsStream(imagePath));
 				if (img.getWidth() == 0)
 					break;
-				textures.add(img);
+				sprites.add(img);
 				index++;
 			} catch (Exception e) {
 				break;
 			}
 		}
-		return textures;
+		return sprites;
 	}
 
-	public Image getEntityTexture(BasicEntity entity) {
+	// get sprite for a given entity
+	public Image getEntitySprite(BasicEntity entity) {
 		if (cache.containsKey(entity)) {
 			return cache.get(entity);
 		}
-		Image texture = null;
+		Image sprite = null;
 		if (entity instanceof PredatorEntity) {
-			texture = getRandomTexture(predatorTextures);
+			sprite = getRandomSprite(wolfSprites);
 		} else if (entity instanceof PreyEntity) {
-			texture = getRandomTexture(preyTextures);
+			sprite = getRandomSprite(sheepSprites);
 		} else if (entity instanceof PlantEntity) {
-			texture = getRandomTexture(plantTextures);
+			sprite = getRandomSprite(plantSprites);
 		}
-		cache.put(entity, texture);
-		return texture;
+		cache.put(entity, sprite);
+		return sprite;
 	}
 
-	private Image getRandomTexture(List<Image> textures) {
-		if (textures.isEmpty())
+	// get a random sprite from a list of sprites
+	private Image getRandomSprite(List<Image> sprites) {
+		if (sprites.isEmpty())
 			return null;
-		return textures.get(random.nextInt(textures.size()));
+		return sprites.get(random.nextInt(sprites.size()));
 	}
 }

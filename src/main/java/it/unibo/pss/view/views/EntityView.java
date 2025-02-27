@@ -1,12 +1,12 @@
 package it.unibo.pss.view.views;
 
+import it.unibo.pss.view.geometry.GeometryRenderer;
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.view.components.CullingUtil;
 import it.unibo.pss.view.components.Camera;
 import it.unibo.pss.view.components.Viewport.Renderable;
-import it.unibo.pss.view.renderer.GeometryRenderer;
 import it.unibo.pss.view.sprites.EntitySpriteLoader;
 import it.unibo.pss.view.components.CameraUtil;
 import javafx.geometry.Point2D;
@@ -14,10 +14,11 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-/** Renders entities using their sprite textures. */
+// render the entities
 public class EntityView implements Renderable {
 	private final EntitySpriteLoader spriteLoader = new EntitySpriteLoader("/sprites/entity");
 
+	// override the render method to render the entities
 	@Override
 	public void render(GraphicsContext gc, ModelDTO modelDTO, Camera camera, GeometryRenderer renderer) {
 		World grid = modelDTO.getGrid();
@@ -41,11 +42,11 @@ public class EntityView implements Renderable {
 					}
 					double centerX = rect.getMinX() + rect.getWidth() / 2;
 					double centerY = rect.getMinY() + rect.getHeight() / 2;
-					Image texture = spriteLoader.getEntityTexture(entity);
-					if (texture != null) {
-						double spriteWidth = texture.getWidth() * camera.getScale();
-						double spriteHeight = texture.getHeight() * camera.getScale();
-						gc.drawImage(texture, centerX - spriteWidth / 2, centerY - spriteHeight / 2, spriteWidth, spriteHeight);
+					Image sprite = spriteLoader.getEntitySprite(entity);
+					if (sprite != null) {
+						double spriteWidth = sprite.getWidth() * camera.getScale();
+						double spriteHeight = sprite.getHeight() * camera.getScale();
+						gc.drawImage(sprite, centerX - spriteWidth / 2, centerY - spriteHeight / 2, spriteWidth, spriteHeight);
 					}
 				}
 			}

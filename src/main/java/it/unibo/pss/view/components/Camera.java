@@ -10,7 +10,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.util.Duration;
 import it.unibo.pss.common.SharedConstants;
 
-/** Manages camera panning and zooming. */
+// camera (handles zoom and pan)
 public class Camera {
 	private double scale = 1.0;
 	private double targetScale = 1.0;
@@ -22,6 +22,7 @@ public class Camera {
 	private final Runnable updateCallback;
 	private final Timeline inertiaTimer;
 
+	// constructor for Camera
 	public Camera(Canvas target, Runnable updateCallback) {
 		this.target = target;
 		this.updateCallback = updateCallback;
@@ -33,12 +34,14 @@ public class Camera {
 		inertiaTimer.play();
 	}
 
+	// attach event handlers
 	private void attachEventHandlers() {
 		target.setOnScroll(this::handleScroll);
 		target.setOnMousePressed(this::handleMousePressed);
 		target.setOnMouseDragged(this::handleMouseDragged);
 	}
 
+	// handle scroll event
 	private void handleScroll(ScrollEvent event) {
 		if (event.isControlDown()) {
 			double zoomFactor = event.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
@@ -59,6 +62,7 @@ public class Camera {
 		event.consume();
 	}
 
+	// handle mouse pressed event
 	private void handleMousePressed(MouseEvent event) {
 		if (event.getButton() == MouseButton.MIDDLE) {
 			lastMouseX = event.getX();
@@ -68,6 +72,7 @@ public class Camera {
 		}
 	}
 
+	// handle mouse dragged event
 	private void handleMouseDragged(MouseEvent event) {
 		if (event.getButton() == MouseButton.MIDDLE) {
 			double dx = event.getX() - lastMouseX;
@@ -84,6 +89,7 @@ public class Camera {
 		}
 	}
 
+	// update inertia for smooth camera movement
 	private void updateInertia() {
 		boolean updated = false;
 		if (Math.abs(velocityX) > SharedConstants.CAMERA_INERTIA_THRESHOLD || Math.abs(velocityY) > SharedConstants.CAMERA_INERTIA_THRESHOLD) {
@@ -102,32 +108,40 @@ public class Camera {
 		}
 	}
 
+	// apply camera transformation
+	public Point2D applyCamera(Point2D baseOffset) {
+		return new Point2D(baseOffset.getX() + panX, baseOffset.getY() + panY);
+	}
+
+
+	// getter for scale
 	public double getScale() {
 		return scale;
 	}
 
+	// getter for horizontal pan
 	public double getPanX() {
 		return panX;
 	}
 
+	// getter for vertical pan
 	public double getPanY() {
 		return panY;
 	}
 
+	// setter for viewport size
 	public void setViewportSize(double width, double height) {
 		this.viewportWidth = width;
 		this.viewportHeight = height;
 	}
 
+	// getter for viewport width
 	public double getViewportWidth() {
 		return viewportWidth;
 	}
 
+	// getter for viewport height
 	public double getViewportHeight() {
 		return viewportHeight;
-	}
-
-	public Point2D applyCamera(Point2D baseOffset) {
-		return new Point2D(baseOffset.getX() + panX, baseOffset.getY() + panY);
 	}
 }
