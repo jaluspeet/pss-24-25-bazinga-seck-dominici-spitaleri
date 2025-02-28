@@ -11,13 +11,12 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import it.unibo.pss.common.SharedConstants;
 
-/** Utility class to generate and initialize the world grid. */
-public final class WorldGenerator {
+public final class WorldManager {
 
 	private static final Random random = new Random();
 	private static final List<World.Tile> lakeCenters = new ArrayList<>();
 
-	private WorldGenerator() {}
+	private WorldManager() {}
 
 	private static void setTile(World grid, int x, int y, World.Tile.TileType type) {
 		grid.setTile(x, y, grid.new Tile(x, y, type));

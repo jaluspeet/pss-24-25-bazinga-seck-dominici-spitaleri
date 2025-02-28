@@ -9,13 +9,13 @@ import it.unibo.pss.model.world.World;
 import it.unibo.pss.common.SharedConstants;
 
 /** Manager for all entities */
-public class EntityGenerator {
+public class EntityManager {
 	private final List<BasicEntity> entities = new ArrayList<>();
 	private final Map<Integer, BasicEntity> entityMap = new HashMap<>();
 	private final World grid;
 	private final Random random = new Random();
 
-	public EntityGenerator(World grid) {
+	public EntityManager(World grid) {
 		this.grid = grid;
 	}
 

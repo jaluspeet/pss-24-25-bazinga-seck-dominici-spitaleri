@@ -1,8 +1,8 @@
 package it.unibo.pss.model;
 
-import it.unibo.pss.model.entity.EntityGenerator;
+import it.unibo.pss.model.entity.EntityManager;
 import it.unibo.pss.model.world.World;
-import it.unibo.pss.model.world.WorldGenerator;
+import it.unibo.pss.model.world.WorldManager;
 import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.controller.observer.ModelObserver;
 import javafx.animation.AnimationTimer;
@@ -12,13 +12,13 @@ import java.util.List;
 
 public class Model {
 	private final World grid;
-	private final EntityGenerator entityGenerator;
+	private final EntityManager entityGenerator;
 	private final List<ModelObserver> observers = new ArrayList<>();
 	private long lastUpdate = 0;
 
 	public Model(int width, int height) {
-		this.grid = WorldGenerator.generateGrid(width, height);
-		this.entityGenerator = new EntityGenerator(grid);
+		this.grid = WorldManager.generateGrid(width, height);
+		this.entityGenerator = new EntityManager(grid);
 		// Generate initial entities on valid LAND tiles
 		entityGenerator.generateEntities();
 		startSimulation();
