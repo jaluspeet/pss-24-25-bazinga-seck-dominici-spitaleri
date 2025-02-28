@@ -9,38 +9,42 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class Controller extends Application implements ModelObserver {
-
 	private Model model;
 	private View view;
-	private ModelDTO modelDTO;
 
-	/* start the application */
 	@Override
 	public void start(Stage stage) {
-
-		// model initialization
 		this.model = new Model(SharedConstants.WORLD_WIDTH, SharedConstants.WORLD_HEIGHT);
-		this.modelDTO = new ModelDTO(this.model.getGrid());
 		this.model.addObserver(this);
-
-		// view initialization
-		this.view = new View(stage, SharedConstants.WINDOW_TITLE, SharedConstants.WINDOW_WIDTH, SharedConstants.WINDOW_HEIGHT, modelDTO);
+		this.view = new View(stage, SharedConstants.WINDOW_TITLE, SharedConstants.WINDOW_WIDTH, SharedConstants.WINDOW_HEIGHT, new ModelDTO(model.getGrid()));
 	}
 
-	/* notify the view to update the model data */
 	@Override
 	public void onModelUpdated() {
-		this.modelDTO = new ModelDTO(this.model.getGrid());
-		this.view.updateModel(modelDTO);
+		view.updateModel(new ModelDTO(model.getGrid()));
 	}
 
-	/* Returns the latest ModelDTO from the model. */
 	public ModelDTO getLatestModelDTO() {
 		return new ModelDTO(model.getGrid());
 	}
 
-	/* main method */
 	public static void main(String[] args) {
 		launch(args);
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
+	public void setModel(Model model) {
+		this.model = model;
+	}
+
+	public View getView() {
+		return view;
+	}
+
+	public void setView(View view) {
+		this.view = view;
 	}
 }

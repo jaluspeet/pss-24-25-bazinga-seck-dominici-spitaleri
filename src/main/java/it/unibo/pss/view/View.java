@@ -3,8 +3,12 @@ package it.unibo.pss.view;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import it.unibo.pss.controller.observer.ModelDTO;
-import it.unibo.pss.model.entity.*;
+import it.unibo.pss.model.entity.BasicEntity;
+import it.unibo.pss.model.entity.PlantEntity;
+import it.unibo.pss.model.entity.PredatorEntity;
+import it.unibo.pss.model.entity.PreyEntity;
 import it.unibo.pss.view.views.EntityView;
+import it.unibo.pss.view.views.StackView;
 import it.unibo.pss.view.views.WorldView;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -12,7 +16,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import it.unibo.pss.view.views.StackView;
 
 public class View {
 	private ModelDTO modelDTO;
