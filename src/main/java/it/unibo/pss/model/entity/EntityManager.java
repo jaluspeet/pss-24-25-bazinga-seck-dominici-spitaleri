@@ -144,9 +144,15 @@ public class EntityManager {
 			case RIGHT: newX++; break;
 		}
 		World.Tile tile = grid.getTile(newX, newY);
+
 		if (tile == null || !tile.getType().equals(World.Tile.TileType.LAND))
-			return false;
-		return tile.getEntities().isEmpty() && entity.getEnergy() > 0;
+			return false; // Prevent moving into water or invalid tiles
+
+		// Check if the tile is occupied by another animal (but allow plants)
+		boolean isBlocked = tile.getEntities().stream()
+			.anyMatch(e -> !(e instanceof PlantEntity) && e.isAlive());
+
+		return !isBlocked && entity.getEnergy() > 0;
 	}
 
 	private void processMove(BasicEntity entity, BasicEntity.Direction dir) {
@@ -199,7 +205,7 @@ public class EntityManager {
 				entity.setBazinged();
 				target.setBazinged();
 			}
-		}
+				}
 	}
 
 	private List<World.Tile> getAdjacentTiles(int x, int y) {

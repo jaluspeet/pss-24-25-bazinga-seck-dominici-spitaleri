@@ -12,6 +12,9 @@ public abstract class BasicEntity {
 	protected State currentState;
 	private static int nextId = 0;
 
+	private int stuckCounter = 0; // Tracks consecutive movement failures
+	private static final int STUCK_THRESHOLD = 3; // Max failures before forced movement
+
 	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
 		this.id = nextId++;
@@ -40,18 +43,18 @@ public abstract class BasicEntity {
 	public void setBazinged() { hasBazinged = true; }
 	public void resetBazinged() { hasBazinged = false; }
 
+	public void resetStuckCounter() { stuckCounter = 0; }
+	public void incrementStuckCounter() { stuckCounter++; }
+	public boolean isStuck() { return stuckCounter >= STUCK_THRESHOLD; }
+
 	public enum Direction { UP, DOWN, LEFT, RIGHT }
 	public enum ActionType { MOVE, INTERACT }
 
-	/** Returns true if the entity is alive (energy > 0) */
 	public boolean isAlive() {
 		return energy > 0;
 	}
 
-
-	/**
-	 * Finds the nearest entity of the given type within the specified range.
-	 */
+	/** Finds the nearest entity of the given type within the specified range. */
 	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {
 		BasicEntity nearest = null;
 		int minDist = Integer.MAX_VALUE;
@@ -78,8 +81,8 @@ public abstract class BasicEntity {
 	/** Request class for actions */
 	public static class Request {
 		public final ActionType type;
-		public final Direction direction; // for MOVE
-		public final int targetId; // for INTERACT
+		public final Direction direction;
+		public final int targetId;
 
 		public Request(ActionType type, Direction direction) {
 			this.type = type;
@@ -93,6 +96,5 @@ public abstract class BasicEntity {
 		}
 	}
 
-	/** FSM state interface */
 	public interface State { }
 }
