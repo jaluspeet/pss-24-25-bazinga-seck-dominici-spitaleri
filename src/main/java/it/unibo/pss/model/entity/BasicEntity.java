@@ -1,115 +1,98 @@
 package it.unibo.pss.model.entity;
 
-import java.util.List;
 import it.unibo.pss.model.world.World;
 
-public class BasicEntity {
-	protected int x;
-	protected int y;
+/** Base class for all entities */
+public abstract class BasicEntity {
 	protected final World grid;
-	private static int nextId = 0;
 	private final int id;
-	private static final int ENTITY_STATE_TIME = 5;
+	protected int x, y;
+	protected int energy;
+	protected boolean hasMated;
+	protected State currentState;
+	private static int nextId = 0;
 
-	protected EntityState state;
-	protected int stateLock;
-
-	/** Constructor for BasicEntity. */
-	public BasicEntity(World grid, int x, int y) {
+	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
+		this.id = nextId++;
 		this.x = x;
 		this.y = y;
-		this.id = nextId++;
-		grid.getTile(x, y).addEntity(this);
-		this.state = new IdleState();
-		this.stateLock = 0;
+		this.energy = initialEnergy;
+		this.hasMated = false;
+		this.currentState = initialState();
 	}
 
-	/** Updates the entity state and behavior. */
-	public final void update() {
-		updateState();
-		if (stateLock > 0) {
-			stateLock--;
-		} else if (!(state instanceof IdleState) && !(state instanceof DeadState)) {
-			setState(new IdleState());
-		}
-		state.execute(this);
-	}
+	protected abstract State initialState();
+	public abstract Request getNextRequest();
+	public abstract void transitionState(boolean actionSuccess);
 
-	/** Override this method to set the default behavior for the entity. */
-	protected void updateState() { }
+	public abstract Class<? extends BasicEntity> getPreyType();
+	public abstract Class<? extends BasicEntity> getPredatorType();
+	public abstract BasicEntity spawnOffspring();
 
-	/** Sets the entity state. */
-	public void setState(EntityState newState) {
-		this.state = newState;
-		this.stateLock = ENTITY_STATE_TIME;
-	}
+	public int getId() { return id; }
+	public int getX() { return x; }
+	public int getY() { return y; }
+	public int getEnergy() { return energy; }
+	public void addEnergy(int amount) { energy += amount; }
+	public void subtractEnergy(int amount) { energy -= amount; }
+	public void setPosition(int newX, int newY) { x = newX; y = newY; }
+	public void setMated() { hasMated = true; }
+	public void resetMated() { hasMated = false; }
 
+	public enum Direction { UP, DOWN, LEFT, RIGHT }
+	public enum ActionType { MOVE, INTERACT }
 
-	/** Moves the entity to the new position. */
-	public void moveTo(int newX, int newY) {
-		grid.getTile(x, y).removeEntity(this);
-		this.x = newX;
-		this.y = newY;
-		grid.getTile(newX, newY).addEntity(this);
-	}
-
-	/** Kills the entity. */
-	public void kill() { }
-
-	/** Returns true if the entity is alive. */
+	/** Returns true if the entity is alive (energy > 0) */
 	public boolean isAlive() {
-		return true;
+		return energy > 0;
 	}
 
-	/** Returns the surrounding tiles. */
-	public List<World.Tile> getSurroundingTiles(int range) {
-		return grid.getTilesInRange(x, y, range);
+	
+	/**
+	 * Finds the nearest entity of the given type within the specified range.
+	 */
+	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {
+		BasicEntity nearest = null;
+		int minDist = Integer.MAX_VALUE;
+		for (int dx = -range; dx <= range; dx++) {
+			for (int dy = -range; dy <= range; dy++) {
+				if (dx == 0 && dy == 0) continue;
+				int nx = x + dx, ny = y + dy;
+				World.Tile tile = grid.getTile(nx, ny);
+				if (tile == null) continue;
+				for (BasicEntity other : tile.getEntities()) {
+					if (type != null && type.isInstance(other) && other.isAlive() && other != this) {
+						int dist = Math.abs(dx) + Math.abs(dy);
+						if (dist < minDist) {
+							minDist = dist;
+							nearest = other;
+						}
+					}
+				}
+			}
+		}
+		return nearest;
 	}
 
-	/** Returns the entity's ID. */
-	public int getId() {
-		return id;
-	}
+	/** Request class for actions */
+	public static class Request {
+		public final ActionType type;
+		public final Direction direction; // for MOVE
+		public final int targetId; // for INTERACT
 
-	/** Returns the entity's X position. */
-	public int getX() {
-		return x;
-	}
-
-	/** Returns the entity's Y position. */
-	public int getY() {
-		return y;
-	}
-
-	/** Returns the entity's grid. */
-	public World getGrid() {
-		return grid;
-	}
-
-	/** Base state interface. */
-	public interface EntityState {
-		void execute(BasicEntity entity);
-		String getName();
-	}
-
-	/** IDLE state. */
-	public static class IdleState implements EntityState {
-		@Override
-		public void execute(BasicEntity entity) { }
-		@Override
-		public String getName() {
-			return "IDLE";
+		public Request(ActionType type, Direction direction) {
+			this.type = type;
+			this.direction = direction;
+			this.targetId = -1;
+		}
+		public Request(ActionType type, int targetId) {
+			this.type = type;
+			this.targetId = targetId;
+			this.direction = null;
 		}
 	}
 
-	/** DEAD state. Subclasses (like PlantEntity) may override kill behavior. */
-	public static class DeadState implements EntityState {
-		@Override
-		public void execute(BasicEntity entity) { }
-		@Override
-		public String getName() {
-			return "DEAD";
-		}
-	}
+	/** FSM state interface */
+	public interface State { }
 }

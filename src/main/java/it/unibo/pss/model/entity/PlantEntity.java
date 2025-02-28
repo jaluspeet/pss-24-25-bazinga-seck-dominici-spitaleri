@@ -1,37 +1,64 @@
 package it.unibo.pss.model.entity;
 
+import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.model.world.World;
 
+/** Plant entity */
 public class PlantEntity extends BasicEntity {
-	private int revivalTimer = 0;
-	private static final int REVIVAL_TIME = 10;
-
-	/* Constructor for PlantEntity. */
-	public PlantEntity(World grid, int x, int y) {
-		super(grid, x, y);
+	private int resurrectionCounter = 0;
+	
+	public PlantEntity(World grid, int x, int y, int initialEnergy) {
+		super(grid, x, y, initialEnergy);
 	}
-
-
-	/* Override updateState() for resurrection */
+	
 	@Override
-	protected void updateState() {
-		if (state instanceof DeadState) {
-			if (revivalTimer-- <= 0) {
-				setState(new IdleState());
-			}
-		}
+	protected State initialState() {
+		return new PlantState();
 	}
-
-	/* Override kill() to set the entity to dead and start the revival timer */
+	
 	@Override
+	public Request getNextRequest() {
+		// Plants simply interact with themselves.
+		return new Request(ActionType.INTERACT, this.getId());
+	}
+	
+	@Override
+	public void transitionState(boolean actionSuccess) {
+		// No state transition needed for plants.
+	}
+	
+	@Override
+	public Class<? extends BasicEntity> getPreyType() {
+		return null;
+	}
+	
+	@Override
+	public Class<? extends BasicEntity> getPredatorType() {
+		return SheepEntity.class;
+	}
+	
+	@Override
+	public BasicEntity spawnOffspring() {
+		return new PlantEntity(grid, x, y, 1);
+	}
+	
 	public void kill() {
-		revivalTimer = REVIVAL_TIME;
-		setState(new DeadState());
+		energy = 0;
+		resurrectionCounter = SharedConstants.PLANT_RESURRECTION_TIME;
 	}
-
-	/* check if the entity is alive */
-	@Override
-	public boolean isAlive() {
-		return !(state instanceof DeadState);
+	
+	public boolean isDead() {
+		return energy <= 0;
 	}
+	
+	public int getResurrectionCounter() {
+		return resurrectionCounter;
+	}
+	
+	public void decrementResurrectionCounter() {
+		if (resurrectionCounter > 0)
+			resurrectionCounter--;
+	}
+	
+	private static class PlantState implements State { }
 }

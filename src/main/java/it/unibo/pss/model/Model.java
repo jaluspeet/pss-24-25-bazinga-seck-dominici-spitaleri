@@ -1,25 +1,26 @@
 package it.unibo.pss.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import it.unibo.pss.common.SharedConstants;
-import it.unibo.pss.controller.observer.ModelObserver;
-import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.entity.EntityGenerator;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.model.world.WorldGenerator;
+import it.unibo.pss.common.SharedConstants;
+import it.unibo.pss.controller.observer.ModelObserver;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Model {
 	private final World grid;
+	private final EntityGenerator entityGenerator;
 	private final List<ModelObserver> observers = new ArrayList<>();
 	private long lastUpdate = 0;
 
 	public Model(int width, int height) {
 		this.grid = WorldGenerator.generateGrid(width, height);
-		EntityGenerator.generateEntities(grid);
+		this.entityGenerator = new EntityGenerator(grid);
+		// Generate initial entities on valid LAND tiles
+		entityGenerator.generateEntities();
 		startSimulation();
 	}
 
@@ -48,10 +49,7 @@ public class Model {
 	}
 
 	private void updateSimulation() {
-		grid.forEachTile(tile -> {
-			List<BasicEntity> entitiesCopy = new ArrayList<>(tile.getEntities()); // list changes over time so a copy is needed
-			entitiesCopy.stream().filter(BasicEntity::isAlive).forEach(BasicEntity::update);
-		});
+		entityGenerator.updateCycle();
 		notifyObservers();
 	}
 

@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.entity.PlantEntity;
-import it.unibo.pss.model.entity.PredatorEntity;
-import it.unibo.pss.model.entity.PreyEntity;
+import it.unibo.pss.model.entity.WolfEntity;
+import it.unibo.pss.model.entity.SheepEntity;
 import it.unibo.pss.view.views.EntityView;
 import it.unibo.pss.view.views.StackView;
 import it.unibo.pss.view.views.WorldView;
@@ -61,8 +61,8 @@ public class View {
 		modelDTO.getGrid().forEachTile(tile -> 
 			tile.getEntities().stream().filter(BasicEntity::isAlive).forEach(entity -> {
 				if (entity instanceof PlantEntity) plants.incrementAndGet();
-				else if (entity instanceof PreyEntity) preys.incrementAndGet();
-				else if (entity instanceof PredatorEntity) predators.incrementAndGet();
+				else if (entity instanceof SheepEntity) preys.incrementAndGet();
+				else if (entity instanceof WolfEntity) predators.incrementAndGet();
 			})
 		);
 

@@ -2,8 +2,8 @@ package it.unibo.pss.view.sprites;
 
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.entity.PlantEntity;
-import it.unibo.pss.model.entity.PreyEntity;
-import it.unibo.pss.model.entity.PredatorEntity;
+import it.unibo.pss.model.entity.SheepEntity;
+import it.unibo.pss.model.entity.WolfEntity;
 import javafx.scene.image.Image;
 import java.util.*;
 
@@ -37,8 +37,8 @@ public class EntitySpriteLoader {
 
 	public Image getEntitySprite(BasicEntity entity) {
 		return cache.computeIfAbsent(entity, e -> {
-			if (e instanceof PredatorEntity) return getRandomSprite(wolfSprites);
-			if (e instanceof PreyEntity) return getRandomSprite(sheepSprites);
+			if (e instanceof WolfEntity) return getRandomSprite(wolfSprites);
+			if (e instanceof SheepEntity) return getRandomSprite(sheepSprites);
 			if (e instanceof PlantEntity) return getRandomSprite(plantSprites);
 			return null;
 		});
