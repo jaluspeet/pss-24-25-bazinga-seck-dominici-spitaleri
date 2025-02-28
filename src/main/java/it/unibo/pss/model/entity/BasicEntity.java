@@ -8,7 +8,7 @@ public abstract class BasicEntity {
 	private final int id;
 	protected int x, y;
 	protected int energy;
-	protected boolean hasMated;
+	protected boolean hasBazinged;
 	protected State currentState;
 	private static int nextId = 0;
 
@@ -18,7 +18,7 @@ public abstract class BasicEntity {
 		this.x = x;
 		this.y = y;
 		this.energy = initialEnergy;
-		this.hasMated = false;
+		this.hasBazinged = false;
 		this.currentState = initialState();
 	}
 
@@ -37,8 +37,8 @@ public abstract class BasicEntity {
 	public void addEnergy(int amount) { energy += amount; }
 	public void subtractEnergy(int amount) { energy -= amount; }
 	public void setPosition(int newX, int newY) { x = newX; y = newY; }
-	public void setMated() { hasMated = true; }
-	public void resetMated() { hasMated = false; }
+	public void setBazinged() { hasBazinged = true; }
+	public void resetBazinged() { hasBazinged = false; }
 
 	public enum Direction { UP, DOWN, LEFT, RIGHT }
 	public enum ActionType { MOVE, INTERACT }
@@ -48,7 +48,7 @@ public abstract class BasicEntity {
 		return energy > 0;
 	}
 
-	
+
 	/**
 	 * Finds the nearest entity of the given type within the specified range.
 	 */

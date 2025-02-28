@@ -17,16 +17,15 @@ public class WolfEntity extends BasicEntity {
 	@Override
 	public Request getNextRequest() {
 		// Wolves have no natural predators.
-		// Priority 1: If energy is high enough, seek mate
 		if (energy >= SharedConstants.WOLF_ENERGY_BAZINGA) {
-			BasicEntity mate = findNearestEntity(this.getClass(), SharedConstants.WOLF_SIGHT_RANGE);
-			if (mate != null) {
-				int dist = Math.abs(x - mate.getX()) + Math.abs(y - mate.getY());
+			BasicEntity bazinger = findNearestEntity(this.getClass(), SharedConstants.WOLF_SIGHT_RANGE);
+			if (bazinger != null) {
+				int dist = Math.abs(x - bazinger.getX()) + Math.abs(y - bazinger.getY());
 				if (dist == 1)
-					return new Request(ActionType.INTERACT, mate.getId());
+					return new Request(ActionType.INTERACT, bazinger.getId());
 				else {
-					int dx = mate.getX() - x;
-					int dy = mate.getY() - y;
+					int dx = bazinger.getX() - x;
+					int dy = bazinger.getY() - y;
 					Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
 						? ((dx > 0) ? Direction.RIGHT : Direction.LEFT)
 						: ((dy > 0) ? Direction.DOWN : Direction.UP);

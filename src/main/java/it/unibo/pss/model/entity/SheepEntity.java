@@ -30,17 +30,17 @@ public class SheepEntity extends BasicEntity {
 				fleeDir = (dy >= 0) ? Direction.DOWN : Direction.UP;
 			return new Request(ActionType.MOVE, fleeDir);
 		}
-		// Priority 2: If energy is high enough for reproduction, seek mate
+		// Priority 2: If energy is high enough for reproduction, seek bazinger
 		if (energy >= SharedConstants.SHEEP_ENERGY_BAZINGA) {
-			BasicEntity mate = findNearestEntity(this.getClass(), SharedConstants.SHEEP_SIGHT_RANGE);
-			if (mate != null) {
-				int dist = Math.abs(x - mate.getX()) + Math.abs(y - mate.getY());
+			BasicEntity bazinger = findNearestEntity(this.getClass(), SharedConstants.SHEEP_SIGHT_RANGE);
+			if (bazinger != null) {
+				int dist = Math.abs(x - bazinger.getX()) + Math.abs(y - bazinger.getY());
 				if (dist == 1)
-					return new Request(ActionType.INTERACT, mate.getId());
+					return new Request(ActionType.INTERACT, bazinger.getId());
 				else {
-					// Move towards mate
-					int dx = mate.getX() - x;
-					int dy = mate.getY() - y;
+					// Move towards bazinger
+					int dx = bazinger.getX() - x;
+					int dy = bazinger.getY() - y;
 					Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
 						? ((dx > 0) ? Direction.RIGHT : Direction.LEFT)
 						: ((dy > 0) ? Direction.DOWN : Direction.UP);

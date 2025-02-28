@@ -128,9 +128,9 @@ public class EntityManager {
 			if (!approvedActions.stream().anyMatch(a -> a.entity.getId() == rw.entity.getId()))
 				rw.entity.transitionState(false);
 		}
-		// Reset mating flag for next update
+		// Reset bazinga flag for next update
 		for (BasicEntity e : entities)
-			e.resetMated();
+			e.resetBazinged();
 		// Process plant resurrection
 		processPlantResurrection();
 	}
@@ -186,18 +186,18 @@ public class EntityManager {
 				return;
 			killEntity(target);
 		}
-		// Mate interaction: if same type and target has sufficient energy and hasn’t mated yet
+		// Bazinga interaction: if same type and target has sufficient energy and hasn’t bazinged yet
 		if (entity.getClass().equals(target.getClass()) &&
 				target.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA &&
-				!target.hasMated) {
+				!target.hasBazinged) {
 			World.Tile freeTile = findFreeAdjacentTile(entity.getX(), entity.getY());
 			if (freeTile != null) {
 				BasicEntity offspring = entity.spawnOffspring();
 				addEntity(offspring);
 				entity.subtractEnergy(SharedConstants.SHEEP_ENERGY_BAZINGA);
 				target.subtractEnergy(SharedConstants.SHEEP_ENERGY_BAZINGA);
-				entity.setMated();
-				target.setMated();
+				entity.setBazinged();
+				target.setBazinged();
 			}
 		}
 	}
