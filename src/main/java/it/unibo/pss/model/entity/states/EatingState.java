@@ -13,7 +13,7 @@ public class EatingState implements BasicEntity.EntityState {
 			a.moveTowards(targetFood.getX(), targetFood.getY());
 			if (a.getX() == targetFood.getX() && a.getY() == targetFood.getY()) {
 				targetFood.kill();
-				a.setEnergy(a.getEnergy() + SharedConstants.ANIMAL_ENERGY_RESTORE);
+				a.setEnergy(a.getEnergy() + SharedConstants.SHEEP_ENERGY_RESTORE);
 			}
 		} else {
 			a.moveRandomly();

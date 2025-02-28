@@ -24,7 +24,7 @@ public class Model {
 		timer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				if (now - lastUpdate >= SharedConstants.MODEL_UPDATE_INTERVAL * 1_000_000) {
+				if (now - lastUpdate >= SharedConstants.ENTITY_UPDATE_INTERVAL * 1_000_000) {
 					updateSimulation();
 					lastUpdate = now;
 				}

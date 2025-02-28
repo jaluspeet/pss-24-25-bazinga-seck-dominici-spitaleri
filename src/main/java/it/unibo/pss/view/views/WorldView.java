@@ -13,27 +13,21 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-// render the world grid
 public class WorldView implements Renderable {
 	private final WorldSpriteLoader spriteLoader = new WorldSpriteLoader("/sprites/world");
 
-	// override the render method to render the world grid
 	@Override
 	public void render(GraphicsContext gc, ModelDTO modelDTO, Camera camera, GeometryRenderer renderer) {
 		World grid = modelDTO.getGrid();
-		int gridCols = grid.getWidth();
-		int gridRows = grid.getHeight();
-		double canvasWidth = gc.getCanvas().getWidth();
-		double canvasHeight = gc.getCanvas().getHeight();
-		Point2D cameraOffset = CameraUtil.computeCameraOffset(renderer, camera, canvasWidth, canvasHeight, gridCols, gridRows);
+		Point2D cameraOffset = CameraUtil.computeCameraOffset(renderer, camera, gc.getCanvas().getWidth(), gc.getCanvas().getHeight(), grid.getWidth(), grid.getHeight());
 
-		for (int x = 0; x < gridCols; x++) {
-			for (int y = 0; y < gridRows; y++) {
-				World.Tile tile = grid.getTile(x, y);
+		for (int x = 0; x < grid.getWidth(); x++) {
+			for (int y = 0; y < grid.getHeight(); y++) {
 				Rectangle2D rect = renderer.computeTileRect(x, y, cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
-				if (!CullingUtil.isRectVisible(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight(), canvasWidth, canvasHeight))
+				if (!CullingUtil.isRectVisible(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight(), gc.getCanvas().getWidth(), gc.getCanvas().getHeight())) 
 					continue;
-				Image sprite = spriteLoader.getTileSprite(tile);
+
+				Image sprite = spriteLoader.getTileSprite(grid.getTile(x, y));
 				if (sprite != null) {
 					gc.drawImage(sprite, rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight());
 				}

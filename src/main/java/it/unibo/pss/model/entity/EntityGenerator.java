@@ -13,8 +13,8 @@ public final class EntityGenerator {
 	/** Generates entities using separate counts for plants, preys, and predators. */
 	public static void generateEntities(World grid) {
 		generatePlants(grid, SharedConstants.PLANT_COUNT);
-		generatePreys(grid, SharedConstants.PREY_COUNT);
-		generatePredators(grid, SharedConstants.PREDATOR_COUNT);
+		generatePreys(grid, SharedConstants.SHEEP_COUNT);
+		generatePredators(grid, SharedConstants.WOLF_COUNT);
 	}
 
 	private static void generatePlants(World grid, int count) {

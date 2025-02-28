@@ -20,34 +20,50 @@ public final class SharedConstants {
 		}
 	}
 
-	public static final String WINDOW_TITLE = PROPERTIES.getProperty("window.title", "pss-javafx");
+	// static constants
+	public static final String WINDOW_TITLE = "pss-javafx";
+	public static final double TILE_WIDTH = 64;
+	public static final double TILE_HEIGHT = 32;
+	public static final double SPRITE_WIDTH = 64;
+	public static final double SPRITE_HEIGHT = 64;
+
+	// exposed constants: use config.properties file to override
+
+	// window
 	public static final int WINDOW_WIDTH = Integer.parseInt(PROPERTIES.getProperty("window.width", "800"));
 	public static final int WINDOW_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("window.height", "600"));
 	
-	public static final int WORLD_WIDTH = Integer.parseInt(PROPERTIES.getProperty("world.width", "32"));
-	public static final int WORLD_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("world.height", "32"));
+	// simulation
+	public static final int WORLD_WIDTH = Integer.parseInt(PROPERTIES.getProperty("world.width", "64"));
+	public static final int WORLD_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("world.height", "64"));
 	public static final double WORLD_WATER_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.water.ratio", "0.4"));
 	public static final double WORLD_LAKE_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.lake.ratio", "0.7"));
 	public static final int WORLD_LAKE_COUNT = Integer.parseInt(PROPERTIES.getProperty("world.lake.count", "6"));
+	public static final int ENTITY_UPDATE_INTERVAL = Integer.parseInt(PROPERTIES.getProperty("model.update.interval", "500"));
 	
-	public static final int PREY_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("prey.seek.radius", "5"));
-	public static final int PREDATOR_SEEK_RADIUS = Integer.parseInt(PROPERTIES.getProperty("predator.seek.radius", "20"));
-	public static final int ANIMAL_MATING_COOLDOWN = Integer.parseInt(PROPERTIES.getProperty("animal.mating.cooldown", "10"));
-	public static final int ANIMAL_INITIAL_ENERGY = Integer.parseInt(PROPERTIES.getProperty("animal.initial.energy", "40"));
-	public static final int ANIMAL_ENERGY_THRESHOLD = Integer.parseInt(PROPERTIES.getProperty("animal.energy.threshold", "10"));
-	public static final int ANIMAL_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("animal.energy.restore", "20"));
-	public static final int ANIMAL_REPRODUCTION_COST = Integer.parseInt(PROPERTIES.getProperty("animal.reproduction.cost", "15"));
-	
-	public static final int PLANT_REVIVAL_TIME = Integer.parseInt(PROPERTIES.getProperty("plant.revival.time", "10"));
+	// sheep
+	public static final int SHEEP_COUNT = Integer.parseInt(PROPERTIES.getProperty("prey.count", "20"));
+	public static final int SHEEP_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("prey.speed", "1"));
+	public static final int SHEEP_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("sheep.sight.range", "5"));
+	public static final int SHEEP_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.default", "40"));
+	public static final int SHEEP_ENERGY_HUNGRY = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.hungry", "10"));
+	public static final int SHEEP_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.restore", "20"));
+	public static final int SHEEP_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.bazinga", "15"));
 
+	// wolf
+	public static final int WOLF_COUNT = Integer.parseInt(PROPERTIES.getProperty("predator.count", "20"));
+	public static final int WOLF_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("predator.speed", "2"));
+	public static final int WOLF_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("wolf.sight.range", "20"));
+	public static final int WOLF_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.default", "40"));
+	public static final int WOLF_ENERGY_HUNGRY = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.hungry", "10"));
+	public static final int WOLF_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.restore", "20"));
+	public static final int WOLF_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.bazinga", "15"));
+
+	// plant
 	public static final int PLANT_COUNT = Integer.parseInt(PROPERTIES.getProperty("plant.count", "20"));
-	public static final int PREY_COUNT = Integer.parseInt(PROPERTIES.getProperty("prey.count", "20"));
-	public static final int PREDATOR_COUNT = Integer.parseInt(PROPERTIES.getProperty("predator.count", "20"));
-	
-	public static final int PREDATOR_SPEED = Integer.parseInt(PROPERTIES.getProperty("predator.speed", "2"));
-	public static final int PREY_SPEED = Integer.parseInt(PROPERTIES.getProperty("prey.speed", "1"));
+	public static final int PLANT_RESURRECTION_TIME = Integer.parseInt(PROPERTIES.getProperty("plant.resurrection.time", "10"));
 
-
+	// camera
 	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));
 	public static final double CAMERA_FRICTION = Double.parseDouble(PROPERTIES.getProperty("camera.friction", "0.9"));
 	public static final double CAMERA_INERTIA_THRESHOLD = Double.parseDouble(PROPERTIES.getProperty("camera.inertia.threshold", "0.01"));
@@ -55,15 +71,7 @@ public final class SharedConstants {
 	public static final double CAMERA_ZOOM_SMOOTHING = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.smoothing", "0.1"));
 	public static final double CAMERA_MIN_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.min.scale", "0.1"));
 	public static final double CAMERA_MAX_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.max.scale", "10.0"));
-	
 	public static final int CAMERA_FRAMERATE = Integer.parseInt(PROPERTIES.getProperty("camera.framerate", "60"));
-	public static final int MODEL_UPDATE_INTERVAL = Integer.parseInt(PROPERTIES.getProperty("model.update.interval", "500"));
-	
-	public static final double TILE_WIDTH = Double.parseDouble(PROPERTIES.getProperty("tile.width", "64"));
-	public static final double TILE_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("tile.height", "32"));
-	public static final double SPRITE_WIDTH = Double.parseDouble(PROPERTIES.getProperty("image.width", "64"));
-	public static final double SPRITE_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("image.height", "64"));
-	public static final double FOOTPRINT_HEIGHT = Double.parseDouble(PROPERTIES.getProperty("footprint.height", "32"));
 
 	private SharedConstants() {}
 }

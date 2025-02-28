@@ -7,7 +7,7 @@ public class PreyEntity extends AnimalEntity {
 
 	/* Constructor for PreyEntity. */
 	public PreyEntity(World grid, int x, int y) {
-		super(grid, x, y, SharedConstants.PREY_SPEED);
+		super(grid, x, y, SharedConstants.SHEEP_MOVEMENT_SPEED);
 	}
 
 	/* check for nearby predators, and switch to FleeingState if one is detected. */
@@ -30,7 +30,7 @@ public class PreyEntity extends AnimalEntity {
 
 	@Override
 	public int getSeekRadius() {
-		return SharedConstants.PREY_SEEK_RADIUS;
+		return SharedConstants.SHEEP_SIGHT_RANGE;
 	}
 
 	/* return the prey's food type */

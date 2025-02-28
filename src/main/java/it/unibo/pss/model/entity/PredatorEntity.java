@@ -8,7 +8,7 @@ public class PredatorEntity extends AnimalEntity {
 
 	/* Constructor for PredatorEntity. */
 	public PredatorEntity(World grid, int x, int y) {
-		super(grid, x, y, SharedConstants.PREDATOR_SPEED);
+		super(grid, x, y, SharedConstants.WOLF_MOVEMENT_SPEED);
 	}
 
 	/* spawn a new predator */
@@ -31,7 +31,7 @@ public class PredatorEntity extends AnimalEntity {
 
 	@Override
 	public int getSeekRadius() {
-		return SharedConstants.PREDATOR_SEEK_RADIUS;
+		return SharedConstants.WOLF_SIGHT_RANGE;
 	}
 
 	@Override

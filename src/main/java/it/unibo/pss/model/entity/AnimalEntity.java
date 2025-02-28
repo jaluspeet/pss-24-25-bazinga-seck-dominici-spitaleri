@@ -20,7 +20,7 @@ public abstract class AnimalEntity extends BasicEntity {
 	public AnimalEntity(World grid, int x, int y, int speed) {
 		super(grid, x, y);
 		this.speed = speed;
-		energy = SharedConstants.ANIMAL_INITIAL_ENERGY;
+		energy = SharedConstants.SHEEP_ENERGY_DEFAULT;
 	}
 
 	// Centralized energy management: subtract energy each update.
@@ -38,7 +38,7 @@ public abstract class AnimalEntity extends BasicEntity {
 
 	// Returns the default state based on energy level
 	protected BasicEntity.EntityState defaultState() {
-		return energy < SharedConstants.ANIMAL_ENERGY_THRESHOLD ? new EatingState() : new MatingState();
+		return energy < SharedConstants.SHEEP_ENERGY_HUNGRY ? new EatingState() : new MatingState();
 	}
 
 	// Finalizes the action by resetting the state to idle
@@ -59,11 +59,11 @@ public abstract class AnimalEntity extends BasicEntity {
 
 	// if both entities have sufficient energy deduct reproduction cost from both and spawn offspring.
 	public boolean performMating(AnimalEntity mate) {
-		if (this.getEnergy() >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
-				mate.getEnergy() >= SharedConstants.ANIMAL_REPRODUCTION_COST &&
+		if (this.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA &&
+				mate.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA &&
 				this.getId() < mate.getId()) {
-			this.setEnergy(this.getEnergy() - SharedConstants.ANIMAL_REPRODUCTION_COST);
-			mate.setEnergy(mate.getEnergy() - SharedConstants.ANIMAL_REPRODUCTION_COST);
+			this.setEnergy(this.getEnergy() - SharedConstants.SHEEP_ENERGY_BAZINGA);
+			mate.setEnergy(mate.getEnergy() - SharedConstants.SHEEP_ENERGY_BAZINGA);
 			this.spawnOffspring();
 			mate.spawnOffspring();
 			return true;
