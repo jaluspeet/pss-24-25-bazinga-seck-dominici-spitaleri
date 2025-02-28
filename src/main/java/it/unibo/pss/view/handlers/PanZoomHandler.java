@@ -1,4 +1,4 @@
-package it.unibo.pss.view.components;
+package it.unibo.pss.view.handlers;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -9,7 +9,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.util.Duration;
 import it.unibo.pss.common.SharedConstants;
 
-public class Camera {
+public class PanZoomHandler {
 	private double scale = 1.0, targetScale = 1.0;
 	private double panX = 0, panY = 0, velocityX = 0, velocityY = 0;
 	private double lastMouseX, lastMouseY;
@@ -17,7 +17,7 @@ public class Camera {
 	private final Runnable updateCallback;
 	private final Timeline inertiaTimer;
 
-	public Camera(Canvas target, Runnable updateCallback) {
+	public PanZoomHandler(Canvas target, Runnable updateCallback) {
 		this.target = target;
 		this.updateCallback = updateCallback;
 		attachEventHandlers();

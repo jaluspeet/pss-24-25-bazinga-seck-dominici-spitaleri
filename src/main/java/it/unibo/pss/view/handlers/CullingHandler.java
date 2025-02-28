@@ -1,7 +1,7 @@
-package it.unibo.pss.view.components;
+package it.unibo.pss.view.handlers;
 
-public final class CullingUtil {
-	private CullingUtil() {}
+public final class CullingHandler {
+	private CullingHandler() {}
 
 	public static boolean isRectVisible(double left, double top, double width, double height, double canvasWidth, double canvasHeight) {
 		return left + width >= 0 && left <= canvasWidth && top + height >= 0 && top <= canvasHeight;

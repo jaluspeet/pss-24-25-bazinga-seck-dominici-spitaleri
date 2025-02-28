@@ -1,22 +1,25 @@
-package it.unibo.pss.view.components;
+package it.unibo.pss.view.views;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import it.unibo.pss.view.handlers.PanZoomHandler;
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.view.geometry.GeometryRenderer;
 import it.unibo.pss.view.geometry.IsometricRenderer;
 import it.unibo.pss.view.geometry.TopDownRenderer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import java.util.*;
 
-public class Viewport extends Canvas {
+public class StackView extends Canvas {
 	private final List<Renderable> renderables = new ArrayList<>();
-	private final Camera camera;
+	private final PanZoomHandler camera;
 	private final GeometryRenderer geometryRenderer;
 	private ModelDTO currentModelDTO;
 
-	public Viewport(double width, double height, boolean isometric) {
+	public StackView(double width, double height, boolean isometric) {
 		super(width, height);
-		camera = new Camera(this, () -> render(currentModelDTO));
+		camera = new PanZoomHandler(this, () -> render(currentModelDTO));
 		geometryRenderer = isometric ? new IsometricRenderer() : new TopDownRenderer();
 	}
 
@@ -31,11 +34,11 @@ public class Viewport extends Canvas {
 		renderables.forEach(r -> r.render(gc, modelDTO, camera, geometryRenderer));
 	}
 
-	public Camera getCamera() {
+	public PanZoomHandler getCamera() {
 		return camera;
 	}
 
 	public interface Renderable {
-		void render(GraphicsContext gc, ModelDTO modelDTO, Camera camera, GeometryRenderer renderer);
+		void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer);
 	}
 }

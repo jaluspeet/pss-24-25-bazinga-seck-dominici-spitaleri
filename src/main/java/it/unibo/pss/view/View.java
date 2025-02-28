@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.entity.*;
-import it.unibo.pss.view.components.Viewport;
 import it.unibo.pss.view.views.EntityView;
 import it.unibo.pss.view.views.WorldView;
 import javafx.animation.AnimationTimer;
@@ -13,14 +12,15 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import it.unibo.pss.view.views.StackView;
 
 public class View {
 	private ModelDTO modelDTO;
-	private final Viewport viewport;
+	private final StackView viewport;
 
 	public View(Stage stage, String title, int width, int height, ModelDTO modelDTO) {
 		this.modelDTO = modelDTO;
-		this.viewport = new Viewport(width, height, true);
+		this.viewport = new StackView(width, height, true);
 		viewport.registerRenderable(new WorldView());
 		viewport.registerRenderable(new EntityView());
 
