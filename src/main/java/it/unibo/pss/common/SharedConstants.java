@@ -30,8 +30,8 @@ public final class SharedConstants {
 	// exposed constants: use config.properties file to override
 
 	// window
-	public static final int WINDOW_WIDTH = Integer.parseInt(PROPERTIES.getProperty("window.width", "800"));
-	public static final int WINDOW_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("window.height", "600"));
+	public static final int WINDOW_WIDTH = Integer.parseInt(PROPERTIES.getProperty("window.width", "2560"));
+	public static final int WINDOW_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("window.height", "1600"));
 	
 	// simulation
 	public static final int WORLD_WIDTH = Integer.parseInt(PROPERTIES.getProperty("world.width", "64"));

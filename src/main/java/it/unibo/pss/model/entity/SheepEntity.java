@@ -3,7 +3,6 @@ package it.unibo.pss.model.entity;
 import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.model.world.World;
 
-/** Sheep entity */
 public class SheepEntity extends BasicEntity {
 	public SheepEntity(World grid, int x, int y, int initialEnergy) {
 		super(grid, x, y, initialEnergy);
@@ -11,16 +10,15 @@ public class SheepEntity extends BasicEntity {
 
 	@Override
 	protected State initialState() {
-		// Simple FSM state; details can be expanded if needed
 		return new SheepState();
 	}
 
 	@Override
 	public Request getNextRequest() {
-		// Priority 1: Flee from predator (wolf)
+		
+		// flee
 		BasicEntity predator = findNearestEntity(getPredatorType(), SharedConstants.SHEEP_SIGHT_RANGE);
 		if (predator != null) {
-			// Compute opposite direction
 			int dx = x - predator.getX();
 			int dy = y - predator.getY();
 			Direction fleeDir;
@@ -30,15 +28,15 @@ public class SheepEntity extends BasicEntity {
 				fleeDir = (dy >= 0) ? Direction.DOWN : Direction.UP;
 			return new Request(ActionType.MOVE, fleeDir);
 		}
-		// Priority 2: If energy is high enough for reproduction, seek bazinger
+
+		// bazinga (if energy is high enough)
 		if (energy >= SharedConstants.SHEEP_ENERGY_BAZINGA) {
 			BasicEntity bazinger = findNearestEntity(this.getClass(), SharedConstants.SHEEP_SIGHT_RANGE);
 			if (bazinger != null) {
 				int dist = Math.abs(x - bazinger.getX()) + Math.abs(y - bazinger.getY());
-				if (dist == 1)
+				if (dist <= 1)
 					return new Request(ActionType.INTERACT, bazinger.getId());
 				else {
-					// Move towards bazinger
 					int dx = bazinger.getX() - x;
 					int dy = bazinger.getY() - y;
 					Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
@@ -48,12 +46,13 @@ public class SheepEntity extends BasicEntity {
 				}
 			}
 		}
-		// Priority 3: If hungry, seek prey (plant)
+
+		// eat
 		if (energy < SharedConstants.SHEEP_ENERGY_HUNGRY) {
 			BasicEntity prey = findNearestEntity(getPreyType(), SharedConstants.SHEEP_SIGHT_RANGE);
 			if (prey != null) {
 				int dist = Math.abs(x - prey.getX()) + Math.abs(y - prey.getY());
-				if (dist == 1)
+				if (dist <= 1)
 					return new Request(ActionType.INTERACT, prey.getId());
 				else {
 					int dx = prey.getX() - x;
@@ -65,7 +64,8 @@ public class SheepEntity extends BasicEntity {
 				}
 			}
 		}
-		// Default: move randomly
+
+		// move randomly
 		Direction[] dirs = Direction.values();
 		Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
 		return new Request(ActionType.MOVE, randomDir);

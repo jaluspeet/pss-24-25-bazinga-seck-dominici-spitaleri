@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import it.unibo.pss.model.entity.BasicEntity;
 
-/** Represents the world grid containing tiles. */
 public class World {
 	private final int width;
 	private final int height;
@@ -48,7 +47,6 @@ public class World {
 		return height;
 	}
 
-	/** Allows iteration over all tiles using a lambda function. */
 	public void forEachTile(Consumer<Tile> action) {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -83,7 +81,6 @@ public class World {
 		return sb.toString();
 	}
 
-	/** Represents a single tile in the grid. */
 	public class Tile {
 		private final int x;
 		private final int y;
@@ -126,7 +123,6 @@ public class World {
 			return type == TileType.LAND ? "L" : "W";
 		}
 
-		/** Represents the type of a Tile. */
 		public enum TileType {
 			LAND, WATER
 		}

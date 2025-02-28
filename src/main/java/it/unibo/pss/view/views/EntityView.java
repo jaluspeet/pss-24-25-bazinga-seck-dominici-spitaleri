@@ -1,5 +1,7 @@
 package it.unibo.pss.view.views;
 
+import java.util.List;
+
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.world.World;
@@ -25,15 +27,18 @@ public class EntityView implements Renderable {
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
 				World.Tile tile = grid.getTile(x, y);
-				if (tile.getEntities().isEmpty()) continue;
+
+				List<BasicEntity> aliveEntities = tile.getEntities().stream()
+					.filter(BasicEntity::isAlive)
+					.toList();
+
+				if (aliveEntities.isEmpty()) continue;
 
 				Rectangle2D rect = renderer.computeTileRect(x, y, cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
 				if (!CullingHandler.isRectVisible(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight(), gc.getCanvas().getWidth(), gc.getCanvas().getHeight()))
 					continue;
 
-				for (BasicEntity entity : tile.getEntities()) {
-					if (!entity.isAlive()) continue;
-
+				for (BasicEntity entity : aliveEntities) {
 					Image sprite = spriteLoader.getEntitySprite(entity);
 					if (sprite != null) {
 						double spriteSizeX = sprite.getWidth() * camera.getScale();

@@ -22,7 +22,7 @@ public final class WorldManager {
 		grid.setTile(x, y, grid.new Tile(x, y, type));
 	}
 
-	/** Generates a new world grid with terrain generation. */
+	// generate a new world grid with terrain generation
 	public static World generateGrid(int width, int height) {
 		World grid = new World(width, height);
 		initializeLand(grid);
@@ -56,14 +56,14 @@ public final class WorldManager {
 		return grid;
 	}
 
-	/** Initializes the grid with land tiles. */
+	// initialize the grid with land tiles
 	private static void initializeLand(World grid) {
 		IntStream.range(0, grid.getWidth())
 			.forEach(x -> IntStream.range(0, grid.getHeight())
 				.forEach(y -> setTile(grid, x, y, World.Tile.TileType.LAND)));
 	}
 
-	/** Creates a lake using a flood-fill expansion from (centerX, centerY) until targetSize is reached. */
+	// create a lake using a flood-fill expansion from (centerX, centerY) until targetSize is reached
 	private static int createLake(World grid, int centerX, int centerY, int targetSize) {
 		Queue<World.Tile> queue = new LinkedList<>();
 		queue.add(grid.getTile(centerX, centerY));
@@ -83,7 +83,7 @@ public final class WorldManager {
 		return lakeTiles.size();
 	}
 
-	/** Creates a river connecting (startX, startY) and (endX, endY), stopping when targetSize is reached. */
+	// create a river connecting (startX, startY) and (endX, endY), stopping when targetSize is reached
 	private static int createRiver(World grid, int startX, int startY, int endX, int endY, int targetSize) {
 		int added = 0;
 		int x = startX, y = startY;

@@ -19,7 +19,6 @@ public class Model {
 	public Model(int width, int height) {
 		this.grid = WorldManager.generateGrid(width, height);
 		this.entityGenerator = new EntityManager(grid);
-		// Generate initial entities on valid LAND tiles
 		entityGenerator.generateEntities();
 		startSimulation();
 	}

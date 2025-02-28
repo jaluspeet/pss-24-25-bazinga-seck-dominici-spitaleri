@@ -2,7 +2,6 @@ package it.unibo.pss.model.entity;
 
 import it.unibo.pss.model.world.World;
 
-/** Base class for all entities */
 public abstract class BasicEntity {
 	protected final World grid;
 	private final int id;
@@ -12,8 +11,8 @@ public abstract class BasicEntity {
 	protected State currentState;
 	private static int nextId = 0;
 
-	private int stuckCounter = 0; // Tracks consecutive movement failures
-	private static final int STUCK_THRESHOLD = 3; // Max failures before forced movement
+	private int stuckCounter = 0;
+	private static final int STUCK_THRESHOLD = 3;
 
 	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
@@ -54,18 +53,18 @@ public abstract class BasicEntity {
 		return energy > 0;
 	}
 
-	/** Finds the nearest entity of the given type within the specified range. */
+	// Finds the nearest entity of the given type within the specified range
 	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {
 		BasicEntity nearest = null;
 		int minDist = Integer.MAX_VALUE;
 		for (int dx = -range; dx <= range; dx++) {
 			for (int dy = -range; dy <= range; dy++) {
-				if (dx == 0 && dy == 0) continue;
 				int nx = x + dx, ny = y + dy;
 				World.Tile tile = grid.getTile(nx, ny);
 				if (tile == null) continue;
 				for (BasicEntity other : tile.getEntities()) {
-					if (type != null && type.isInstance(other) && other.isAlive() && other != this) {
+					if (other == this) continue;
+					if (type != null && type.isInstance(other) && other.isAlive()) {
 						int dist = Math.abs(dx) + Math.abs(dy);
 						if (dist < minDist) {
 							minDist = dist;
@@ -78,7 +77,6 @@ public abstract class BasicEntity {
 		return nearest;
 	}
 
-	/** Request class for actions */
 	public static class Request {
 		public final ActionType type;
 		public final Direction direction;
