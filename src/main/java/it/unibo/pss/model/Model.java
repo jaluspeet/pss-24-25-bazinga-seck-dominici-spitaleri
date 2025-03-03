@@ -8,21 +8,22 @@ import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.controller.observer.ModelObserver;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Model {
 	private final World grid;
-	private final EntityManager entityGenerator;
+	private final EntityManager entityManager;
 	private final List<ModelObserver> observers = new ArrayList<>();
 	private long lastUpdate = 0;
 	private int updateInterval;
 
 	public Model(int width, int height) {
 		this.grid = WorldManager.generateGrid(width, height);
-		this.entityGenerator = new EntityManager(grid);
-		entityGenerator.generateEntities();
-		this.updateInterval = SharedConstants.ENTITY_UPDATE_INTERVAL; // initialize update interval
+		this.entityManager = new EntityManager(grid);
+		this.entityManager.generateInitialEntities();
+		this.updateInterval = SharedConstants.ENTITY_UPDATE_INTERVAL;
 		startSimulation();
 	}
 
@@ -51,7 +52,7 @@ public class Model {
 	}
 
 	private void updateSimulation() {
-		entityGenerator.updateCycle();
+		entityManager.updateCycle();
 		notifyObservers();
 	}
 
@@ -64,13 +65,15 @@ public class Model {
 	}
 
 	public String getTileActions(int tileX, int tileY) {
-		if(tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()){
+		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
 			return "Invalid tile";
 		}
 		World.Tile tile = grid.getTile(tileX, tileY);
 		StringBuilder sb = new StringBuilder();
 		for (BasicEntity entity : tile.getEntities()) {
-			if (entity instanceof it.unibo.pss.model.entity.PlantEntity) continue;
+			if (entity instanceof it.unibo.pss.model.entity.PlantEntity) {
+				continue;
+			}
 			String entityName = getEntityName(entity);
 			int energy = entity.getEnergy();
 			BasicEntity.Request req = entity.getNextRequest();
@@ -83,7 +86,11 @@ public class Model {
 				BasicEntity target = findEntityById(req.targetId);
 				String targetName = (target != null) ? getEntityName(target) : "unknown";
 				if (entity instanceof it.unibo.pss.model.entity.SheepEntity) {
-					action = entity.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA ? "bazinga with " + targetName : "eating " + targetName;
+					if (entity.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA) {
+						action = "bazinga with " + targetName;
+					} else {
+						action = "eating " + targetName;
+					}
 				} else if (entity instanceof it.unibo.pss.model.entity.WolfEntity) {
 					action = "chasing " + targetName;
 				} else {
@@ -101,25 +108,24 @@ public class Model {
 	}
 
 	private BasicEntity findEntityById(int id) {
-		for (int x = 0; x < grid.getWidth(); x++) {
-			for (int y = 0; y < grid.getHeight(); y++) {
-				for (BasicEntity e : grid.getTile(x, y).getEntities()) {
-					if (e.getId() == id) return e;
-				}
+		for (BasicEntity e : entityManager.getEntities()) {
+			if (e.getId() == id) {
+				return e;
 			}
 		}
 		return null;
 	}
 
 	private String getEntityName(BasicEntity e) {
-		if (e instanceof it.unibo.pss.model.entity.SheepEntity)
+		if (e instanceof it.unibo.pss.model.entity.SheepEntity) {
 			return "sheep" + e.getId();
-		else if (e instanceof it.unibo.pss.model.entity.WolfEntity)
+		} else if (e instanceof it.unibo.pss.model.entity.WolfEntity) {
 			return "wolf" + e.getId();
-		else if (e instanceof it.unibo.pss.model.entity.PlantEntity)
+		} else if (e instanceof it.unibo.pss.model.entity.PlantEntity) {
 			return "plant" + e.getId();
-		else
+		} else {
 			return "entity" + e.getId();
+		}
 	}
 
 	public World getGrid() {
