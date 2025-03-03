@@ -41,4 +41,8 @@ public class StackView extends Canvas {
 	public interface Renderable {
 		void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer);
 	}
+
+	public GeometryRenderer getGeometryRenderer() {
+		return geometryRenderer;
+	}
 }

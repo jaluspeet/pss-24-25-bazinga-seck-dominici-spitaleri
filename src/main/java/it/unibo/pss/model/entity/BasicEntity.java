@@ -12,9 +12,6 @@ public abstract class BasicEntity {
 	private static int nextId = 0;
 	private int moveCounter = 0;
 
-	private int stuckCounter = 0;
-	private static final int STUCK_THRESHOLD = 3;
-
 	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
 		this.id = nextId++;
@@ -28,7 +25,6 @@ public abstract class BasicEntity {
 	protected abstract State initialState();
 	public abstract Request getNextRequest();
 	public abstract void transitionState(boolean actionSuccess);
-
 	public abstract Class<? extends BasicEntity> getPreyType();
 	public abstract Class<? extends BasicEntity> getPredatorType();
 	public abstract BasicEntity spawnOffspring();
@@ -38,29 +34,20 @@ public abstract class BasicEntity {
 	public int getY() { return y; }
 	public int getEnergy() { return energy; }
 	public void addEnergy(int amount) { energy += amount; }
-	public void subtractEnergy(int amount) { energy -= amount; }
+	public void subtractEnergy(int amount) { energy = Math.max(0, energy - amount); }
 	public void setPosition(int newX, int newY) { x = newX; y = newY; }
 	public void setBazinged() { hasBazinged = true; }
 	public void resetBazinged() { hasBazinged = false; }
 
-	public void resetStuckCounter() { stuckCounter = 0; }
-	public void incrementStuckCounter() { stuckCounter++; }
-	public boolean isStuck() { return stuckCounter >= STUCK_THRESHOLD; }
+	public boolean isAlive() { return energy > 0; }
 
-	public enum Direction { UP, DOWN, LEFT, RIGHT }
-	public enum ActionType { MOVE, INTERACT }
-
-	public boolean isAlive() {
-		return energy > 0;
-	}
-
-	// movement
+	// Movement logic
 	public void incrementMoveCounter() { moveCounter++; }
 	public boolean isTimeToMove() { return moveCounter >= getMovementSpeed(); }
 	public void resetMoveCounter() { moveCounter = 0; }
 	public abstract int getMovementSpeed();
 
-	// Finds the nearest entity of the given type within the specified range
+	// Find nearest entity of a specific type
 	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {
 		BasicEntity nearest = null;
 		int minDist = Integer.MAX_VALUE;
@@ -83,6 +70,9 @@ public abstract class BasicEntity {
 		}
 		return nearest;
 	}
+
+	public enum Direction { UP, DOWN, LEFT, RIGHT }
+	public enum ActionType { MOVE, INTERACT }
 
 	public static class Request {
 		public final ActionType type;

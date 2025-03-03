@@ -41,6 +41,11 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 					: Math.min(1500, current + 100);
 				model.setUpdateInterval(newInterval);
 				break;
+			case TILE_CLICK:
+				ViewDTO.EntityTileClickCommand clickCmd = (ViewDTO.EntityTileClickCommand) viewDTO.getCommand();
+				String actions = model.getTileActions(clickCmd.getTileX(), clickCmd.getTileY());
+				view.setActionText(actions);
+				break;
 			default:
 				break;
 		}
