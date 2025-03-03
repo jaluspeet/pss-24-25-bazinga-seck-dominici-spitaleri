@@ -10,8 +10,8 @@ import javafx.util.Duration;
 import it.unibo.pss.common.SharedConstants;
 
 public class PanZoomHandler {
-	private double scale = 1.0, targetScale = 1.0;
-	private double panX = 0, panY = 0, velocityX = 0, velocityY = 0;
+	private double scale = 1.0, panX = 0, panY = 0;
+	private double velocityX = 0, velocityY = 0;
 	private double lastMouseX, lastMouseY;
 	private final Canvas target;
 	private final Runnable updateCallback;
@@ -21,13 +21,13 @@ public class PanZoomHandler {
 		this.target = target;
 		this.updateCallback = updateCallback;
 		attachEventHandlers();
-		inertiaTimer = new Timeline(new KeyFrame(Duration.millis(1000 / SharedConstants.CAMERA_FRAMERATE), e -> updateInertia()));
+		inertiaTimer = new Timeline(new KeyFrame(Duration.millis(1000 / SharedConstants.CAMERA_FRAMERATE), e -> applyInertia()));
 		inertiaTimer.setCycleCount(Timeline.INDEFINITE);
 		inertiaTimer.play();
 	}
 
 	private void attachEventHandlers() {
-		target.setOnScroll(this::handleScroll);
+		target.setOnScroll(this::handleScrollAndZoom);
 		target.setOnMousePressed(e -> {
 			if (e.getButton() == MouseButton.MIDDLE) {
 				lastMouseX = e.getX();
@@ -37,12 +37,10 @@ public class PanZoomHandler {
 		});
 		target.setOnMouseDragged(e -> {
 			if (e.getButton() == MouseButton.MIDDLE) {
-				double dx = (e.getX() - lastMouseX) / scale * SharedConstants.CAMERA_SENSITIVITY;
-				double dy = (e.getY() - lastMouseY) / scale * SharedConstants.CAMERA_SENSITIVITY;
-				panX += dx;
-				panY += dy;
-				velocityX = dx;
-				velocityY = dy;
+				panX += (e.getX() - lastMouseX) / scale * SharedConstants.CAMERA_SENSITIVITY;
+				panY += (e.getY() - lastMouseY) / scale * SharedConstants.CAMERA_SENSITIVITY;
+				velocityX = (e.getX() - lastMouseX) * 0.1;
+				velocityY = (e.getY() - lastMouseY) * 0.1;
 				lastMouseX = e.getX();
 				lastMouseY = e.getY();
 				updateCallback.run();
@@ -50,11 +48,13 @@ public class PanZoomHandler {
 		});
 	}
 
-	private void handleScroll(ScrollEvent e) {
-		if (e.isControlDown()) {
-			targetScale *= e.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
-			targetScale = Math.max(SharedConstants.CAMERA_MIN_SCALE, Math.min(targetScale, SharedConstants.CAMERA_MAX_SCALE));
-		} else {
+	private void handleScrollAndZoom(ScrollEvent e) {
+		if (e.isControlDown()) { 
+			// Zooming
+			double zoomFactor = e.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
+			scale = Math.max(SharedConstants.CAMERA_MIN_SCALE, Math.min(scale * zoomFactor, SharedConstants.CAMERA_MAX_SCALE));
+		} else { 
+			// Trackpad Panning (if not zooming)
 			panX += e.getDeltaX() / scale * SharedConstants.CAMERA_SENSITIVITY;
 			panY += e.getDeltaY() / scale * SharedConstants.CAMERA_SENSITIVITY;
 		}
@@ -62,20 +62,14 @@ public class PanZoomHandler {
 		e.consume();
 	}
 
-	private void updateInertia() {
-		boolean updated = false;
+	private void applyInertia() {
 		if (Math.abs(velocityX) > SharedConstants.CAMERA_INERTIA_THRESHOLD || Math.abs(velocityY) > SharedConstants.CAMERA_INERTIA_THRESHOLD) {
 			panX += velocityX;
 			panY += velocityY;
 			velocityX *= SharedConstants.CAMERA_FRICTION;
 			velocityY *= SharedConstants.CAMERA_FRICTION;
-			updated = true;
+			updateCallback.run();
 		}
-		if (Math.abs(targetScale - scale) > 0.001) {
-			scale += (targetScale - scale) * SharedConstants.CAMERA_ZOOM_SMOOTHING;
-			updated = true;
-		}
-		if (updated) updateCallback.run();
 	}
 
 	public Point2D applyCamera(Point2D baseOffset) {
