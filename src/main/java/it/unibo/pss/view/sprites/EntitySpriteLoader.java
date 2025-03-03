@@ -5,23 +5,29 @@ import it.unibo.pss.model.entity.PlantEntity;
 import it.unibo.pss.model.entity.SheepEntity;
 import it.unibo.pss.model.entity.WolfEntity;
 import javafx.scene.image.Image;
-
 import java.io.InputStream;
 import java.util.*;
 
 public class EntitySpriteLoader {
-	private final List<Image> wolfSprites;
-	private final List<Image> sheepSprites;
-	private final List<Image> plantSprites;
+	private List<Image> wolfSprites;
+	private List<Image> sheepSprites;
+	private List<Image> plantSprites;
 	private final Map<BasicEntity, Image> cache = new IdentityHashMap<>();
 	private final Random random = new Random();
 	private static final int MAX_SPRITES = 50;
+	private final String relativeBasePath;
 
+	public EntitySpriteLoader(String relativeBasePath) {
+		this.relativeBasePath = relativeBasePath;
+		reload();
+	}
 
-	public EntitySpriteLoader(String basePath) {
+	public void reload() {
+		String basePath = SpritePathResolver.getPrefix() + relativeBasePath;
 		wolfSprites = loadSprites(basePath, "wolf");
 		sheepSprites = loadSprites(basePath, "sheep");
 		plantSprites = loadSprites(basePath, "plant");
+		cache.clear();
 	}
 
 	private List<Image> loadSprites(String basePath, String prefix) {

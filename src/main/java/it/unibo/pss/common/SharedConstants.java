@@ -51,7 +51,7 @@ public final class SharedConstants {
 	public static final int SHEEP_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.bazinga", "20"));
 
 	// wolf
-	public static final int WOLF_COUNT = Integer.parseInt(PROPERTIES.getProperty("wolf.count", "100"));
+	public static final int WOLF_COUNT = Integer.parseInt(PROPERTIES.getProperty("wolf.count", "20"));
 	public static final int WOLF_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("wolf.speed", "1"));
 	public static final int WOLF_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("wolf.sight.range", "30"));
 	public static final int WOLF_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.default", "100"));

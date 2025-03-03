@@ -1,7 +1,6 @@
 package it.unibo.pss.view.views;
 
 import java.util.List;
-
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.world.World;
@@ -10,14 +9,15 @@ import it.unibo.pss.view.handlers.CameraOffsetHandler;
 import it.unibo.pss.view.handlers.CullingHandler;
 import it.unibo.pss.view.handlers.PanZoomHandler;
 import it.unibo.pss.view.sprites.EntitySpriteLoader;
+import it.unibo.pss.view.sprites.SpriteCache;
 import it.unibo.pss.view.views.StackView.Renderable;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-public class EntityView implements Renderable {
-	private final EntitySpriteLoader spriteLoader = new EntitySpriteLoader("/sprites/entity");
+public class EntityView implements Renderable, SpriteCache {
+	private final EntitySpriteLoader spriteLoader = new EntitySpriteLoader("/entity");
 
 	@Override
 	public void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer) {
@@ -48,5 +48,10 @@ public class EntityView implements Renderable {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void reloadSprites() {
+		spriteLoader.reload();
 	}
 }

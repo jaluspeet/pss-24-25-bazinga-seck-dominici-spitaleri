@@ -12,6 +12,13 @@ public abstract class BasicEntity {
 	private static int nextId = 0;
 	private int moveCounter = 0;
 
+	// Configurable properties
+	protected int sightRange;
+	protected int energyBazinga;
+	protected int energyHungry;
+	protected int energyRestore;
+	protected int movementSpeed;
+
 	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
 		this.id = nextId++;
@@ -29,6 +36,19 @@ public abstract class BasicEntity {
 	public abstract Class<? extends BasicEntity> getPredatorType();
 	public abstract BasicEntity spawnOffspring();
 
+	// Getters and Setters for configurable values
+	public int getSightRange() { return sightRange; }
+	public void setSightRange(int sightRange) { this.sightRange = sightRange; }
+	public int getEnergyBazinga() { return energyBazinga; }
+	public void setEnergyBazinga(int energyBazinga) { this.energyBazinga = energyBazinga; }
+	public int getEnergyHungry() { return energyHungry; }
+	public void setEnergyHungry(int energyHungry) { this.energyHungry = energyHungry; }
+	public int getEnergyRestore() { return energyRestore; }
+	public void setEnergyRestore(int energyRestore) { this.energyRestore = energyRestore; }
+	public int getMovementSpeed() { return movementSpeed; }
+	public void setMovementSpeed(int movementSpeed) { this.movementSpeed = movementSpeed; }
+
+	// Standard getters
 	public int getId() { return id; }
 	public int getX() { return x; }
 	public int getY() { return y; }
@@ -38,32 +58,68 @@ public abstract class BasicEntity {
 	public void setPosition(int newX, int newY) { x = newX; y = newY; }
 	public void setBazinged() { hasBazinged = true; }
 	public void resetBazinged() { hasBazinged = false; }
-
 	public boolean isAlive() { return energy > 0; }
 
 	// Movement logic
 	public void incrementMoveCounter() { moveCounter++; }
 	public boolean isTimeToMove() { return moveCounter >= getMovementSpeed(); }
 	public void resetMoveCounter() { moveCounter = 0; }
-	public abstract int getMovementSpeed();
 
-	// Find nearest entity of a specific type
+	protected Request moveOrInteract(BasicEntity target) {
+		int dist = Math.abs(x - target.getX()) + Math.abs(y - target.getY());
+		return (dist <= 1) ? new Request(ActionType.INTERACT, target.getId()) : moveToward(target);
+	}
+
+	protected Request moveToward(BasicEntity target) {
+		int dx = target.getX() - x, dy = target.getY() - y;
+		Direction moveDir = (Math.abs(dx) >= Math.abs(dy)) ? (dx > 0 ? Direction.RIGHT : Direction.LEFT) : (dy > 0 ? Direction.DOWN : Direction.UP);
+		return new Request(ActionType.MOVE, moveDir);
+	}
+
+	protected Request moveAway(BasicEntity entity) {
+		Direction bestDirection = null;
+		int maxDist = Math.abs(x - entity.getX()) + Math.abs(y - entity.getY());
+
+		for (Direction dir : Direction.values()) {
+			int newX = x, newY = y;
+			switch (dir) {
+				case UP:    newY--; break;
+				case DOWN:  newY++; break;
+				case LEFT:  newX--; break;
+				case RIGHT: newX++; break;
+			}
+
+			int newDist = Math.abs(newX - entity.getX()) + Math.abs(newY - entity.getY());
+			if (newDist > maxDist) {
+				maxDist = newDist;
+				bestDirection = dir;
+			}
+		}
+
+		return new Request(ActionType.MOVE, (bestDirection != null) ? bestDirection : randomDirection());
+	}
+
+	protected Direction randomDirection() {
+		Direction[] dirs = Direction.values();
+		return dirs[(int) (Math.random() * dirs.length)];
+	}
+
 	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {
 		BasicEntity nearest = null;
 		int minDist = Integer.MAX_VALUE;
+
 		for (int dx = -range; dx <= range; dx++) {
 			for (int dy = -range; dy <= range; dy++) {
 				int nx = x + dx, ny = y + dy;
 				World.Tile tile = grid.getTile(nx, ny);
 				if (tile == null) continue;
+
 				for (BasicEntity other : tile.getEntities()) {
-					if (other == this) continue;
-					if (type != null && type.isInstance(other) && other.isAlive()) {
-						int dist = Math.abs(dx) + Math.abs(dy);
-						if (dist < minDist) {
-							minDist = dist;
-							nearest = other;
-						}
+					if (other == this || !type.isInstance(other) || !other.isAlive()) continue;
+					int dist = Math.abs(dx) + Math.abs(dy);
+					if (dist < minDist) {
+						minDist = dist;
+						nearest = other;
 					}
 				}
 			}

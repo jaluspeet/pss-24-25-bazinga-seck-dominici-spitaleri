@@ -6,14 +6,22 @@ import javafx.scene.image.Image;
 import java.util.*;
 
 public class WorldSpriteLoader {
-	private final List<Image> landSprites;
-	private final List<Image> waterSprites;
+	private List<Image> landSprites;
+	private List<Image> waterSprites;
 	private final Map<World.Tile, Image> cache = new IdentityHashMap<>();
 	private final Random random = new Random();
+	private final String relativeBasePath;
 
-	public WorldSpriteLoader(String basePath) {
+	public WorldSpriteLoader(String relativeBasePath) {
+		this.relativeBasePath = relativeBasePath;
+		reload();
+	}
+
+	public void reload() {
+		String basePath = SpritePathResolver.getPrefix() + relativeBasePath;
 		landSprites = loadSprites(basePath, "land");
 		waterSprites = loadSprites(basePath, "water");
+		cache.clear();
 	}
 
 	private List<Image> loadSprites(String basePath, String prefix) {
@@ -36,7 +44,6 @@ public class WorldSpriteLoader {
 			return cache.computeIfAbsent(tile, t -> getRandomSprite(landSprites));
 		}
 		if (waterSprites.isEmpty()) return null;
-
 		int globalIndex = (int) ((System.currentTimeMillis() / (SharedConstants.CAMERA_FRAMERATE * 10)) % waterSprites.size());
 		return waterSprites.get((globalIndex + (tile.getX() + tile.getY())) % waterSprites.size());
 	}
