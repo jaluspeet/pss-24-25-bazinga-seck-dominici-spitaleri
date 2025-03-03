@@ -10,6 +10,7 @@ public abstract class BasicEntity {
 	protected boolean hasBazinged;
 	protected State currentState;
 	private static int nextId = 0;
+	private int moveCounter = 0;
 
 	private int stuckCounter = 0;
 	private static final int STUCK_THRESHOLD = 3;
@@ -52,6 +53,12 @@ public abstract class BasicEntity {
 	public boolean isAlive() {
 		return energy > 0;
 	}
+
+	// movement
+	public void incrementMoveCounter() { moveCounter++; }
+	public boolean isTimeToMove() { return moveCounter >= getMovementSpeed(); }
+	public void resetMoveCounter() { moveCounter = 0; }
+	public abstract int getMovementSpeed();
 
 	// Finds the nearest entity of the given type within the specified range
 	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {

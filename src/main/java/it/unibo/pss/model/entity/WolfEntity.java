@@ -16,16 +16,16 @@ public class WolfEntity extends BasicEntity {
 	@Override
 	public Request getNextRequest() {
 		
-		// wolves do not flee
+		// mate
 		if (energy >= SharedConstants.WOLF_ENERGY_BAZINGA) {
-			BasicEntity bazinger = findNearestEntity(this.getClass(), SharedConstants.WOLF_SIGHT_RANGE);
-			if (bazinger != null) {
-				int dist = Math.abs(x - bazinger.getX()) + Math.abs(y - bazinger.getY());
+			BasicEntity mate = findNearestEntity(this.getClass(), SharedConstants.WOLF_SIGHT_RANGE);
+			if (mate != null && mate != this) {
+				int dist = Math.abs(x - mate.getX()) + Math.abs(y - mate.getY());
 				if (dist <= 1)
-					return new Request(ActionType.INTERACT, bazinger.getId());
+					return new Request(ActionType.INTERACT, mate.getId());
 				else {
-					int dx = bazinger.getX() - x;
-					int dy = bazinger.getY() - y;
+					int dx = mate.getX() - x;
+					int dy = mate.getY() - y;
 					Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
 						? ((dx > 0) ? Direction.RIGHT : Direction.LEFT)
 						: ((dy > 0) ? Direction.DOWN : Direction.UP);
@@ -33,6 +33,7 @@ public class WolfEntity extends BasicEntity {
 				}
 			}
 		}
+
 		// eat
 		if (energy < SharedConstants.WOLF_ENERGY_HUNGRY) {
 			BasicEntity prey = findNearestEntity(getPreyType(), SharedConstants.WOLF_SIGHT_RANGE);
@@ -50,9 +51,10 @@ public class WolfEntity extends BasicEntity {
 				}
 			}
 		}
+
 		// move randomly
 		Direction[] dirs = Direction.values();
-		Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
+		Direction randomDir = dirs[(int)(Math.random() * dirs.length)];
 		return new Request(ActionType.MOVE, randomDir);
 	}
 
@@ -69,6 +71,11 @@ public class WolfEntity extends BasicEntity {
 	@Override
 	public Class<? extends BasicEntity> getPredatorType() {
 		return null;
+	}
+
+	@Override
+	public int getMovementSpeed() {
+		return SharedConstants.WOLF_MOVEMENT_SPEED;
 	}
 
 	@Override

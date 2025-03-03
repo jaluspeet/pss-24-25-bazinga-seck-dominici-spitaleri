@@ -5,6 +5,8 @@ import it.unibo.pss.model.entity.PlantEntity;
 import it.unibo.pss.model.entity.SheepEntity;
 import it.unibo.pss.model.entity.WolfEntity;
 import javafx.scene.image.Image;
+
+import java.io.InputStream;
 import java.util.*;
 
 public class EntitySpriteLoader {
@@ -13,6 +15,8 @@ public class EntitySpriteLoader {
 	private final List<Image> plantSprites;
 	private final Map<BasicEntity, Image> cache = new IdentityHashMap<>();
 	private final Random random = new Random();
+	private static final int MAX_SPRITES = 50;
+
 
 	public EntitySpriteLoader(String basePath) {
 		wolfSprites = loadSprites(basePath, "wolf");
@@ -22,14 +26,14 @@ public class EntitySpriteLoader {
 
 	private List<Image> loadSprites(String basePath, String prefix) {
 		List<Image> sprites = new ArrayList<>();
-		for (int index = 0; ; index++) {
+		for (int index = 0; index < MAX_SPRITES; index++) {
 			String imagePath = basePath + "/" + prefix + "_" + index + ".png";
-			try {
-				Image img = new Image(getClass().getResourceAsStream(imagePath));
-				if (img.isError()) break;
-				sprites.add(img);
-			} catch (Exception e) {
-				break;
+			InputStream stream = getClass().getResourceAsStream(imagePath);
+			if (stream != null) {
+				Image img = new Image(stream);
+				if (!img.isError()) {
+					sprites.add(img);
+				}
 			}
 		}
 		return sprites;

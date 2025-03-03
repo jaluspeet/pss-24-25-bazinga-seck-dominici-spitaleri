@@ -34,34 +34,34 @@ public final class SharedConstants {
 	public static final int WINDOW_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("window.height", "1600"));
 	
 	// simulation
-	public static final int WORLD_WIDTH = Integer.parseInt(PROPERTIES.getProperty("world.width", "64"));
-	public static final int WORLD_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("world.height", "64"));
+	public static final int WORLD_WIDTH = Integer.parseInt(PROPERTIES.getProperty("world.width", "128"));
+	public static final int WORLD_HEIGHT = Integer.parseInt(PROPERTIES.getProperty("world.height", "128"));
 	public static final double WORLD_WATER_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.water.ratio", "0.4"));
 	public static final double WORLD_LAKE_RATIO = Double.parseDouble(PROPERTIES.getProperty("world.lake.ratio", "0.7"));
 	public static final int WORLD_LAKE_COUNT = Integer.parseInt(PROPERTIES.getProperty("world.lake.count", "6"));
 	public static final int ENTITY_UPDATE_INTERVAL = Integer.parseInt(PROPERTIES.getProperty("model.update.interval", "500"));
 	
 	// sheep
-	public static final int SHEEP_COUNT = Integer.parseInt(PROPERTIES.getProperty("prey.count", "1000"));
-	public static final int SHEEP_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("prey.speed", "1"));
-	public static final int SHEEP_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("sheep.sight.range", "20"));
-	public static final int SHEEP_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.default", "40"));
+	public static final int SHEEP_COUNT = Integer.parseInt(PROPERTIES.getProperty("sheep.count", "1000"));
+	public static final int SHEEP_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("sheep.speed", "2"));
+	public static final int SHEEP_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("sheep.sight.range", "10"));
+	public static final int SHEEP_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.default", "30"));
 	public static final int SHEEP_ENERGY_HUNGRY = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.hungry", "10"));
-	public static final int SHEEP_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.restore", "15"));
-	public static final int SHEEP_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.bazinga", "15"));
+	public static final int SHEEP_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.restore", "5"));
+	public static final int SHEEP_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("sheep.energy.bazinga", "20"));
 
 	// wolf
-	public static final int WOLF_COUNT = Integer.parseInt(PROPERTIES.getProperty("predator.count", "10"));
-	public static final int WOLF_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("predator.speed", "2"));
-	public static final int WOLF_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("wolf.sight.range", "20"));
-	public static final int WOLF_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.default", "40"));
-	public static final int WOLF_ENERGY_HUNGRY = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.hungry", "10"));
-	public static final int WOLF_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.restore", "15"));
-	public static final int WOLF_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.bazinga", "15"));
+	public static final int WOLF_COUNT = Integer.parseInt(PROPERTIES.getProperty("wolf.count", "100"));
+	public static final int WOLF_MOVEMENT_SPEED = Integer.parseInt(PROPERTIES.getProperty("wolf.speed", "1"));
+	public static final int WOLF_SIGHT_RANGE = Integer.parseInt(PROPERTIES.getProperty("wolf.sight.range", "30"));
+	public static final int WOLF_ENERGY_DEFAULT = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.default", "100"));
+	public static final int WOLF_ENERGY_HUNGRY = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.hungry", "120"));
+	public static final int WOLF_ENERGY_RESTORE = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.restore", "30"));
+	public static final int WOLF_ENERGY_BAZINGA = Integer.parseInt(PROPERTIES.getProperty("wolf.energy.bazinga", "120"));
 
 	// plant
-	public static final int PLANT_COUNT = Integer.parseInt(PROPERTIES.getProperty("plant.count", "1000"));
-	public static final int PLANT_RESURRECTION_TIME = Integer.parseInt(PROPERTIES.getProperty("plant.resurrection.time", "10"));
+	public static final int PLANT_COUNT = Integer.parseInt(PROPERTIES.getProperty("plant.count", "250"));
+	public static final int PLANT_RESURRECTION_TIME = Integer.parseInt(PROPERTIES.getProperty("plant.resurrection.time", "100"));
 
 	// camera
 	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));

@@ -13,9 +13,11 @@ public class EntityManager {
 	private final Map<Integer, BasicEntity> entityMap = new HashMap<>();
 	private final World grid;
 	private final Random random = new Random();
+	private final InteractionManager interactionManager;
 
 	public EntityManager(World grid) {
 		this.grid = grid;
+		this.interactionManager = new InteractionManager(grid, entityMap);
 	}
 
 	public void addEntity(BasicEntity entity) {
@@ -100,22 +102,31 @@ public class EntityManager {
 				entity.subtractEnergy(1);
 		}
 
-		// Collect requests from entities that send a request
+		// Remove dead non-plant entities from simulation.
+		entities.removeIf(entity -> !(entity instanceof PlantEntity) && !entity.isAlive());
+
+		// Collect requests based on movement speed.
 		for (BasicEntity e : entities) {
-			BasicEntity.Request req = e.getNextRequest();
-			if (req != null) {
-				RequestWrapper rw = new RequestWrapper(e, req);
-				requests.add(rw);
+			if (e.getMovementSpeed() > 0) {
+				e.incrementMoveCounter();
+				if (e.isTimeToMove()) {
+					BasicEntity.Request req = e.getNextRequest();
+					if (req != null) {
+						RequestWrapper rw = new RequestWrapper(e, req);
+						requests.add(rw);
+					}
+					e.resetMoveCounter();
+				}
 			}
 		}
 
 		// Validate requests.
 		for (RequestWrapper rw : requests) {
 			if (rw.request.type == BasicEntity.ActionType.MOVE) {
-				if (validateMove(rw.entity, rw.request.direction))
+				if (interactionManager.validateMove(rw.entity, rw.request.direction))
 					approvedActions.add(new Action(rw.entity, rw.request));
 			} else if (rw.request.type == BasicEntity.ActionType.INTERACT) {
-				if (validateInteract(rw.entity, rw.request.targetId))
+				if (interactionManager.validateInteract(rw.entity, rw.request.targetId))
 					approvedActions.add(new Action(rw.entity, rw.request));
 			}
 		}
@@ -123,11 +134,15 @@ public class EntityManager {
 		// Process approved actions.
 		for (Action action : approvedActions) {
 			if (action.request.type == BasicEntity.ActionType.MOVE) {
-				processMove(action.entity, action.request.direction);
+				interactionManager.processMove(action.entity, action.request.direction);
 				action.entity.transitionState(true);
+				// Subtract energy only when a move occurs
+				action.entity.subtractEnergy(1);
 			} else if (action.request.type == BasicEntity.ActionType.INTERACT) {
-				processInteract(action.entity, action.request.targetId);
+				interactionManager.processInteract(action.entity, action.request.targetId);
 				action.entity.transitionState(true);
+				// Optionally subtract energy for interactions
+				action.entity.subtractEnergy(1);
 			}
 		}
 
@@ -137,105 +152,25 @@ public class EntityManager {
 				rw.entity.transitionState(false);
 		}
 
-		// Reset bazinga flag for next update.
+		// Reset bazinga flag.
 		for (BasicEntity e : entities)
 			e.resetBazinged();
-	}
 
-	private boolean validateMove(BasicEntity entity, BasicEntity.Direction dir) {
-		int newX = entity.getX(), newY = entity.getY();
-		switch(dir) {
-			case UP: newY--; break;
-			case DOWN: newY++; break;
-			case LEFT: newX--; break;
-			case RIGHT: newX++; break;
-		}
-		World.Tile tile = grid.getTile(newX, newY);
-		if (tile == null || !tile.getType().equals(World.Tile.TileType.LAND))
-			return false;
-
-		// TODO: change this check
-		boolean isBlocked = tile.getEntities().stream()
-			.anyMatch(e -> !(e instanceof PlantEntity) && e.isAlive());
-		
-		return !isBlocked && entity.getEnergy() > 0;
-	}
-
-	private void processMove(BasicEntity entity, BasicEntity.Direction dir) {
-		int newX = entity.getX(), newY = entity.getY();
-		switch(dir) {
-			case UP: newY--; break;
-			case DOWN: newY++; break;
-			case LEFT: newX--; break;
-			case RIGHT: newX++; break;
-		}
-		World.Tile currentTile = grid.getTile(entity.getX(), entity.getY());
-		World.Tile targetTile = grid.getTile(newX, newY);
-		if (targetTile != null) {
-			currentTile.removeEntity(entity);
-			entity.setPosition(newX, newY);
-			targetTile.addEntity(entity);
-			entity.subtractEnergy(1);
-		}
-	}
-
-	private boolean validateInteract(BasicEntity entity, int targetId) {
-		List<World.Tile> adjacent = getAdjacentTiles(entity.getX(), entity.getY());
-		for (World.Tile t : adjacent)
-			for (BasicEntity other : t.getEntities())
-				if (other.getId() == targetId)
-					return true;
-		return false;
-	}
-
-	private void processInteract(BasicEntity entity, int targetId) {
-		BasicEntity target = entityMap.get(targetId);
-		if (target == null)
-			return;
-
-		// Prey interaction
-		if (entity.getPreyType() != null && target.getClass().equals(entity.getPreyType())) {
-			if (!target.isAlive())
-				return;
-			killEntity(target);
-		}
-		// Bazinga interaction
-		if (entity.getClass().equals(target.getClass()) &&
-				target.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA &&
-				!target.hasBazinged) {
-			World.Tile freeTile = findFreeAdjacentTile(entity.getX(), entity.getY());
-			if (freeTile != null) {
-				BasicEntity offspring = entity.spawnOffspring();
-				addEntity(offspring);
-				entity.subtractEnergy(SharedConstants.SHEEP_ENERGY_BAZINGA);
-				target.subtractEnergy(SharedConstants.SHEEP_ENERGY_BAZINGA);
-				entity.setBazinged();
-				target.setBazinged();
-			}
+		// Process plant resurrection.
+		for (BasicEntity entity : entities) {
+			if (entity instanceof PlantEntity) {
+				PlantEntity plant = (PlantEntity) entity;
+				if (!plant.isAlive()) {
+					plant.decrementResurrectionDelay();
+					if (plant.getResurrectionDelay() == 0) {
+						plant.addEnergy(1);
+						World.Tile tile = grid.getTile(plant.getX(), plant.getY());
+						if (!tile.getEntities().contains(plant))
+							tile.addEntity(plant);
+					}
 				}
-	}
-
-	private List<World.Tile> getAdjacentTiles(int x, int y) {
-		List<World.Tile> tiles = new ArrayList<>();
-		tiles.add(grid.getTile(x, y - 1));
-		tiles.add(grid.getTile(x, y + 1));
-		tiles.add(grid.getTile(x - 1, y));
-		tiles.add(grid.getTile(x + 1, y));
-		tiles.removeIf(t -> t == null);
-		return tiles;
-	}
-
-	private World.Tile findFreeAdjacentTile(int x, int y) {
-		for (World.Tile t : getAdjacentTiles(x, y))
-			if (t.getEntities().isEmpty())
-				return t;
-		return null;
-	}
-
-	private void killEntity(BasicEntity entity) {
-		World.Tile tile = grid.getTile(entity.getX(), entity.getY());
-		tile.removeEntity(entity);
-		entity.energy = 0;
+			}
+		}
 	}
 
 	private static class RequestWrapper {

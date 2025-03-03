@@ -59,5 +59,10 @@ public class PlantEntity extends BasicEntity {
 			resurrectionDelay--;
 	}
 
+	@Override
+	public int getMovementSpeed() {
+		return 0;
+	}
+
 	private static class PlantState implements State { }
 }

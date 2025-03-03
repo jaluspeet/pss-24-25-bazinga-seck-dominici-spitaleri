@@ -15,30 +15,34 @@ public class SheepEntity extends BasicEntity {
 
 	@Override
 	public Request getNextRequest() {
-		
 		// flee
 		BasicEntity predator = findNearestEntity(getPredatorType(), SharedConstants.SHEEP_SIGHT_RANGE);
 		if (predator != null) {
-			int dx = x - predator.getX();
-			int dy = y - predator.getY();
-			Direction fleeDir;
-			if (Math.abs(dx) >= Math.abs(dy))
-				fleeDir = (dx >= 0) ? Direction.RIGHT : Direction.LEFT;
-			else
-				fleeDir = (dy >= 0) ? Direction.DOWN : Direction.UP;
-			return new Request(ActionType.MOVE, fleeDir);
+			int currentDist = Math.abs(x - predator.getX()) + Math.abs(y - predator.getY());
+			for (Direction dir : Direction.values()) {
+				int newX = x, newY = y;
+				switch (dir) {
+					case UP:    newY--; break;
+					case DOWN:  newY++; break;
+					case LEFT:  newX--; break;
+					case RIGHT: newX++; break;
+				}
+				int newDist = Math.abs(newX - predator.getX()) + Math.abs(newY - predator.getY());
+				if (newDist > currentDist)
+					return new Request(ActionType.MOVE, dir);
+			}
 		}
 
-		// bazinga (if energy is high enough)
+		// bazinga
 		if (energy >= SharedConstants.SHEEP_ENERGY_BAZINGA) {
-			BasicEntity bazinger = findNearestEntity(this.getClass(), SharedConstants.SHEEP_SIGHT_RANGE);
-			if (bazinger != null) {
-				int dist = Math.abs(x - bazinger.getX()) + Math.abs(y - bazinger.getY());
+			BasicEntity mate = findNearestEntity(this.getClass(), SharedConstants.SHEEP_SIGHT_RANGE);
+			if (mate != null && mate != this) {
+				int dist = Math.abs(x - mate.getX()) + Math.abs(y - mate.getY());
 				if (dist <= 1)
-					return new Request(ActionType.INTERACT, bazinger.getId());
+					return new Request(ActionType.INTERACT, mate.getId());
 				else {
-					int dx = bazinger.getX() - x;
-					int dy = bazinger.getY() - y;
+					int dx = mate.getX() - x;
+					int dy = mate.getY() - y;
 					Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
 						? ((dx > 0) ? Direction.RIGHT : Direction.LEFT)
 						: ((dy > 0) ? Direction.DOWN : Direction.UP);
@@ -50,7 +54,7 @@ public class SheepEntity extends BasicEntity {
 		// eat
 		if (energy < SharedConstants.SHEEP_ENERGY_HUNGRY) {
 			BasicEntity prey = findNearestEntity(getPreyType(), SharedConstants.SHEEP_SIGHT_RANGE);
-			if (prey != null) {
+			if (prey != null && prey.isAlive()) {
 				int dist = Math.abs(x - prey.getX()) + Math.abs(y - prey.getY());
 				if (dist <= 1)
 					return new Request(ActionType.INTERACT, prey.getId());
@@ -67,7 +71,7 @@ public class SheepEntity extends BasicEntity {
 
 		// move randomly
 		Direction[] dirs = Direction.values();
-		Direction randomDir = dirs[(int) (Math.random() * dirs.length)];
+		Direction randomDir = dirs[(int)(Math.random() * dirs.length)];
 		return new Request(ActionType.MOVE, randomDir);
 	}
 
@@ -84,6 +88,11 @@ public class SheepEntity extends BasicEntity {
 	@Override
 	public Class<? extends BasicEntity> getPredatorType() {
 		return WolfEntity.class;
+	}
+
+	@Override
+	public int getMovementSpeed() {
+		return SharedConstants.SHEEP_MOVEMENT_SPEED;
 	}
 
 	@Override

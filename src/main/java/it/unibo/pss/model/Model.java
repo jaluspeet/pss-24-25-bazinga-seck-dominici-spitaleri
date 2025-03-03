@@ -15,11 +15,13 @@ public class Model {
 	private final EntityManager entityGenerator;
 	private final List<ModelObserver> observers = new ArrayList<>();
 	private long lastUpdate = 0;
+	private int updateInterval;
 
 	public Model(int width, int height) {
 		this.grid = WorldManager.generateGrid(width, height);
 		this.entityGenerator = new EntityManager(grid);
 		entityGenerator.generateEntities();
+		this.updateInterval = SharedConstants.ENTITY_UPDATE_INTERVAL; // initialize update interval
 		startSimulation();
 	}
 
@@ -39,7 +41,7 @@ public class Model {
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				if (now - lastUpdate >= SharedConstants.ENTITY_UPDATE_INTERVAL * 1_000_000) {
+				if (now - lastUpdate >= updateInterval * 1_000_000) {
 					updateSimulation();
 					lastUpdate = now;
 				}
@@ -50,6 +52,14 @@ public class Model {
 	private void updateSimulation() {
 		entityGenerator.updateCycle();
 		notifyObservers();
+	}
+
+	public void setUpdateInterval(int interval) {
+		this.updateInterval = interval;
+	}
+
+	public int getUpdateInterval() {
+		return updateInterval;
 	}
 
 	public World getGrid() {
