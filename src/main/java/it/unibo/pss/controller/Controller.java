@@ -18,36 +18,51 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 	public void start(Stage stage) {
 		this.model = new Model(SharedConstants.WORLD_WIDTH, SharedConstants.WORLD_HEIGHT);
 		this.model.addObserver(this);
-		this.view = new View(stage, SharedConstants.WINDOW_TITLE, SharedConstants.WINDOW_WIDTH, SharedConstants.WINDOW_HEIGHT, new ModelDTO(model.getGrid()), this);
+
+		// CHANGED: Instead of new ModelDTO(...), 
+		// get the complete version with entityActions.
+		ModelDTO initialDTO = model.getLatestModelDTO();
+
+		this.view = new View(
+				stage,
+				SharedConstants.WINDOW_TITLE,
+				SharedConstants.WINDOW_WIDTH,
+				SharedConstants.WINDOW_HEIGHT,
+				initialDTO,
+				this
+				);
 	}
 
+	// CHANGED: call model.getLatestModelDTO() 
+	// so the view sees the updated actions each time
 	@Override
 	public void onModelUpdated() {
-		view.updateModel(new ModelDTO(model.getGrid()));
+		view.updateModel(model.getLatestModelDTO());
 	}
 
 	public ModelDTO getLatestModelDTO() {
-		return new ModelDTO(model.getGrid());
+		return model.getLatestModelDTO();
 	}
 
 	@Override
 	public void onViewAction(ViewDTO viewDTO) {
-		switch(viewDTO.getCommand().getType()) {
-			case SPEED:
+		switch (viewDTO.getCommand().getType()) {
+			case SPEED -> {
 				ViewDTO.SpeedCommand speedCmd = (ViewDTO.SpeedCommand) viewDTO.getCommand();
 				int current = model.getUpdateInterval();
 				int newInterval = (speedCmd.getDelta() < 0)
 					? Math.max(100, current - 100)
 					: Math.min(1500, current + 100);
 				model.setUpdateInterval(newInterval);
-				break;
-			case TILE_CLICK:
+			}
+			case TILE_CLICK -> {
 				ViewDTO.EntityTileClickCommand clickCmd = (ViewDTO.EntityTileClickCommand) viewDTO.getCommand();
 				String actions = model.getTileActions(clickCmd.getTileX(), clickCmd.getTileY());
 				view.setActionText(actions);
-				break;
-			default:
-				break;
+			}
+			default -> {
+				// no-op
+			}
 		}
 	}
 

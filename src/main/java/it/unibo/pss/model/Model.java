@@ -1,16 +1,19 @@
 package it.unibo.pss.model;
 
-import it.unibo.pss.model.entity.EntityManager;
 import it.unibo.pss.model.entity.BasicEntity;
+import it.unibo.pss.model.entity.EntityManager;
 import it.unibo.pss.model.world.World;
 import it.unibo.pss.model.world.WorldManager;
 import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.controller.observer.ModelObserver;
+import it.unibo.pss.controller.observer.ModelDTO;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Model {
 	private final World grid;
@@ -64,47 +67,21 @@ public class Model {
 		return updateInterval;
 	}
 
-	public String getTileActions(int tileX, int tileY) {
-		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
-			return "Invalid tile";
-		}
-		World.Tile tile = grid.getTile(tileX, tileY);
-		StringBuilder sb = new StringBuilder();
-		for (BasicEntity entity : tile.getEntities()) {
-			if (entity instanceof it.unibo.pss.model.entity.PlantEntity) {
-				continue;
+	public World getGrid() {
+		return grid;
+	}
+
+	// ------------------------------------------------
+	// Build a map { entityId -> "MOVE_UP"/"EAT"/"BAZINGA"/"IDLE"... }
+	// ------------------------------------------------
+	public ModelDTO getLatestModelDTO() {
+		Map<Integer,String> entityActions = new HashMap<>();
+		for (BasicEntity e : entityManager.getEntities()) {
+			if (e.isAlive()) {
+				entityActions.put(e.getId(), getActionString(e));
 			}
-			String entityName = getEntityName(entity);
-			int energy = entity.getEnergy();
-			BasicEntity.Request req = entity.getNextRequest();
-			String action;
-			if (req == null) {
-				action = "idle";
-			} else if (req.type == BasicEntity.ActionType.MOVE) {
-				action = "moving " + req.direction;
-			} else if (req.type == BasicEntity.ActionType.INTERACT) {
-				BasicEntity target = findEntityById(req.targetId);
-				String targetName = (target != null) ? getEntityName(target) : "unknown";
-				if (entity instanceof it.unibo.pss.model.entity.SheepEntity) {
-					if (entity.getEnergy() >= SharedConstants.SHEEP_ENERGY_BAZINGA) {
-						action = "bazinga with " + targetName;
-					} else {
-						action = "eating " + targetName;
-					}
-				} else if (entity instanceof it.unibo.pss.model.entity.WolfEntity) {
-					action = "chasing " + targetName;
-				} else {
-					action = "interacting with " + targetName;
-				}
-			} else {
-				action = "performing action";
-			}
-			sb.append(entityName)
-				.append("(").append(energy).append("): ")
-				.append(action).append("\n");
 		}
-		String result = sb.toString().trim();
-		return result.isEmpty() ? "No actions" : result;
+		return new ModelDTO(grid, entityActions);
 	}
 
 	private BasicEntity findEntityById(int id) {
@@ -114,6 +91,42 @@ public class Model {
 			}
 		}
 		return null;
+	}
+
+	private String getActionString(BasicEntity e) {
+		BasicEntity.Request req = e.getNextRequest();
+		if (req == null) {
+			return "IDLE";
+		}
+		// Let the request produce the action name with context
+		return req.toActionString(e, this::findEntityById);
+	}
+
+	// This is the "tile click" text
+	public String getTileActions(int tileX, int tileY) {
+		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
+			return "Invalid tile";
+		}
+		World.Tile tile = grid.getTile(tileX, tileY);
+		if (tile.getEntities().isEmpty()) {
+			return "No actions";
+		}
+
+		StringBuilder sb = new StringBuilder();
+		for (BasicEntity entity : tile.getEntities()) {
+			if (!entity.isAlive()) {
+				continue;
+			}
+			String entityName = getEntityName(entity);
+			int energy = entity.getEnergy();
+			String actionKey = getActionString(entity); // same logic
+			sb.append(entityName)
+				.append("(").append(energy).append("): ")
+				.append(actionKey)
+				.append("\n");
+		}
+		String result = sb.toString().trim();
+		return result.isEmpty() ? "No actions" : result;
 	}
 
 	private String getEntityName(BasicEntity e) {
@@ -126,9 +139,5 @@ public class Model {
 		} else {
 			return "entity" + e.getId();
 		}
-	}
-
-	public World getGrid() {
-		return grid;
 	}
 }

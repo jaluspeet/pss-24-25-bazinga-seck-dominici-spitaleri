@@ -1,6 +1,7 @@
 package it.unibo.pss.model.entity;
 
 import it.unibo.pss.model.world.World;
+import java.util.function.Function;
 
 public abstract class BasicEntity {
 	protected final World grid;
@@ -58,6 +59,7 @@ public abstract class BasicEntity {
 	public void setPosition(int newX, int newY) { x = newX; y = newY; }
 	public void setBazinged() { hasBazinged = true; }
 	public void resetBazinged() { hasBazinged = false; }
+	public boolean hasBazinged() { return this.hasBazinged; }
 	public boolean isAlive() { return energy > 0; }
 
 	// Movement logic
@@ -67,12 +69,19 @@ public abstract class BasicEntity {
 
 	protected Request moveOrInteract(BasicEntity target) {
 		int dist = Math.abs(x - target.getX()) + Math.abs(y - target.getY());
-		return (dist <= 1) ? new Request(ActionType.INTERACT, target.getId()) : moveToward(target);
+		if (dist <= 1) {
+			return new Request(ActionType.INTERACT, target.getId());
+		} else {
+			return moveToward(target);
+		}
 	}
 
 	protected Request moveToward(BasicEntity target) {
-		int dx = target.getX() - x, dy = target.getY() - y;
-		Direction moveDir = (Math.abs(dx) >= Math.abs(dy)) ? (dx > 0 ? Direction.RIGHT : Direction.LEFT) : (dy > 0 ? Direction.DOWN : Direction.UP);
+		int dx = target.getX() - x;
+		int dy = target.getY() - y;
+		Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
+			? (dx > 0 ? Direction.RIGHT : Direction.LEFT)
+			: (dy > 0 ? Direction.DOWN : Direction.UP);
 		return new Request(ActionType.MOVE, moveDir);
 	}
 
@@ -83,12 +92,11 @@ public abstract class BasicEntity {
 		for (Direction dir : Direction.values()) {
 			int newX = x, newY = y;
 			switch (dir) {
-				case UP:    newY--; break;
-				case DOWN:  newY++; break;
-				case LEFT:  newX--; break;
-				case RIGHT: newX++; break;
+				case UP -> newY--;
+				case DOWN -> newY++;
+				case LEFT -> newX--;
+				case RIGHT -> newX++;
 			}
-
 			int newDist = Math.abs(newX - entity.getX()) + Math.abs(newY - entity.getY());
 			if (newDist > maxDist) {
 				maxDist = newDist;
@@ -130,6 +138,10 @@ public abstract class BasicEntity {
 	public enum Direction { UP, DOWN, LEFT, RIGHT }
 	public enum ActionType { MOVE, INTERACT }
 
+	// ===================================================
+	// CHANGED: Request now returns "IDLE" if an INTERACT
+	// is not 'EAT' or 'BAZINGA' (no fallback "INTERACT").
+	// ===================================================
 	public static class Request {
 		public final ActionType type;
 		public final Direction direction;
@@ -140,10 +152,51 @@ public abstract class BasicEntity {
 			this.direction = direction;
 			this.targetId = -1;
 		}
+
 		public Request(ActionType type, int targetId) {
 			this.type = type;
 			this.targetId = targetId;
 			this.direction = null;
+		}
+
+		/**
+		 * Produce something like "MOVE_UP", "BAZINGA", "EAT", or "IDLE".
+		 */
+		public String toActionString(BasicEntity self, Function<Integer, BasicEntity> entityLookup) {
+			if (type == ActionType.MOVE) {
+				if (direction == null) {
+					return "IDLE";
+				}
+				return "MOVE_" + direction.name();  // e.g. MOVE_UP
+			} else if (type == ActionType.INTERACT) {
+				BasicEntity target = entityLookup.apply(targetId);
+				// If no target or dead target => IDLE
+				if (target == null || !target.isAlive()) {
+					return "IDLE";
+				}
+				// If it's a prey => EAT
+				if (self.getPreyType() != null && self.getPreyType().isInstance(target)) {
+					return "EAT";
+				}
+				// If same class => BAZINGA
+				// (both have enough energy, etc.)
+				if (self.getClass().equals(target.getClass())
+						&& self.getEnergy() >= self.getEnergyBazinga()
+						&& !self.hasBazinged
+						&& !target.hasBazinged()) {
+					return "BAZINGA";
+						}
+				// If not EAT or BAZINGA, we do NOT do "INTERACT";
+				// we do "IDLE" as you requested
+				return "IDLE";
+			}
+			return "IDLE";
+		}
+
+		@Override
+		public String toString() {
+			// fallback if someone calls toString() with no context
+			return type + (direction != null ? "_" + direction : "");
 		}
 	}
 
