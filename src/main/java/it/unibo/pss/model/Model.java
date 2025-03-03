@@ -71,9 +71,6 @@ public class Model {
 		return grid;
 	}
 
-	// ------------------------------------------------
-	// Build a map { entityId -> "MOVE_UP"/"EAT"/"BAZINGA"/"IDLE"... }
-	// ------------------------------------------------
 	public ModelDTO getLatestModelDTO() {
 		Map<Integer,String> entityActions = new HashMap<>();
 		for (BasicEntity e : entityManager.getEntities()) {
@@ -98,11 +95,9 @@ public class Model {
 		if (req == null) {
 			return "IDLE";
 		}
-		// Let the request produce the action name with context
 		return req.toActionString(e, this::findEntityById);
 	}
 
-	// This is the "tile click" text
 	public String getTileActions(int tileX, int tileY) {
 		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
 			return "Invalid tile";
@@ -119,14 +114,14 @@ public class Model {
 			}
 			String entityName = getEntityName(entity);
 			int energy = entity.getEnergy();
-			String actionKey = getActionString(entity); // same logic
+			String actionKey = getActionString(entity);
 			sb.append(entityName)
 				.append("(").append(energy).append("): ")
 				.append(actionKey)
 				.append("\n");
 		}
 		String result = sb.toString().trim();
-		return result.isEmpty() ? "No actions" : result;
+		return result.isEmpty() ? "no actions" : result;
 	}
 
 	private String getEntityName(BasicEntity e) {

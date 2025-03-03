@@ -18,9 +18,6 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 	public void start(Stage stage) {
 		this.model = new Model(SharedConstants.WORLD_WIDTH, SharedConstants.WORLD_HEIGHT);
 		this.model.addObserver(this);
-
-		// CHANGED: Instead of new ModelDTO(...), 
-		// get the complete version with entityActions.
 		ModelDTO initialDTO = model.getLatestModelDTO();
 
 		this.view = new View(
@@ -33,8 +30,6 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 				);
 	}
 
-	// CHANGED: call model.getLatestModelDTO() 
-	// so the view sees the updated actions each time
 	@Override
 	public void onModelUpdated() {
 		view.updateModel(model.getLatestModelDTO());
@@ -61,7 +56,6 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 				view.setActionText(actions);
 			}
 			default -> {
-				// no-op
 			}
 		}
 	}

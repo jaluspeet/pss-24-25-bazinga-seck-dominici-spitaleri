@@ -1,7 +1,8 @@
 package it.unibo.pss.model.entity;
 
-import it.unibo.pss.model.world.World;
 import java.util.function.Function;
+
+import it.unibo.pss.model.world.World;
 
 public abstract class BasicEntity {
 	protected final World grid;
@@ -13,7 +14,6 @@ public abstract class BasicEntity {
 	private static int nextId = 0;
 	private int moveCounter = 0;
 
-	// Configurable properties
 	protected int sightRange;
 	protected int energyBazinga;
 	protected int energyHungry;
@@ -37,7 +37,6 @@ public abstract class BasicEntity {
 	public abstract Class<? extends BasicEntity> getPredatorType();
 	public abstract BasicEntity spawnOffspring();
 
-	// Getters and Setters for configurable values
 	public int getSightRange() { return sightRange; }
 	public void setSightRange(int sightRange) { this.sightRange = sightRange; }
 	public int getEnergyBazinga() { return energyBazinga; }
@@ -49,24 +48,23 @@ public abstract class BasicEntity {
 	public int getMovementSpeed() { return movementSpeed; }
 	public void setMovementSpeed(int movementSpeed) { this.movementSpeed = movementSpeed; }
 
-	// Standard getters
 	public int getId() { return id; }
 	public int getX() { return x; }
 	public int getY() { return y; }
 	public int getEnergy() { return energy; }
+
 	public void addEnergy(int amount) { energy += amount; }
 	public void subtractEnergy(int amount) { energy = Math.max(0, energy - amount); }
 	public void setPosition(int newX, int newY) { x = newX; y = newY; }
+
 	public void setBazinged() { hasBazinged = true; }
 	public void resetBazinged() { hasBazinged = false; }
 	public boolean hasBazinged() { return this.hasBazinged; }
-	public boolean isAlive() { return energy > 0; }
 
-	// Movement logic
+	public boolean isAlive() { return energy > 0; }
 	public void incrementMoveCounter() { moveCounter++; }
 	public boolean isTimeToMove() { return moveCounter >= getMovementSpeed(); }
 	public void resetMoveCounter() { moveCounter = 0; }
-
 	protected Request moveOrInteract(BasicEntity target) {
 		int dist = Math.abs(x - target.getX()) + Math.abs(y - target.getY());
 		if (dist <= 1) {
@@ -88,7 +86,6 @@ public abstract class BasicEntity {
 	protected Request moveAway(BasicEntity entity) {
 		Direction bestDirection = null;
 		int maxDist = Math.abs(x - entity.getX()) + Math.abs(y - entity.getY());
-
 		for (Direction dir : Direction.values()) {
 			int newX = x, newY = y;
 			switch (dir) {
@@ -103,7 +100,6 @@ public abstract class BasicEntity {
 				bestDirection = dir;
 			}
 		}
-
 		return new Request(ActionType.MOVE, (bestDirection != null) ? bestDirection : randomDirection());
 	}
 
@@ -113,17 +109,22 @@ public abstract class BasicEntity {
 	}
 
 	protected BasicEntity findNearestEntity(Class<? extends BasicEntity> type, int range) {
+		if (type == null) {
+			return null;
+		}
 		BasicEntity nearest = null;
 		int minDist = Integer.MAX_VALUE;
-
 		for (int dx = -range; dx <= range; dx++) {
 			for (int dy = -range; dy <= range; dy++) {
 				int nx = x + dx, ny = y + dy;
 				World.Tile tile = grid.getTile(nx, ny);
-				if (tile == null) continue;
-
+				if (tile == null) {
+					continue;
+				}
 				for (BasicEntity other : tile.getEntities()) {
-					if (other == this || !type.isInstance(other) || !other.isAlive()) continue;
+					if (other == this || !type.isInstance(other) || !other.isAlive()) {
+						continue;
+					}
 					int dist = Math.abs(dx) + Math.abs(dy);
 					if (dist < minDist) {
 						minDist = dist;
@@ -135,13 +136,10 @@ public abstract class BasicEntity {
 		return nearest;
 	}
 
-	public enum Direction { UP, DOWN, LEFT, RIGHT }
 	public enum ActionType { MOVE, INTERACT }
 
-	// ===================================================
-	// CHANGED: Request now returns "IDLE" if an INTERACT
-	// is not 'EAT' or 'BAZINGA' (no fallback "INTERACT").
-	// ===================================================
+	public enum Direction { UP, DOWN, LEFT, RIGHT }
+
 	public static class Request {
 		public final ActionType type;
 		public final Direction direction;
@@ -159,44 +157,29 @@ public abstract class BasicEntity {
 			this.direction = null;
 		}
 
-		/**
-		 * Produce something like "MOVE_UP", "BAZINGA", "EAT", or "IDLE".
-		 */
 		public String toActionString(BasicEntity self, Function<Integer, BasicEntity> entityLookup) {
 			if (type == ActionType.MOVE) {
 				if (direction == null) {
 					return "IDLE";
 				}
-				return "MOVE_" + direction.name();  // e.g. MOVE_UP
+				return "MOVE_" + direction.name();
 			} else if (type == ActionType.INTERACT) {
 				BasicEntity target = entityLookup.apply(targetId);
-				// If no target or dead target => IDLE
 				if (target == null || !target.isAlive()) {
 					return "IDLE";
 				}
-				// If it's a prey => EAT
 				if (self.getPreyType() != null && self.getPreyType().isInstance(target)) {
 					return "EAT";
 				}
-				// If same class => BAZINGA
-				// (both have enough energy, etc.)
 				if (self.getClass().equals(target.getClass())
 						&& self.getEnergy() >= self.getEnergyBazinga()
 						&& !self.hasBazinged
 						&& !target.hasBazinged()) {
 					return "BAZINGA";
 						}
-				// If not EAT or BAZINGA, we do NOT do "INTERACT";
-				// we do "IDLE" as you requested
 				return "IDLE";
 			}
 			return "IDLE";
-		}
-
-		@Override
-		public String toString() {
-			// fallback if someone calls toString() with no context
-			return type + (direction != null ? "_" + direction : "");
 		}
 	}
 

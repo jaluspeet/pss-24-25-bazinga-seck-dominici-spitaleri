@@ -7,6 +7,7 @@ import it.unibo.pss.common.SharedConstants;
 public class EntityManager {
 	private final List<BasicEntity> entities = new ArrayList<>();
 	private final Map<Integer, BasicEntity> entityMap = new HashMap<>();
+	private final List<PlantEntity> deadPlants = new ArrayList<>();
 	private final World grid;
 	private final Random random = new Random();
 
@@ -27,26 +28,24 @@ public class EntityManager {
 	}
 
 	public void updateCycle() {
-		List<Action> approvedActions = new ArrayList<>();
-		List<RequestWrapper> requests = new ArrayList<>();
-
-		// 1) Subtract energy for all non-plants
 		for (BasicEntity entity : new ArrayList<>(entities)) {
 			if (!(entity instanceof PlantEntity)) {
 				entity.subtractEnergy(1);
 			}
 		}
 
-		// 2) Remove dead (non-plant) entities
-		entities.removeIf(entity -> {
-			if (!(entity instanceof PlantEntity) && !entity.isAlive()) {
+		for (BasicEntity entity : new ArrayList<>(entities)) {
+			if (!entity.isAlive()) {
 				removeEntity(entity);
-				return true;
+				if (entity instanceof PlantEntity p) {
+					p.setResurrectionDelay(SharedConstants.PLANT_RESURRECTION_TIME);
+					deadPlants.add(p);
+				}
+				entities.remove(entity);
 			}
-			return false;
-		});
+		}
 
-		// 3) Collect requests (movement/interaction) from those who are ready
+		List<RequestWrapper> requests = new ArrayList<>();
 		for (BasicEntity e : entities) {
 			if (e.getMovementSpeed() > 0) {
 				e.incrementMoveCounter();
@@ -60,21 +59,26 @@ public class EntityManager {
 			}
 		}
 
-		// 4) Validate requested actions
+		List<Action> approvedActions = new ArrayList<>();
 		for (RequestWrapper rw : requests) {
+			boolean validated = false;
 			BasicEntity.Request req = rw.request;
 			if (req.type == BasicEntity.ActionType.MOVE) {
 				if (validateMove(rw.entity, req.direction)) {
 					approvedActions.add(new Action(rw.entity, req));
+					validated = true;
 				}
 			} else if (req.type == BasicEntity.ActionType.INTERACT) {
 				if (validateInteract(rw.entity, req.targetId)) {
 					approvedActions.add(new Action(rw.entity, req));
+					validated = true;
 				}
+			}
+			if (!validated) {
+				rw.entity.transitionState(false);
 			}
 		}
 
-		// 5) Process approved actions
 		for (Action action : approvedActions) {
 			BasicEntity.Request req = action.request;
 			if (req.type == BasicEntity.ActionType.MOVE) {
@@ -85,41 +89,44 @@ public class EntityManager {
 			action.entity.transitionState(true);
 		}
 
-		// 6) Reset bazinga flag
-		entities.forEach(BasicEntity::resetBazinged);
+		for (BasicEntity e : entities) {
+			e.resetBazinged();
+		}
 
-		// 7) Handle plant resurrection
-		for (BasicEntity entity : entities) {
-			if (entity instanceof PlantEntity) {
-				PlantEntity plant = (PlantEntity) entity;
-				if (!plant.isAlive()) {
-					plant.decrementResurrectionDelay();
-					if (plant.getResurrectionDelay() == 0) {
-						// re-add to tile if needed
-						plant.addEnergy(1);
-						World.Tile tile = grid.getTile(plant.getX(), plant.getY());
-						if (!tile.getEntities().contains(plant)) {
-							tile.addEntity(plant);
-						}
-					}
-				}
+		for (PlantEntity p : new ArrayList<>(deadPlants)) {
+			p.decrementResurrectionDelay();
+			if (p.getResurrectionDelay() <= 0) {
+				p.addEnergy(1);
+				World.Tile tile = grid.getTile(p.getX(), p.getY());
+				tile.addEntity(p);
+				entities.add(p);
+				entityMap.put(p.getId(), p);
+				deadPlants.remove(p);
 			}
 		}
 	}
 
 	private void removeEntity(BasicEntity entity) {
-		grid.getTile(entity.getX(), entity.getY()).removeEntity(entity);
+		World.Tile tile = grid.getTile(entity.getX(), entity.getY());
+		if (tile != null) {
+			tile.removeEntity(entity);
+		}
 		entityMap.remove(entity.getId());
+	}
+
+	public void killEntity(BasicEntity toKill) {
+		removeEntity(toKill);
+		toKill.subtractEnergy(toKill.getEnergy());
 	}
 
 	private boolean validateMove(BasicEntity entity, BasicEntity.Direction dir) {
 		int newX = entity.getX();
 		int newY = entity.getY();
 		switch (dir) {
-			case UP:    newY--; break;
-			case DOWN:  newY++; break;
-			case LEFT:  newX--; break;
-			case RIGHT: newX++; break;
+			case UP -> newY--;
+			case DOWN -> newY++;
+			case LEFT -> newX--;
+			case RIGHT -> newX++;
 		}
 		World.Tile tile = grid.getTile(newX, newY);
 		if (tile == null || tile.getType() != World.Tile.TileType.LAND || entity.getEnergy() <= 0) {
@@ -134,10 +141,10 @@ public class EntityManager {
 		int newX = entity.getX();
 		int newY = entity.getY();
 		switch (dir) {
-			case UP:    newY--; break;
-			case DOWN:  newY++; break;
-			case LEFT:  newX--; break;
-			case RIGHT: newX++; break;
+			case UP -> newY--;
+			case DOWN -> newY++;
+			case LEFT -> newX--;
+			case RIGHT -> newX++;
 		}
 		World.Tile currentTile = grid.getTile(entity.getX(), entity.getY());
 		World.Tile targetTile  = grid.getTile(newX, newY);
@@ -145,7 +152,7 @@ public class EntityManager {
 			currentTile.removeEntity(entity);
 			entity.setPosition(newX, newY);
 			targetTile.addEntity(entity);
-			entity.subtractEnergy(1); // movement cost
+			entity.subtractEnergy(1);
 		}
 	}
 
@@ -168,17 +175,13 @@ public class EntityManager {
 			entity.addEnergy(entity.getEnergyRestore());
 			return;
 		}
-		if (entity.getClass().equals(target.getClass()) &&
-				entity.getEnergy() >= entity.getEnergyBazinga() &&
-				target.getEnergy() >= target.getEnergyBazinga() &&
-				!entity.hasBazinged && !target.hasBazinged) {
+		if (entity.getClass().equals(target.getClass())
+				&& entity.getEnergy() >= entity.getEnergyBazinga()
+				&& target.getEnergy() >= target.getEnergyBazinga()
+				&& !entity.hasBazinged()
+				&& !target.hasBazinged()) {
 			spawnOffspring(entity, target);
 				}
-	}
-
-	private void killEntity(BasicEntity toKill) {
-		removeEntity(toKill);
-		toKill.subtractEnergy(toKill.getEnergy());
 	}
 
 	private void spawnOffspring(BasicEntity parent1, BasicEntity parent2) {
@@ -219,9 +222,11 @@ public class EntityManager {
 	private void generatePlants(int count) {
 		generateEntitiesOfType(PlantEntity.class, count);
 	}
+
 	private void generateSheep(int count) {
 		generateEntitiesOfType(SheepEntity.class, count);
 	}
+
 	private void generateWolves(int count) {
 		generateEntitiesOfType(WolfEntity.class, count);
 	}
@@ -233,10 +238,12 @@ public class EntityManager {
 			int x = random.nextInt(width);
 			int y = random.nextInt(height);
 			World.Tile tile = grid.getTile(x, y);
-			if (!tile.getType().equals(World.Tile.TileType.LAND) 
-					|| hasEntityOfType(tile, type)) {
+			if (tile == null || tile.getType() != World.Tile.TileType.LAND) {
 				continue;
-					}
+			}
+			if (hasEntityOfType(tile, type)) {
+				continue;
+			}
 			BasicEntity entity = createEntity(type, x, y);
 			if (entity != null) {
 				addEntity(entity);

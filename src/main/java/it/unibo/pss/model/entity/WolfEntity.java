@@ -4,6 +4,8 @@ import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.model.world.World;
 
 public class WolfEntity extends BasicEntity {
+	private int failCount;
+
 	public WolfEntity(World grid, int x, int y, int initialEnergy) {
 		super(grid, x, y, initialEnergy);
 		setSightRange(SharedConstants.WOLF_SIGHT_RANGE);
@@ -15,30 +17,55 @@ public class WolfEntity extends BasicEntity {
 
 	@Override
 	public Request getNextRequest() {
-		// hunt
-		BasicEntity prey = findNearestEntity(getPreyType(), this.sightRange);
-		if (prey != null) return moveOrInteract(prey);
-
-		// bazinga
-		if (energy >= energyBazinga) {
-			BasicEntity mate = findNearestEntity(this.getClass(), this.sightRange);
-			if (mate != null) return moveOrInteract(mate);
+		if (failCount >= 2) {
+			failCount = 0;
+			return new Request(ActionType.MOVE, randomDirection());
 		}
 
-		// move randomly
+		BasicEntity prey = findNearestEntity(getPreyType(), getSightRange());
+		if (prey != null) {
+			return moveOrInteract(prey);
+		}
+
+		if (getEnergy() >= getEnergyBazinga()) {
+			BasicEntity mate = findNearestEntity(this.getClass(), getSightRange());
+			if (mate != null) {
+				return moveOrInteract(mate);
+			}
+		}
+
 		return new Request(ActionType.MOVE, randomDirection());
 	}
 
 	@Override
-	protected State initialState() { return new WolfState(); }
-	@Override
-	public Class<? extends BasicEntity> getPreyType() { return SheepEntity.class; }
-	@Override
-	public Class<? extends BasicEntity> getPredatorType() { return null; }
-	@Override
-	public BasicEntity spawnOffspring() { return new WolfEntity(grid, x, y, SharedConstants.WOLF_ENERGY_DEFAULT); }
-	@Override
-	public void transitionState(boolean actionSuccess) {}
+	protected State initialState() {
+		return new WolfState();
+	}
 
-	private static class WolfState implements State {}
+	@Override
+	public Class<? extends BasicEntity> getPreyType() {
+		return SheepEntity.class;
+	}
+
+	@Override
+	public Class<? extends BasicEntity> getPredatorType() {
+		return null;
+	}
+
+	@Override
+	public BasicEntity spawnOffspring() {
+		return new WolfEntity(grid, x, y, SharedConstants.WOLF_ENERGY_DEFAULT);
+	}
+
+	@Override
+	public void transitionState(boolean actionSuccess) {
+		if (actionSuccess) {
+			failCount = 0;
+		} else {
+			failCount++;
+		}
+	}
+
+	private static class WolfState implements State {
+	}
 }
