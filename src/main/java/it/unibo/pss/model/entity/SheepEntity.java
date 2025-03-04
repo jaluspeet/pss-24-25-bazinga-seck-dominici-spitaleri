@@ -22,7 +22,7 @@ public class SheepEntity extends BasicEntity {
 			return new Request(ActionType.MOVE, randomDirection());
 		}
 
-		int fleeRange = Math.max(1, getSightRange() / 3);
+		int fleeRange = Math.max(1, getSightRange());
 		BasicEntity predator = findNearestEntity(getPredatorType(), fleeRange);
 		if (predator != null) {
 			return moveAway(predator);
