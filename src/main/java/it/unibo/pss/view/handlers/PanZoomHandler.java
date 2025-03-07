@@ -42,7 +42,7 @@ public class PanZoomHandler {
 		if (e.isControlDown()) { 
 			double zoomFactor = e.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
 			scale = Math.max(SharedConstants.CAMERA_MIN_SCALE, Math.min(scale * zoomFactor, SharedConstants.CAMERA_MAX_SCALE));
-			// panning
+		// panning
 		} else {
 			panX += e.getDeltaX() / scale * SharedConstants.CAMERA_SENSITIVITY;
 			panY += e.getDeltaY() / scale * SharedConstants.CAMERA_SENSITIVITY;

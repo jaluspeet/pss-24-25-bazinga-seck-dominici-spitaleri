@@ -1,6 +1,5 @@
 package it.unibo.pss.view;
 
-import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.controller.observer.ViewDTO;
 import it.unibo.pss.controller.observer.ViewObserver;
@@ -24,10 +23,12 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import java.util.List;
 
 public class View {
 	private ModelDTO modelDTO;
@@ -36,22 +37,27 @@ public class View {
 	private final Label plantCounter;
 	private final Label sheepCounter;
 	private final Label wolfCounter;
+	// Keep a reference to WorldView to update the highlighted tile.
+	private WorldView worldView;
 
 	public View(Stage stage, String title, int width, int height, ViewObserver viewObserver) {
 		this.viewport = new StackView(width, height, true);
-		this.actionLabel = new Label("actions: ");
+		this.actionLabel = new Label("Actions: ");
 		this.plantCounter = new Label("plant: 0");
 		this.sheepCounter = new Label("sheep: 0");
 		this.wolfCounter = new Label("wolf: 0");
 
 		initializeViewport();
 		initializeUI(stage, title, width, height, viewObserver);
-		setupMouseClickHandler(viewObserver);
+		setupEventHandlers(viewObserver);
 		startRenderingLoop();
 	}
 
+	// Register renderable components.
 	private void initializeViewport() {
-		viewport.registerRenderable(new WorldView());
+		// Create a WorldView instance and keep a reference for highlighting.
+		worldView = new WorldView();
+		viewport.registerRenderable(worldView);
 		viewport.registerRenderable(new EntityView());
 	}
 
@@ -66,77 +72,105 @@ public class View {
 		stage.show();
 	}
 
+	// Create the control bar with fixed controls and a scrollable action list.
 	private FlowPane createControlBar(ViewObserver viewObserver) {
 		Button speedUpButton = createSpeedButton("+", -100, viewObserver);
 		Button speedDownButton = createSpeedButton("-", 100, viewObserver);
-		Button toggleViewButton = new Button("Toggle View");
-		toggleViewButton.setOnAction(e -> {
-			GeometryRenderer current = viewport.getGeometryRenderer();
-			if (current instanceof it.unibo.pss.view.geometry.IsometricRenderer) {
-				viewport.setGeometryRenderer(new it.unibo.pss.view.geometry.TopDownRenderer());
-				SpritePathResolver.setMode("topdown");
-			} else {
-				viewport.setGeometryRenderer(new it.unibo.pss.view.geometry.IsometricRenderer());
-				SpritePathResolver.setMode("isometric");
-			}
-			viewport.clearSpriteCaches();
-		});
+		Button toggleViewButton = createToggleViewButton();
+
+		// Wrap the action label in a ScrollPane for horizontal scrolling.
+		ScrollPane actionScrollPane = new ScrollPane(actionLabel);
+		actionScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+		actionScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+		double actionPaneWidth = 200;
+		double actionPaneHeight = 30;
+		actionScrollPane.setPrefSize(actionPaneWidth, actionPaneHeight);
+		actionScrollPane.setMinSize(actionPaneWidth, actionPaneHeight);
+		actionScrollPane.setMaxSize(actionPaneWidth, actionPaneHeight);
+
 		FlowPane topBar = new FlowPane(10, 10);
 		topBar.setPadding(new Insets(10));
-		topBar.getChildren().addAll(plantCounter, sheepCounter, wolfCounter, speedUpButton, speedDownButton, toggleViewButton, actionLabel);
+		topBar.getChildren().addAll(
+				plantCounter, 
+				sheepCounter, 
+				wolfCounter, 
+				speedUpButton, 
+				speedDownButton, 
+				toggleViewButton, 
+				actionScrollPane
+				);
+		double fixedPanelHeight = 50;
+		topBar.setPrefHeight(fixedPanelHeight);
+		topBar.setMinHeight(fixedPanelHeight);
+		topBar.setMaxHeight(fixedPanelHeight);
+
 		return topBar;
 	}
 
+	// Create a speed button.
 	private Button createSpeedButton(String label, int speedChange, ViewObserver viewObserver) {
 		Button button = new Button(label);
 		button.setOnAction(e -> viewObserver.onViewAction(new ViewDTO(new ViewDTO.SpeedCommand(speedChange))));
 		return button;
 	}
 
+	// Create the toggle view button.
+	private Button createToggleViewButton() {
+		Button toggleViewButton = new Button("Toggle View");
+		toggleViewButton.setOnAction(e -> toggleViewMode());
+		return toggleViewButton;
+	}
+
+	private void setupEventHandlers(ViewObserver viewObserver) {
+		setupMouseClickHandler(viewObserver);
+	}
+
+	// Handle mouse clicks using the geometry renderer to convert screen to grid coordinates.
 	private void setupMouseClickHandler(ViewObserver viewObserver) {
-		viewport.setOnMouseClicked(e -> {
-			Point2D localPoint = viewport.sceneToLocal(e.getSceneX(), e.getSceneY());
-			GeometryRenderer renderer = viewport.getGeometryRenderer();
-			double scale = viewport.getCamera().getScale();
-			World grid = modelDTO.getGrid();
-			Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(renderer, viewport.getCamera(),
-					viewport.getWidth(), viewport.getHeight(), grid.getWidth(), grid.getHeight());
-
-			int tileX, tileY;
-
-			if (renderer instanceof it.unibo.pss.view.geometry.IsometricRenderer) {
-				Point2D gridCoords = screenToIsometricGrid(localPoint, scale, cameraOffset);
-				tileX = (int) gridCoords.getX();
-				tileY = (int) gridCoords.getY();
-			} else {
-				tileX = (int) ((localPoint.getX() / scale - cameraOffset.getX()) / SharedConstants.TILE_WIDTH);
-				tileY = (int) ((localPoint.getY() / scale - cameraOffset.getY()) / SharedConstants.TILE_HEIGHT);
-			}
-
-			if (tileX >= 0 && tileY >= 0 && tileX < grid.getWidth() && tileY < grid.getHeight()) {
-				viewObserver.onViewAction(new ViewDTO(new ViewDTO.EntityTileClickCommand(tileX, tileY)));
-			}
-		});
+		viewport.setOnMouseClicked(e -> handleMouseClick(e.getSceneX(), e.getSceneY(), viewObserver));
 	}
 
-	private Point2D screenToIsometricGrid(Point2D screenPoint, double scale, Point2D cameraOffset) {
-		double A = SharedConstants.TILE_WIDTH / 2.0;
-		double B = SharedConstants.TILE_HEIGHT / 2.0;
+	private void handleMouseClick(double sceneX, double sceneY, ViewObserver viewObserver) {
+		Point2D localPoint = viewport.sceneToLocal(sceneX, sceneY);
+		double scale = viewport.getCamera().getScale();
+		World grid = modelDTO.getGrid();
+		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(
+				viewport.getGeometryRenderer(),
+				viewport.getCamera(),
+				viewport.getWidth(),
+				viewport.getHeight(),
+				grid.getWidth(),
+				grid.getHeight()
+				);
+		Point2D gridCoords = viewport.getGeometryRenderer().screenToGrid(localPoint, scale, cameraOffset);
+		int tileX = (int) gridCoords.getX();
+		int tileY = (int) gridCoords.getY();
 
-		double Xprime = (screenPoint.getX() / scale) - cameraOffset.getX();
-		double Yprime = (screenPoint.getY() / scale) - cameraOffset.getY() + SharedConstants.TILE_HEIGHT;
-
-		int tileX = (int) Math.floor(((Xprime / A) + (Yprime / B)) / 2);
-		int tileY = (int) Math.floor(((Yprime / B) - (Xprime / A)) / 2);
-
-		return new Point2D(tileX, tileY);
+		if (tileX >= 0 && tileY >= 0 && tileX < grid.getWidth() && tileY < grid.getHeight()) {
+			// Update the highlighted tile in WorldView.
+			worldView.setHighlightedTile(tileX, tileY);
+			viewObserver.onViewAction(new ViewDTO(new ViewDTO.EntityTileClickCommand(tileX, tileY)));
+		}
 	}
 
+	private void toggleViewMode() {
+		GeometryRenderer current = viewport.getGeometryRenderer();
+		if (current instanceof it.unibo.pss.view.geometry.IsometricRenderer) {
+			viewport.setGeometryRenderer(new it.unibo.pss.view.geometry.TopDownRenderer());
+			SpritePathResolver.setMode("topdown");
+		} else {
+			viewport.setGeometryRenderer(new it.unibo.pss.view.geometry.IsometricRenderer());
+			SpritePathResolver.setMode("isometric");
+		}
+		viewport.clearSpriteCaches();
+	}
+
+	// Start a single AnimationTimer and pass its timestamp to all renderables.
 	private void startRenderingLoop() {
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				viewport.render(modelDTO);
+				viewport.render(modelDTO, now);
 			}
 		}.start();
 		initializeCountersUpdater();
@@ -160,13 +194,16 @@ public class View {
 				for (int y = 0; y < modelDTO.getGrid().getHeight(); y++) {
 					for (BasicEntity entity : modelDTO.getGrid().getTile(x, y).getEntities()) {
 						if (!entity.isAlive()) continue;
-						if (entity instanceof PlantEntity) plants++;
-						else if (entity instanceof SheepEntity) sheep++;
-						else if (entity instanceof WolfEntity) wolves++;
+						if (entity instanceof PlantEntity) {
+							plants++;
+						} else if (entity instanceof SheepEntity) {
+							sheep++;
+						} else if (entity instanceof WolfEntity) {
+							wolves++;
+						}
 					}
 				}
 			}
-
 			final int p = plants, s = sheep, w = wolves;
 			Platform.runLater(() -> {
 				plantCounter.setText("plant: " + p);
@@ -176,12 +213,20 @@ public class View {
 		}).start();
 	}
 
+	// Update the model and re-render with the current timestamp.
 	public void updateModel(ModelDTO newModelDTO) {
 		this.modelDTO = newModelDTO;
-		viewport.render(modelDTO);
+		viewport.render(modelDTO, System.nanoTime());
 	}
 
+	// Set the actions text in the scrollable area.
 	public void setActionText(String text) {
 		actionLabel.setText(text);
+	}
+
+	// Alternatively, to display a list of actions separated by commas.
+	public void setActions(List<String> actions) {
+		String joinedActions = String.join(", ", actions);
+		actionLabel.setText("Actions: " + joinedActions);
 	}
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.model.entity.BasicEntity;
 import it.unibo.pss.model.world.World;
@@ -23,7 +22,6 @@ import javafx.scene.image.Image;
 public class EntityView implements Renderable, SpriteCache {
 	private final EntitySpriteLoader spriteLoader = new EntitySpriteLoader("/entity");
 	private final Map<Integer, InterpolationData> interpolationMap = new HashMap<>();
-
 	private static final long INTERP_DURATION_NANO = 100_000_000L;
 
 	private static class InterpolationData {
@@ -47,12 +45,14 @@ public class EntityView implements Renderable, SpriteCache {
 	}
 
 	@Override
-	public void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer) {
+	public void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer, long now) {
 		World grid = modelDTO.getGrid();
 		double canvasWidth = gc.getCanvas().getWidth();
 		double canvasHeight = gc.getCanvas().getHeight();
-		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(renderer, camera, canvasWidth, canvasHeight,
-				grid.getWidth(), grid.getHeight());
+		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(
+				renderer, camera, canvasWidth, canvasHeight,
+				grid.getWidth(), grid.getHeight()
+				);
 
 		List<BasicEntity> allEntities = new ArrayList<>();
 		for (int x = 0; x < grid.getWidth(); x++) {
@@ -67,17 +67,16 @@ public class EntityView implements Renderable, SpriteCache {
 			}
 		}
 
-		// Batch render entities by z-index
+		// Batch render entities by z-index.
 		for (int currentZ = 0; currentZ <= 2; currentZ++) {
 			for (BasicEntity entity : allEntities) {
 				if (entity.getZIndex() != currentZ)
 					continue;
 
-				// compute the current grid position.
+				// Compute the current grid position.
 				Point2D currentGridPos = new Point2D(entity.getX(), entity.getY());
-				long now = System.nanoTime();
 
-				// retrieve or initialize interpolation data.
+				// Retrieve or initialize interpolation data.
 				InterpolationData interpData = interpolationMap.get(entity.getId());
 				if (interpData == null) {
 					interpData = new InterpolationData(currentGridPos, now);
@@ -86,20 +85,20 @@ public class EntityView implements Renderable, SpriteCache {
 					interpData.update(currentGridPos, now);
 				}
 
-				// compute the interpolation factor
+				// Compute the interpolation fraction using the passed timestamp.
 				double fraction = Math.min(1.0, (double) (now - interpData.lastUpdateTime) / INTERP_DURATION_NANO);
 
-				// compute the pixel rectangles for the previous and current grid positions.
-				Rectangle2D prevRect = renderer.computeTileRect((int) interpData.previous.getX(),
-						(int) interpData.previous.getY(),
-						cameraOffset.getX(), cameraOffset.getY(),
-						camera.getScale());
-				Rectangle2D currRect = renderer.computeTileRect((int) interpData.current.getX(),
-						(int) interpData.current.getY(),
-						cameraOffset.getX(), cameraOffset.getY(),
-						camera.getScale());
+				// Get the pixel rectangles for the previous and current grid positions.
+				Rectangle2D prevRect = renderer.computeTileRect(
+						(int) interpData.previous.getX(), (int) interpData.previous.getY(),
+						cameraOffset.getX(), cameraOffset.getY(), camera.getScale()
+						);
+				Rectangle2D currRect = renderer.computeTileRect(
+						(int) interpData.current.getX(), (int) interpData.current.getY(),
+						cameraOffset.getX(), cameraOffset.getY(), camera.getScale()
+						);
 
-				// linearly interpolate the top-left coordinates.
+				// Linearly interpolate the top-left coordinates.
 				double interpMinX = prevRect.getMinX() + fraction * (currRect.getMinX() - prevRect.getMinX());
 				double interpMinY = prevRect.getMinY() + fraction * (currRect.getMinY() - prevRect.getMinY());
 				Rectangle2D interpolatedRect = new Rectangle2D(interpMinX, interpMinY, currRect.getWidth(), currRect.getHeight());

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unibo.pss.view.handlers.PanZoomHandler;
-import it.unibo.pss.view.sprites.SpriteCache;
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.view.geometry.GeometryRenderer;
 import it.unibo.pss.view.geometry.IsometricRenderer;
@@ -20,13 +19,13 @@ public class StackView extends Canvas {
 
 	public StackView(double width, double height, boolean isometric) {
 		super(width, height);
-		camera = new PanZoomHandler(this, () -> render(currentModelDTO));
+		camera = new PanZoomHandler(this, () -> render(currentModelDTO, System.nanoTime()));
 		geometryRenderer = isometric ? new IsometricRenderer() : new TopDownRenderer();
 	}
 
 	public void setGeometryRenderer(GeometryRenderer newRenderer) {
 		this.geometryRenderer = newRenderer;
-		render(currentModelDTO);
+		render(currentModelDTO, System.nanoTime());
 	}
 
 	public GeometryRenderer getGeometryRenderer() {
@@ -41,22 +40,22 @@ public class StackView extends Canvas {
 		renderables.add(r);
 	}
 
-	public void render(ModelDTO modelDTO) {
+	public void render(ModelDTO modelDTO, long now) {
 		currentModelDTO = modelDTO;
 		GraphicsContext gc = getGraphicsContext2D();
 		gc.clearRect(0, 0, getWidth(), getHeight());
-		renderables.forEach(r -> r.render(gc, modelDTO, camera, geometryRenderer));
+		renderables.forEach(r -> r.render(gc, modelDTO, camera, geometryRenderer, now));
 	}
 
 	public void clearSpriteCaches() {
 		for (Renderable r : renderables) {
-			if (r instanceof SpriteCache) {
-				((SpriteCache) r).reloadSprites();
+			if (r instanceof it.unibo.pss.view.sprites.SpriteCache) {
+				((it.unibo.pss.view.sprites.SpriteCache) r).reloadSprites();
 			}
 		}
 	}
 
 	public interface Renderable {
-		void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer);
+		void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer, long now);
 	}
 }

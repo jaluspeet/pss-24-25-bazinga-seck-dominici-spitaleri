@@ -66,7 +66,7 @@ public final class SharedConstants {
 	public static final double CAMERA_SENSITIVITY = Double.parseDouble(PROPERTIES.getProperty("camera.sensitivity", "0.5"));
 	public static final double CAMERA_FRICTION = Double.parseDouble(PROPERTIES.getProperty("camera.friction", "0.9"));
 	public static final double CAMERA_INERTIA_THRESHOLD = Double.parseDouble(PROPERTIES.getProperty("camera.inertia.threshold", "0.01"));
-	public static final double CAMERA_ZOOM_BASE = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.base", "1.1"));
+	public static final double CAMERA_ZOOM_BASE = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.base", "1.01"));
 	public static final double CAMERA_ZOOM_SMOOTHING = Double.parseDouble(PROPERTIES.getProperty("camera.zoom.smoothing", "0.1"));
 	public static final double CAMERA_MIN_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.min.scale", "0.1"));
 	public static final double CAMERA_MAX_SCALE = Double.parseDouble(PROPERTIES.getProperty("camera.max.scale", "10.0"));

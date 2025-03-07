@@ -39,12 +39,13 @@ public class WorldSpriteLoader {
 		return sprites;
 	}
 
-	public Image getTileSprite(World.Tile tile) {
+	public Image getTileSprite(World.Tile tile, long now) {
 		if (tile.getType() == World.Tile.TileType.LAND) {
 			return cache.computeIfAbsent(tile, t -> getRandomSprite(landSprites));
 		}
 		if (waterSprites.isEmpty()) return null;
-		int globalIndex = (int) ((System.currentTimeMillis() / (SharedConstants.CAMERA_FRAMERATE * 10)) % waterSprites.size());
+		long currentMillis = now / 1_000_000;
+		int globalIndex = (int) ((currentMillis / (SharedConstants.CAMERA_FRAMERATE * 10)) % waterSprites.size());
 		return waterSprites.get((globalIndex + (tile.getX() + tile.getY())) % waterSprites.size());
 	}
 
