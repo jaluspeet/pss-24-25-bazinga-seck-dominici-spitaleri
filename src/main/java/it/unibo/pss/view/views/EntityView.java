@@ -54,7 +54,7 @@ public class EntityView implements Renderable, SpriteCache {
 					double spriteSizeX = sprite.getWidth() * camera.getScale();
 					double spriteSizeY = sprite.getHeight() * camera.getScale();
 					double drawX = rect.getMinX() + rect.getWidth() / 2 - spriteSizeX / 2;
-					double drawY = rect.getMinY() + rect.getHeight() / 2 - spriteSizeY / 2;
+					double drawY = rect.getMinY() + rect.getHeight() - spriteSizeY;
 					gc.drawImage(sprite, drawX, drawY, spriteSizeX, spriteSizeY);
 				}
 			}

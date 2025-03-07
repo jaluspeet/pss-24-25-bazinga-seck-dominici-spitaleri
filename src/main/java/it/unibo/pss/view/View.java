@@ -33,8 +33,7 @@ public class View {
 	private final Label sheepCounter;
 	private final Label wolfCounter;
 
-	public View(Stage stage, String title, int width, int height, ModelDTO modelDTO, ViewObserver viewObserver) {
-		this.modelDTO = modelDTO;
+	public View(Stage stage, String title, int width, int height, ViewObserver viewObserver) {
 		this.viewport = new StackView(width, height, true);
 		this.actionLabel = new Label("actions: ");
 		this.plantCounter = new Label("plant: 0");

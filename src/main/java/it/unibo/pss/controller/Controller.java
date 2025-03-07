@@ -18,21 +18,20 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 	public void start(Stage stage) {
 		this.model = new Model(SharedConstants.WORLD_WIDTH, SharedConstants.WORLD_HEIGHT);
 		this.model.addObserver(this);
-		ModelDTO initialDTO = model.getLatestModelDTO();
 
 		this.view = new View(
 				stage,
 				SharedConstants.WINDOW_TITLE,
 				SharedConstants.WINDOW_WIDTH,
 				SharedConstants.WINDOW_HEIGHT,
-				initialDTO,
 				this
 				);
 	}
 
 	@Override
 	public void onModelUpdated() {
-		view.updateModel(model.getLatestModelDTO());
+		ModelDTO latestDTO = model.getLatestModelDTO();
+		view.updateModel(latestDTO);
 	}
 
 	public ModelDTO getLatestModelDTO() {

@@ -8,7 +8,6 @@ import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.controller.observer.ModelObserver;
 import it.unibo.pss.controller.observer.ModelDTO;
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +38,9 @@ public class Model {
 	}
 
 	private void notifyObservers() {
-		Platform.runLater(() -> observers.forEach(ModelObserver::onModelUpdated));
+		for (ModelObserver observer : observers) {
+			observer.onModelUpdated();
+		}
 	}
 
 	private void startSimulation() {
