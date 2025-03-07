@@ -13,6 +13,7 @@ public class SheepEntity extends BasicEntity {
 		setEnergyHungry(SharedConstants.SHEEP_ENERGY_HUNGRY);
 		setEnergyRestore(SharedConstants.SHEEP_ENERGY_RESTORE);
 		setMovementSpeed(SharedConstants.SHEEP_MOVEMENT_SPEED);
+	        this.zIndex = 0;
 	}
 
 	@Override

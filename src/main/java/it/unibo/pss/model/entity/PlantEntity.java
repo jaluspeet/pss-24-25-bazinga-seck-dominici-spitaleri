@@ -7,6 +7,7 @@ public class PlantEntity extends BasicEntity {
 
 	public PlantEntity(World grid, int x, int y, int initialEnergy) {
 		super(grid, x, y, initialEnergy);
+		this.zIndex = 1;
 	}
 
 	@Override

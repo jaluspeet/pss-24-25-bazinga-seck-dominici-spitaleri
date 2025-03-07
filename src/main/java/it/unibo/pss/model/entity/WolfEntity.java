@@ -13,6 +13,7 @@ public class WolfEntity extends BasicEntity {
 		setEnergyHungry(SharedConstants.WOLF_ENERGY_HUNGRY);
 		setEnergyRestore(SharedConstants.WOLF_ENERGY_RESTORE);
 		setMovementSpeed(SharedConstants.WOLF_MOVEMENT_SPEED);
+		this.zIndex = 2;
 	}
 
 	@Override

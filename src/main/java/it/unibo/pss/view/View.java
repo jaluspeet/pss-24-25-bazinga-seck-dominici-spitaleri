@@ -1,7 +1,5 @@
 package it.unibo.pss.view;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import it.unibo.pss.common.SharedConstants;
 import it.unibo.pss.controller.observer.ModelDTO;
 import it.unibo.pss.controller.observer.ViewDTO;
@@ -148,22 +146,29 @@ public class View {
 	}
 
 	private void updateCounters() {
-		AtomicInteger plants = new AtomicInteger();
-		AtomicInteger sheep = new AtomicInteger();
-		AtomicInteger wolves = new AtomicInteger();
+		new Thread(() -> {
+			int plants = 0;
+			int sheep = 0;
+			int wolves = 0;
 
-		modelDTO.getGrid().forEachTile(tile ->
-				tile.getEntities().stream()
-				.filter(BasicEntity::isAlive)
-				.forEach(entity -> {
-					if (entity instanceof PlantEntity) plants.incrementAndGet();
-					else if (entity instanceof SheepEntity) sheep.incrementAndGet();
-					else if (entity instanceof WolfEntity) wolves.incrementAndGet();
-				}));
+			for (int x = 0; x < modelDTO.getGrid().getWidth(); x++) {
+				for (int y = 0; y < modelDTO.getGrid().getHeight(); y++) {
+					for (BasicEntity entity : modelDTO.getGrid().getTile(x, y).getEntities()) {
+						if (!entity.isAlive()) continue;
+						if (entity instanceof PlantEntity) plants++;
+						else if (entity instanceof SheepEntity) sheep++;
+						else if (entity instanceof WolfEntity) wolves++;
+					}
+				}
+			}
 
-		plantCounter.setText("plant: " + plants.get());
-		sheepCounter.setText("sheep: " + sheep.get());
-		wolfCounter.setText("wolf: " + wolves.get());
+			final int p = plants, s = sheep, w = wolves;
+			javafx.application.Platform.runLater(() -> {
+				plantCounter.setText("plant: " + p);
+				sheepCounter.setText("sheep: " + s);
+				wolfCounter.setText("wolf: " + w);
+			});
+		}).start();
 	}
 
 	public void setActionText(String text) {

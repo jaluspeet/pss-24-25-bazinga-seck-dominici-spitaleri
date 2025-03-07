@@ -19,6 +19,8 @@ public abstract class BasicEntity {
 	protected int energyHungry;
 	protected int energyRestore;
 	protected int movementSpeed;
+	
+	protected int zIndex;
 
 	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
@@ -28,6 +30,7 @@ public abstract class BasicEntity {
 		this.energy = initialEnergy;
 		this.hasBazinged = false;
 		this.currentState = initialState();
+		this.zIndex = 0;
 	}
 
 	protected abstract State initialState();
@@ -48,6 +51,7 @@ public abstract class BasicEntity {
 	public int getMovementSpeed() { return movementSpeed; }
 	public void setMovementSpeed(int movementSpeed) { this.movementSpeed = movementSpeed; }
 
+	public int getZIndex() { return zIndex; }
 	public int getId() { return id; }
 	public int getX() { return x; }
 	public int getY() { return y; }

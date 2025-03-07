@@ -3,7 +3,6 @@ package it.unibo.pss.model.world;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
 import it.unibo.pss.model.entity.BasicEntity;
 
 public class World {
@@ -86,12 +85,16 @@ public class World {
 		private final int y;
 		private final TileType type;
 		private final List<BasicEntity> entities;
+		private final List<BasicEntity> sortedEntities;
+		private boolean needsSorting;
 
 		public Tile(int x, int y, TileType type) {
 			this.x = x;
 			this.y = y;
 			this.type = type;
 			this.entities = new ArrayList<>();
+			this.sortedEntities = new ArrayList<>();
+			this.needsSorting = false;
 		}
 
 		public List<BasicEntity> getEntities() {
@@ -100,10 +103,29 @@ public class World {
 
 		public void addEntity(BasicEntity entity) {
 			entities.add(entity);
+			sortedEntities.add(entity);
+			needsSorting = true;
 		}
 
 		public void removeEntity(BasicEntity entity) {
 			entities.remove(entity);
+			sortedEntities.remove(entity);
+		}
+
+		public List<BasicEntity> getSortedEntities() {
+			if (needsSorting) {
+				sortedEntities.sort((a, b) -> {
+					// First, sort by zIndex in descending order (higher values last)
+					int zComparison = Integer.compare(a.getZIndex(), b.getZIndex());
+					if (zComparison != 0) {
+						return zComparison; // Ensure higher zIndex appears later
+					}
+					// If zIndex is the same, sort by ID for consistent ordering
+					return Integer.compare(a.getId(), b.getId());
+				});
+				needsSorting = false;
+			}
+			return sortedEntities;
 		}
 
 		public TileType getType() {

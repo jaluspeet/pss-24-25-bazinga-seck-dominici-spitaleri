@@ -49,12 +49,12 @@ public class PanZoomHandler {
 	}
 
 	private void handleScrollAndZoom(ScrollEvent e) {
+		// zooming
 		if (e.isControlDown()) { 
-			// Zooming
 			double zoomFactor = e.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
 			scale = Math.max(SharedConstants.CAMERA_MIN_SCALE, Math.min(scale * zoomFactor, SharedConstants.CAMERA_MAX_SCALE));
-		} else { 
-			// Trackpad Panning (if not zooming)
+		// panning
+		} else {
 			panX += e.getDeltaX() / scale * SharedConstants.CAMERA_SENSITIVITY;
 			panY += e.getDeltaY() / scale * SharedConstants.CAMERA_SENSITIVITY;
 		}
@@ -63,13 +63,15 @@ public class PanZoomHandler {
 	}
 
 	private void applyInertia() {
-		if (Math.abs(velocityX) > SharedConstants.CAMERA_INERTIA_THRESHOLD || Math.abs(velocityY) > SharedConstants.CAMERA_INERTIA_THRESHOLD) {
-			panX += velocityX;
-			panY += velocityY;
-			velocityX *= SharedConstants.CAMERA_FRICTION;
-			velocityY *= SharedConstants.CAMERA_FRICTION;
-			updateCallback.run();
+		if (Math.abs(velocityX) < 0.01 && Math.abs(velocityY) < 0.01) {
+			velocityX = velocityY = 0;
+			return;
 		}
+		panX += Math.round(velocityX);
+		panY += Math.round(velocityY);
+		velocityX *= SharedConstants.CAMERA_FRICTION;
+		velocityY *= SharedConstants.CAMERA_FRICTION;
+		updateCallback.run();
 	}
 
 	public Point2D applyCamera(Point2D baseOffset) {

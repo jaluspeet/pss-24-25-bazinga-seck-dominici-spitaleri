@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/** Loads configuration settings from a properties file. */
 public final class SharedConstants {
 
 	private static final Properties PROPERTIES = new Properties();
@@ -27,7 +26,7 @@ public final class SharedConstants {
 	public static final double SPRITE_WIDTH = 64;
 	public static final double SPRITE_HEIGHT = 64;
 
-	// exposed constants: use config.properties file to override
+	// use config.properties file to override
 
 	// window
 	public static final int WINDOW_WIDTH = Integer.parseInt(PROPERTIES.getProperty("window.width", "2560"));
