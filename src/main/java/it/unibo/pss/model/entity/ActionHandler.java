@@ -13,6 +13,8 @@ public class ActionHandler {
 		this.entityManager = entityManager;
 	}
 
+	// ====== REQUEST PROCESSING ======
+
 	public List<RequestWrapper> collectRequests(List<BasicEntity> entities) {
 		List<RequestWrapper> requests = new ArrayList<>();
 		for (BasicEntity e : entities) {
@@ -34,10 +36,8 @@ public class ActionHandler {
 		List<Action> approvedActions = new ArrayList<>();
 		for (RequestWrapper rw : requests) {
 			boolean validated = switch (rw.request.type) {
-				case MOVE ->
-					validateMove(rw.entity, rw.request.direction);
-				case INTERACT ->
-					validateInteract(rw.entity, rw.request.targetId);
+				case MOVE -> validateMove(rw.entity, rw.request.direction);
+				case INTERACT -> validateInteract(rw.entity, rw.request.targetId);
 			};
 
 			if (validated) {
@@ -60,7 +60,7 @@ public class ActionHandler {
 		}
 	}
 
-	// validation
+	// ====== VALIDATION ======
 
 	private boolean validateMove(BasicEntity entity, BasicEntity.Direction dir) {
 		int newX = entity.getX();
@@ -81,8 +81,7 @@ public class ActionHandler {
 			return false;
 		}
 
-		boolean isBlocked = tile.getEntities().stream()
-			.anyMatch(e -> !(e instanceof PlantEntity) && e.isAlive());
+		boolean isBlocked = tile.getEntities().stream().anyMatch(e -> !(e instanceof PlantEntity) && e.isAlive());
 		return !isBlocked;
 	}
 
@@ -91,12 +90,11 @@ public class ActionHandler {
 		if (target == null || !target.isAlive()) {
 			return false;
 		}
-		// Must be on or adjacent tile
 		List<Tile> adjacent = getAdjacentTiles(entity.getX(), entity.getY());
 		return adjacent.stream().anyMatch(t -> t.getEntities().contains(target));
 	}
 
-	// processing
+	// ====== ACTION PROCESSING ======
 
 	private void processMove(BasicEntity entity, BasicEntity.Direction dir) {
 		int newX = entity.getX();
@@ -123,18 +121,20 @@ public class ActionHandler {
 		if (target == null || !target.isAlive()) {
 			return;
 		}
+
 		// EAT
 		if (entity.getPreyType() != null && entity.getPreyType().isInstance(target)) {
 			entityManager.killEntity(target);
 			entity.addEnergy(entity.getEnergyRestore());
 			return;
 		}
-		// BAZINGA
-		if (entity.getClass().equals(target.getClass())
-				&& entity.getEnergy() >= entity.getEnergyBazinga()
-				&& target.getEnergy() >= target.getEnergyBazinga()
-				&& !entity.hasBazinged()
-				&& !target.hasBazinged()) {
+
+		// BAZINGA (Reproduction)
+		if (entity.getClass().equals(target.getClass()) &&
+				entity.getEnergy() >= entity.getEnergyBazinga() &&
+				target.getEnergy() >= target.getEnergyBazinga() &&
+				!entity.hasBazinged() &&
+				!target.hasBazinged()) {
 			spawnOffspring(entity, target);
 				}
 	}
@@ -153,6 +153,8 @@ public class ActionHandler {
 		}
 	}
 
+	// ====== HELPER METHODS ======
+
 	private Tile findFreeAdjacentTile(int x, int y) {
 		for (Tile t : getAdjacentTiles(x, y)) {
 			if (t.getEntities().isEmpty()) {
@@ -163,19 +165,17 @@ public class ActionHandler {
 	}
 
 	private List<Tile> getAdjacentTiles(int x, int y) {
-		List<Tile> tiles = new ArrayList<>(
-				Arrays.asList(
+		List<Tile> tiles = new ArrayList<>(Arrays.asList(
 					world.getTile(x, y - 1),
 					world.getTile(x, y + 1),
 					world.getTile(x - 1, y),
 					world.getTile(x + 1, y)
-					)
-				);
+					));
 		tiles.removeIf(Objects::isNull);
 		return tiles;
 	}
 
-	// utility
+	// ====== UTILITY CLASSES ======
 
 	public static class RequestWrapper {
 		public final BasicEntity entity;

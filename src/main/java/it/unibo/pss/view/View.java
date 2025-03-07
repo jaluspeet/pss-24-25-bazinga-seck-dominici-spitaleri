@@ -16,6 +16,9 @@ import it.unibo.pss.view.views.EntityView;
 import it.unibo.pss.view.views.StackView;
 import it.unibo.pss.view.views.WorldView;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
@@ -24,6 +27,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class View {
 	private ModelDTO modelDTO;
@@ -43,7 +47,6 @@ public class View {
 		initializeViewport();
 		initializeUI(stage, title, width, height, viewObserver);
 		setupMouseClickHandler(viewObserver);
-
 		startRenderingLoop();
 	}
 
@@ -134,14 +137,17 @@ public class View {
 			@Override
 			public void handle(long now) {
 				viewport.render(modelDTO);
-				updateCounters();
 			}
 		}.start();
+		initializeCountersUpdater();
 	}
 
-	public void updateModel(ModelDTO newModelDTO) {
-		this.modelDTO = newModelDTO;
-		viewport.render(modelDTO);
+	private void initializeCountersUpdater() {
+		Timeline counterTimeline = new Timeline(
+				new KeyFrame(Duration.millis(500), e -> updateCounters())
+				);
+		counterTimeline.setCycleCount(Timeline.INDEFINITE);
+		counterTimeline.play();
 	}
 
 	private void updateCounters() {
@@ -162,12 +168,17 @@ public class View {
 			}
 
 			final int p = plants, s = sheep, w = wolves;
-			javafx.application.Platform.runLater(() -> {
+			Platform.runLater(() -> {
 				plantCounter.setText("plant: " + p);
 				sheepCounter.setText("sheep: " + s);
 				wolfCounter.setText("wolf: " + w);
 			});
 		}).start();
+	}
+
+	public void updateModel(ModelDTO newModelDTO) {
+		this.modelDTO = newModelDTO;
+		viewport.render(modelDTO);
 	}
 
 	public void setActionText(String text) {

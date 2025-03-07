@@ -39,13 +39,18 @@ public class PlantEntity extends BasicEntity {
 		return new PlantEntity(grid, x, y, 1);
 	}
 
-	public void kill() {
-		energy = 0;
-	}
-
 	@Override
 	public boolean isAlive() {
 		return energy > 0;
+	}
+
+	@Override
+	public int getMovementSpeed() {
+		return 0;
+	}
+
+	public void kill() {
+		energy = 0;
 	}
 
 	public int getResurrectionDelay() {
@@ -60,11 +65,6 @@ public class PlantEntity extends BasicEntity {
 		if (resurrectionDelay > 0) {
 			resurrectionDelay--;
 		}
-	}
-
-	@Override
-	public int getMovementSpeed() {
-		return 0;
 	}
 
 	private static class PlantState implements State {

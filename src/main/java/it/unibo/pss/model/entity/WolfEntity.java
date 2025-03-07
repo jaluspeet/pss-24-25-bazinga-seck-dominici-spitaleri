@@ -17,6 +17,11 @@ public class WolfEntity extends BasicEntity {
 	}
 
 	@Override
+	protected State initialState() {
+		return new WolfState();
+	}
+
+	@Override
 	public Request getNextRequest() {
 		if (failCount >= 2) {
 			failCount = 0;
@@ -39,8 +44,12 @@ public class WolfEntity extends BasicEntity {
 	}
 
 	@Override
-	protected State initialState() {
-		return new WolfState();
+	public void transitionState(boolean actionSuccess) {
+		if (actionSuccess) {
+			failCount = 0;
+		} else {
+			failCount++;
+		}
 	}
 
 	@Override
@@ -56,15 +65,6 @@ public class WolfEntity extends BasicEntity {
 	@Override
 	public BasicEntity spawnOffspring() {
 		return new WolfEntity(grid, x, y, SharedConstants.WOLF_ENERGY_DEFAULT);
-	}
-
-	@Override
-	public void transitionState(boolean actionSuccess) {
-		if (actionSuccess) {
-			failCount = 0;
-		} else {
-			failCount++;
-		}
 	}
 
 	private static class WolfState implements State {

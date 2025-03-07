@@ -13,7 +13,12 @@ public class SheepEntity extends BasicEntity {
 		setEnergyHungry(SharedConstants.SHEEP_ENERGY_HUNGRY);
 		setEnergyRestore(SharedConstants.SHEEP_ENERGY_RESTORE);
 		setMovementSpeed(SharedConstants.SHEEP_MOVEMENT_SPEED);
-	        this.zIndex = 0;
+		this.zIndex = 0;
+	}
+
+	@Override
+	protected State initialState() {
+		return new SheepState();
 	}
 
 	@Override
@@ -47,8 +52,12 @@ public class SheepEntity extends BasicEntity {
 	}
 
 	@Override
-	protected State initialState() {
-		return new SheepState();
+	public void transitionState(boolean actionSuccess) {
+		if (actionSuccess) {
+			failCount = 0;
+		} else {
+			failCount++;
+		}
 	}
 
 	@Override
@@ -64,15 +73,6 @@ public class SheepEntity extends BasicEntity {
 	@Override
 	public BasicEntity spawnOffspring() {
 		return new SheepEntity(grid, x, y, SharedConstants.SHEEP_ENERGY_DEFAULT);
-	}
-
-	@Override
-	public void transitionState(boolean actionSuccess) {
-		if (actionSuccess) {
-			failCount = 0;
-		} else {
-			failCount++;
-		}
 	}
 
 	private static class SheepState implements State {

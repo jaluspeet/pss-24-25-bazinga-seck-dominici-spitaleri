@@ -1,7 +1,6 @@
 package it.unibo.pss.model.entity;
 
 import java.util.function.Function;
-
 import it.unibo.pss.model.world.World;
 
 public abstract class BasicEntity {
@@ -19,8 +18,9 @@ public abstract class BasicEntity {
 	protected int energyHungry;
 	protected int energyRestore;
 	protected int movementSpeed;
-	
 	protected int zIndex;
+
+	// ====== CONSTRUCTOR ======
 
 	public BasicEntity(World grid, int x, int y, int initialEnergy) {
 		this.grid = grid;
@@ -33,6 +33,8 @@ public abstract class BasicEntity {
 		this.zIndex = 0;
 	}
 
+	// ====== ABSTRACT METHODS ======
+
 	protected abstract State initialState();
 	public abstract Request getNextRequest();
 	public abstract void transitionState(boolean actionSuccess);
@@ -40,56 +42,52 @@ public abstract class BasicEntity {
 	public abstract Class<? extends BasicEntity> getPredatorType();
 	public abstract BasicEntity spawnOffspring();
 
-	public int getSightRange() { return sightRange; }
-	public void setSightRange(int sightRange) { this.sightRange = sightRange; }
-	public int getEnergyBazinga() { return energyBazinga; }
-	public void setEnergyBazinga(int energyBazinga) { this.energyBazinga = energyBazinga; }
-	public int getEnergyHungry() { return energyHungry; }
-	public void setEnergyHungry(int energyHungry) { this.energyHungry = energyHungry; }
-	public int getEnergyRestore() { return energyRestore; }
-	public void setEnergyRestore(int energyRestore) { this.energyRestore = energyRestore; }
-	public int getMovementSpeed() { return movementSpeed; }
-	public void setMovementSpeed(int movementSpeed) { this.movementSpeed = movementSpeed; }
+	// ====== GETTERS & SETTERS ======
 
-	public int getZIndex() { return zIndex; }
 	public int getId() { return id; }
 	public int getX() { return x; }
 	public int getY() { return y; }
 	public int getEnergy() { return energy; }
+	public int getZIndex() { return zIndex; }
+	public boolean isAlive() { return energy > 0; }
 
+	public void setPosition(int newX, int newY) { x = newX; y = newY; }
 	public void addEnergy(int amount) { energy += amount; }
 	public void subtractEnergy(int amount) { energy = Math.max(0, energy - amount); }
-	public void setPosition(int newX, int newY) { x = newX; y = newY; }
 
-	public void setBazinged() { hasBazinged = true; }
-	public void resetBazinged() { hasBazinged = false; }
-	public boolean hasBazinged() { return this.hasBazinged; }
+	public int getSightRange() { return sightRange; }
+	public void setSightRange(int sightRange) { this.sightRange = sightRange; }
 
-	public boolean isAlive() { return energy > 0; }
-	public void incrementMoveCounter() { moveCounter++; }
-	public boolean isTimeToMove() { return moveCounter >= getMovementSpeed(); }
-	public void resetMoveCounter() { moveCounter = 0; }
+	public int getEnergyBazinga() { return energyBazinga; }
+	public void setEnergyBazinga(int energyBazinga) { this.energyBazinga = energyBazinga; }
+
+	public int getEnergyHungry() { return energyHungry; }
+	public void setEnergyHungry(int energyHungry) { this.energyHungry = energyHungry; }
+
+	public int getEnergyRestore() { return energyRestore; }
+	public void setEnergyRestore(int energyRestore) { this.energyRestore = energyRestore; }
+
+	public int getMovementSpeed() { return movementSpeed; }
+	public void setMovementSpeed(int movementSpeed) { this.movementSpeed = movementSpeed; }
+
+	// ====== MOVEMENT & INTERACTION ======
+
 	protected Request moveOrInteract(BasicEntity target) {
 		int dist = Math.abs(x - target.getX()) + Math.abs(y - target.getY());
-		if (dist <= 1) {
-			return new Request(ActionType.INTERACT, target.getId());
-		} else {
-			return moveToward(target);
-		}
+		return dist <= 1 ? new Request(ActionType.INTERACT, target.getId()) : moveToward(target);
 	}
 
 	protected Request moveToward(BasicEntity target) {
 		int dx = target.getX() - x;
 		int dy = target.getY() - y;
-		Direction moveDir = (Math.abs(dx) >= Math.abs(dy))
-			? (dx > 0 ? Direction.RIGHT : Direction.LEFT)
-			: (dy > 0 ? Direction.DOWN : Direction.UP);
+		Direction moveDir = (Math.abs(dx) >= Math.abs(dy)) ? (dx > 0 ? Direction.RIGHT : Direction.LEFT) : (dy > 0 ? Direction.DOWN : Direction.UP);
 		return new Request(ActionType.MOVE, moveDir);
 	}
 
 	protected Request moveAway(BasicEntity entity) {
 		Direction bestDirection = null;
 		int maxDist = Math.abs(x - entity.getX()) + Math.abs(y - entity.getY());
+
 		for (Direction dir : Direction.values()) {
 			int newX = x, newY = y;
 			switch (dir) {
@@ -104,6 +102,7 @@ public abstract class BasicEntity {
 				bestDirection = dir;
 			}
 		}
+
 		return new Request(ActionType.MOVE, (bestDirection != null) ? bestDirection : randomDirection());
 	}
 
@@ -140,6 +139,20 @@ public abstract class BasicEntity {
 		return nearest;
 	}
 
+	// ====== STATE & MOVEMENT TIMING ======
+
+	public void incrementMoveCounter() { moveCounter++; }
+	public boolean isTimeToMove() { return moveCounter >= getMovementSpeed(); }
+	public void resetMoveCounter() { moveCounter = 0; }
+
+	// ====== BAZINGA FLAG ======
+
+	public void setBazinged() { hasBazinged = true; }
+	public void resetBazinged() { hasBazinged = false; }
+	public boolean hasBazinged() { return this.hasBazinged; }
+
+	// ====== REQUEST HANDLING ======
+
 	public enum ActionType { MOVE, INTERACT }
 
 	public enum Direction { UP, DOWN, LEFT, RIGHT }
@@ -175,10 +188,10 @@ public abstract class BasicEntity {
 				if (self.getPreyType() != null && self.getPreyType().isInstance(target)) {
 					return "EAT";
 				}
-				if (self.getClass().equals(target.getClass())
-						&& self.getEnergy() >= self.getEnergyBazinga()
-						&& !self.hasBazinged
-						&& !target.hasBazinged()) {
+				if (self.getClass().equals(target.getClass()) &&
+						self.getEnergy() >= self.getEnergyBazinga() &&
+						!self.hasBazinged &&
+						!target.hasBazinged()) {
 					return "BAZINGA";
 						}
 				return "IDLE";
