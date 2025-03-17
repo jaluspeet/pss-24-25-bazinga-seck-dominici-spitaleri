@@ -13,7 +13,7 @@ public class ActionHandler {
 		this.entityManager = entityManager;
 	}
 
-	// ====== REQUEST PROCESSING ======
+	// ====== REQUEST ======
 
 	public List<RequestWrapper> collectRequests(List<BasicEntity> entities) {
 		List<RequestWrapper> requests = new ArrayList<>();
@@ -94,7 +94,7 @@ public class ActionHandler {
 		return adjacent.stream().anyMatch(t -> t.getEntities().contains(target));
 	}
 
-	// ====== ACTION PROCESSING ======
+	// ====== PROCESSING ======
 
 	private void processMove(BasicEntity entity, BasicEntity.Direction dir) {
 		int newX = entity.getX();
@@ -129,7 +129,7 @@ public class ActionHandler {
 			return;
 		}
 
-		// BAZINGA (Reproduction)
+		// BAZINGA
 		if (entity.getClass().equals(target.getClass()) &&
 				entity.getEnergy() >= entity.getEnergyBazinga() &&
 				target.getEnergy() >= target.getEnergyBazinga() &&

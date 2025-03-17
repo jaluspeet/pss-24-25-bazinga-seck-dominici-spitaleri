@@ -5,8 +5,6 @@ import javafx.geometry.Point2D;
 
 /**
  * Utility class to compute the camera offset.
- * The camera offset is the offset that must be applied to the rendering of the grid to center it in the canvas.
- * The camera offset is computed by the renderer and then transformed by the camera.
  */
 public final class CameraOffsetHandler {
 	private CameraOffsetHandler() { }

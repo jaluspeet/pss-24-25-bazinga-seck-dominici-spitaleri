@@ -4,8 +4,20 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import it.unibo.pss.common.SharedConstants;
 
+/**
+ * Implementation of the GeometryRenderer that renders the grid in a top-down perspective.
+ */
 public class TopDownRenderer implements GeometryRenderer {
 
+	/**
+	 * Computes the rectangle that represents the tile at the given grid position.
+	 *
+	 * @param gridX the x-coordinate of the tile in the grid
+	 * @param gridY the y-coordinate of the tile in the grid
+	 * @param offsetX the x-coordinate of the grid's top-left corner
+	 * @param offsetY the y-coordinate of the grid's top-left corner
+	 * @param scale the scale factor
+	 */
 	@Override
 	public Rectangle2D computeTileRect(int gridX, int gridY, double offsetX, double offsetY, double scale) {
 		return new Rectangle2D(
@@ -16,6 +28,15 @@ public class TopDownRenderer implements GeometryRenderer {
 				);
 	}
 
+	/**
+	 * Computes the offset that centers the grid in the canvas.
+	 *
+	 * @param canvasWidth the width of the canvas
+	 * @param canvasHeight the height of the canvas
+	 * @param gridCols the number of columns in the grid
+	 * @param gridRows the number of rows in the grid
+	 * @param scale the scale factor
+	 */
 	@Override
 	public Point2D computeCenterOffset(double canvasWidth, double canvasHeight, int gridCols, int gridRows, double scale) {
 		double gridWidth = gridCols * SharedConstants.TILE_WIDTH * scale;
@@ -26,6 +47,13 @@ public class TopDownRenderer implements GeometryRenderer {
 				);
 	}
 
+	/**
+	 * Converts a grid position to a screen position.
+	 *
+	 * @param gridPoint the grid position
+	 * @param scale the scale factor
+	 * @param cameraOffset the offset of the camera
+	 */
 	@Override
 	public Point2D screenToGrid(Point2D screenPoint, double scale, Point2D cameraOffset) {
 		double gridX = (screenPoint.getX() - cameraOffset.getX()) / (SharedConstants.TILE_WIDTH * scale);
@@ -33,6 +61,13 @@ public class TopDownRenderer implements GeometryRenderer {
 		return new Point2D(Math.floor(gridX), Math.floor(gridY));
 	}
 
+	/**
+	 * Converts a screen position to a grid position.
+	 *
+	 * @param screenPoint the screen position
+	 * @param scale the scale factor
+	 * @param cameraOffset the offset of the camera
+	 */
 	@Override
 	public double[][] computeTileOutline(int gridX, int gridY, double offsetX, double offsetY, double scale) {
 		Rectangle2D rect = computeTileRect(gridX, gridY, offsetX, offsetY, scale);

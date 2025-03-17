@@ -4,8 +4,20 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import it.unibo.pss.common.SharedConstants;
 
+/**
+ * Implementation of the GeometryRenderer interface that renders in isometric perspective.
+ */
 public class IsometricRenderer implements GeometryRenderer {
 
+	/**
+	 * Returns the isometric coordinates of the given grid coordinates.
+	 *
+	 * @param gridX The x-coordinate of the grid.
+	 * @param gridY The y-coordinate of the grid.
+	 * @param offsetX The x-offset of the grid.
+	 * @param offsetY The y-offset of the grid.
+	 * @return The isometric coordinates of the given grid coordinates.
+	 */
 	private Point2D getIsometricCoordinates(int gridX, int gridY, double offsetX, double offsetY) {
 		return new Point2D(
 				(gridX - gridY) * (SharedConstants.TILE_WIDTH / 2.0) + offsetX,
@@ -13,6 +25,15 @@ public class IsometricRenderer implements GeometryRenderer {
 				);
 	}
 
+	/**
+	 * Returns the grid coordinates of the given isometric coordinates.
+	 *
+	 * @param isoX The x-coordinate of the isometric coordinates.
+	 * @param isoY The y-coordinate of the isometric coordinates.
+	 * @param offsetX The x-offset of the grid.
+	 * @param offsetY The y-offset of the grid.
+	 * @return The grid coordinates of the given isometric coordinates.
+	 */
 	@Override
 	public Rectangle2D computeTileRect(int gridX, int gridY, double offsetX, double offsetY, double scale) {
 		Point2D isoCoords = getIsometricCoordinates(gridX, gridY, offsetX, offsetY);
@@ -26,6 +47,16 @@ public class IsometricRenderer implements GeometryRenderer {
 				);
 	}
 
+	/**
+	 * Returns the center offset for the given canvas dimensions and grid dimensions.
+	 *
+	 * @param canvasWidth The width of the canvas.
+	 * @param canvasHeight The height of the canvas.
+	 * @param gridCols The number of columns in the grid.
+	 * @param gridRows The number of rows in the grid.
+	 * @param scale The scale of the grid.
+	 * @return The center offset for the given canvas dimensions and grid dimensions.
+	 */
 	@Override
 	public Point2D computeCenterOffset(double canvasWidth, double canvasHeight, int gridCols, int gridRows, double scale) {
 		double centerTileX = (gridCols - 1) / 2.0;
@@ -36,6 +67,14 @@ public class IsometricRenderer implements GeometryRenderer {
 				);
 	}
 
+	/**
+	 * Returns the grid coordinates of the given screen coordinates.
+	 *
+	 * @param screenPoint The screen coordinates.
+	 * @param scale The scale of the grid.
+	 * @param cameraOffset The offset of the camera.
+	 * @return The grid coordinates of the given screen coordinates.
+	 */
 	@Override
 	public Point2D screenToGrid(Point2D screenPoint, double scale, Point2D cameraOffset) {
 		double A = SharedConstants.TILE_WIDTH / 2.0;
@@ -47,6 +86,14 @@ public class IsometricRenderer implements GeometryRenderer {
 		return new Point2D(gridX, gridY);
 	}
 
+	/**
+	 * Returns the screen coordinates of the given grid coordinates.
+	 *
+	 * @param gridPoint The grid coordinates.
+	 * @param scale The scale of the grid.
+	 * @param cameraOffset The offset of the camera.
+	 * @return The screen coordinates of the given grid coordinates.
+	 */
 	@Override
 	public double[][] computeTileOutline(int gridX, int gridY, double offsetX, double offsetY, double scale) {
 		// Compute a diamond outline for isometric tiles.
