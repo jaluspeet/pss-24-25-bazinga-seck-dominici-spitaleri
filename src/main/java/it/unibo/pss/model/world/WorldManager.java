@@ -11,13 +11,17 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import it.unibo.pss.common.SharedConstants;
 
+/**
+ * Utility class for generating and managing the world grid.
+ */
 public final class WorldManager {
-
 	private static final Random random = new Random();
 	private static final List<World.Tile> lakeCenters = new ArrayList<>();
 
+	// prevent instantiation
 	private WorldManager() {}
 
+	// set a tile at (x, y) to the given type
 	private static void setTile(World grid, int x, int y, World.Tile.TileType type) {
 		grid.setTile(x, y, grid.new Tile(x, y, type));
 	}
@@ -28,11 +32,13 @@ public final class WorldManager {
 		initializeLand(grid);
 		lakeCenters.clear();
 		
+		// calculate target number of water tiles, lakes, and rivers
 		int totalTiles = width * height;
 		int targetWaterTiles = (int) (totalTiles * SharedConstants.WORLD_WATER_RATIO);
 		int targetLakeTiles = (int) (targetWaterTiles * SharedConstants.WORLD_LAKE_RATIO);
 		int targetRiverTiles = targetWaterTiles - targetLakeTiles;
 		
+		// generate lakes and rivers
 		int lakeTargetSize = targetLakeTiles / SharedConstants.WORLD_LAKE_COUNT;
 		for (int i = 0; i < SharedConstants.WORLD_LAKE_COUNT; i++) {
 			int centerX = random.nextInt(width - 4) + 2;
@@ -42,6 +48,7 @@ public final class WorldManager {
 			lakeCenters.add(grid.getTile(centerX, centerY));
 		}
 		
+		// connect lakes with rivers
 		if (lakeCenters.size() > 1) {
 			Collections.shuffle(lakeCenters);
 			int numRivers = lakeCenters.size() - 1;

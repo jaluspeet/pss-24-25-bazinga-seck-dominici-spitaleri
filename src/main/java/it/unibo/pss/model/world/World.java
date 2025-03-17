@@ -5,11 +5,21 @@ import java.util.List;
 import java.util.function.Consumer;
 import it.unibo.pss.model.entity.BasicEntity;
 
+/**
+ * Represents the world map, which is a grid of tiles. Each tile can be either land or water.
+ * Each tile can contain entities, which are objects that can be placed on the map.
+ * The world map is used to render the game and to simulate the interactions between entities.
+ */
 public class World {
 	private final int width;
 	private final int height;
 	private final Tile[][] tiles;
 
+	/**
+	 * Creates a new world map with the specified width and height.
+	 * @param width the width of the world map
+	 * @param height the height of the world map
+	 */
 	public World(int width, int height) {
 		this.width = width;
 		this.height = height;
@@ -17,6 +27,9 @@ public class World {
 		initializeTiles();
 	}
 
+	/**
+	 * Initializes all tiles in the world map as land.
+	 */
 	private void initializeTiles() {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -25,6 +38,12 @@ public class World {
 		}
 	}
 
+	/**
+	 * Returns the tile at the specified coordinates.
+	 * @param x the x-coordinate of the tile
+	 * @param y the y-coordinate of the tile
+	 * @return the tile at the specified coordinates, or null if the coordinates are out of bounds
+	 */
 	public Tile getTile(int x, int y) {
 		if (x >= 0 && x < width && y >= 0 && y < height) {
 			return tiles[x][y];
@@ -32,20 +51,25 @@ public class World {
 		return null;
 	}
 
+	/**
+	 * Sets the tile at the specified coordinates.
+	 * @param x the x-coordinate of the tile
+	 * @param y the y-coordinate of the tile
+	 * @param tile the new tile to set
+	 */
 	public void setTile(int x, int y, Tile tile) {
 		if (x >= 0 && x < width && y >= 0 && y < height) {
 			tiles[x][y] = tile;
 		}
 	}
 
-	public int getWidth() {
-		return width;
-	}
+	public int getWidth() { return width; }
+	public int getHeight() { return height; }
 
-	public int getHeight() {
-		return height;
-	}
-
+	/**
+	 * Iterates over all tiles in the world map and applies the specified action to each tile.
+	 * @param action the action to apply to each tile
+	 */
 	public void forEachTile(Consumer<Tile> action) {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -54,6 +78,10 @@ public class World {
 		}
 	}
 
+	/**
+	 * Returns a list of all tiles in the world map.
+	 * @return a list of all tiles in the world map
+	 */
 	public List<Tile> getTilesInRange(int x, int y, int range) {
 		List<Tile> nearbyTiles = new ArrayList<>();
 		for (int dx = -range; dx <= range; dx++) {
@@ -68,6 +96,10 @@ public class World {
 		return nearbyTiles;
 	}
 
+	/**
+	 * Returns a string representation of the world map.
+	 * @return a string representation of the world map
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -80,6 +112,9 @@ public class World {
 		return sb.toString();
 	}
 
+	/**
+	 * Represents a tile in the world map.
+	 */
 	public class Tile {
 		private final int x;
 		private final int y;
@@ -88,6 +123,12 @@ public class World {
 		private final List<BasicEntity> sortedEntities;
 		private boolean needsSorting;
 
+		/**
+		 * Creates a new tile with the specified coordinates and type.
+		 * @param x the x-coordinate of the tile
+		 * @param y the y-coordinate of the tile
+		 * @param type the type of the tile
+		 */
 		public Tile(int x, int y, TileType type) {
 			this.x = x;
 			this.y = y;
@@ -97,24 +138,35 @@ public class World {
 			this.needsSorting = false;
 		}
 
-		public List<BasicEntity> getEntities() {
-			return entities;
-		}
+		public List<BasicEntity> getEntities() { return entities; }
 
+		/**
+		 * Adds an entity to the tile.
+		 * @param entity the entity to add
+		 */
 		public void addEntity(BasicEntity entity) {
 			entities.add(entity);
 			sortedEntities.add(entity);
 			needsSorting = true;
 		}
 
+		/**
+		 * Removes an entity from the tile.
+		 * @param entity the entity to remove
+		 */
 		public void removeEntity(BasicEntity entity) {
 			entities.remove(entity);
 			sortedEntities.remove(entity);
 		}
 
+		/**
+		 * Returns a list of entities on the tile, sorted by zIndex in descending order.
+		 * @return a list of entities on the tile, sorted by zIndex in descending order
+		 */
 		public List<BasicEntity> getSortedEntities() {
 			if (needsSorting) {
 				sortedEntities.sort((a, b) -> {
+
 					// First, sort by zIndex in descending order (higher values last)
 					int zComparison = Integer.compare(a.getZIndex(), b.getZIndex());
 					if (zComparison != 0) {
@@ -128,25 +180,12 @@ public class World {
 			return sortedEntities;
 		}
 
-		public TileType getType() {
-			return type;
-		}
-
-		public int getX() {
-			return x;
-		}
-
-		public int getY() {
-			return y;
-		}
+		public TileType getType() { return type; }
+		public int getX() { return x; }
+		public int getY() { return y; }
 
 		@Override
-		public String toString() {
-			return type == TileType.LAND ? "L" : "W";
-		}
-
-		public enum TileType {
-			LAND, WATER
-		}
+		public String toString() { return type == TileType.LAND ? "L" : "W"; }
+		public enum TileType { LAND, WATER }
 	}
 }

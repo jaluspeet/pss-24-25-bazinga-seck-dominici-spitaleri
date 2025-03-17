@@ -1,19 +1,22 @@
 package it.unibo.pss.model;
 
-import it.unibo.pss.model.entity.BasicEntity;
-import it.unibo.pss.model.entity.EntityManager;
-import it.unibo.pss.model.world.World;
-import it.unibo.pss.model.world.WorldManager;
-import it.unibo.pss.common.SharedConstants;
-import it.unibo.pss.controller.observer.ModelObserver;
-import it.unibo.pss.controller.observer.ModelDTO;
-import javafx.animation.AnimationTimer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.unibo.pss.common.SharedConstants;
+import it.unibo.pss.controller.observer.ModelDTO;
+import it.unibo.pss.controller.observer.ModelObserver;
+import it.unibo.pss.model.entity.BasicEntity;
+import it.unibo.pss.model.entity.EntityManager;
+import it.unibo.pss.model.world.World;
+import it.unibo.pss.model.world.WorldManager;
+import javafx.animation.AnimationTimer;
+
+/**
+ * Core of the application, manages the simulation and the entities.
+ */
 public class Model {
 	private final World grid;
 	private final EntityManager entityManager;
@@ -21,6 +24,12 @@ public class Model {
 	private long lastUpdate = 0;
 	private int updateInterval;
 
+	/**
+	 * Creates a new grid with the given dimensions and starts the simulation.
+	 *
+	 * @param width the width of the grid
+	 * @param height the height of the grid
+	 */
 	public Model(int width, int height) {
 		this.grid = WorldManager.generateGrid(width, height);
 		this.entityManager = new EntityManager(grid);
@@ -29,20 +38,36 @@ public class Model {
 		startSimulation();
 	}
 
+	/**
+	 * Adds an observer to the model.
+	 *
+	 * @param observer the observer to add
+	 */
 	public void addObserver(ModelObserver observer) {
 		observers.add(observer);
 	}
 
+	/**
+	 * Removes an observer from the model.
+	 *
+	 * @param observer the observer to remove
+	 */
 	public void removeObserver(ModelObserver observer) {
 		observers.remove(observer);
 	}
 
+	/**
+	 * Notifies all observers that the model has been updated.
+	 */
 	private void notifyObservers() {
 		for (ModelObserver observer : observers) {
 			observer.onModelUpdated();
 		}
 	}
 
+	/**
+	 * Starts the simulation loop.
+	 */
 	private void startSimulation() {
 		new AnimationTimer() {
 			@Override
@@ -55,22 +80,17 @@ public class Model {
 		}.start();
 	}
 
+	/**
+	 * Updates the simulation by one cycle.
+	 */
 	private void updateSimulation() {
 		entityManager.updateCycle();
 		notifyObservers();
 	}
 
-	public void setUpdateInterval(int interval) {
-		this.updateInterval = interval;
-	}
-
-	public int getUpdateInterval() {
-		return updateInterval;
-	}
-
-	public World getGrid() {
-		return grid;
-	}
+	public void setUpdateInterval(int interval) { this.updateInterval = interval; }
+	public int getUpdateInterval() { return updateInterval; }
+	public World getGrid() { return grid; }
 
 	public ModelDTO getLatestModelDTO() {
 		Map<Integer,String> entityActions = new HashMap<>();
@@ -99,7 +119,7 @@ public class Model {
 		return req.toActionString(e, this::findEntityById);
 	}
 
-public String getTileActions(int tileX, int tileY) {
+	public String getTileActions(int tileX, int tileY) {
 		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
 			return "Invalid tile";
 		}
