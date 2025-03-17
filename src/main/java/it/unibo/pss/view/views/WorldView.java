@@ -13,15 +13,25 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
+/**
+ * The WorldView class is responsible for rendering the world grid (terrain).
+ */
 public class WorldView implements StackView.Renderable, SpriteCache {
 	private final WorldSpriteLoader spriteLoader = new WorldSpriteLoader("/world");
-	// Holds the highlighted tile coordinates.
 	private int highlightedTileX = -1;
 	private int highlightedTileY = -1;
 
+	/**
+	 * The render method is called by the view manager to render the world grid.
+	 *
+	 * @param gc The graphics context to render to.
+	 * @param modelDTO The model data to render.
+	 * @param camera The camera handler to use for rendering.
+	 * @param renderer The geometry renderer to use for rendering.
+	 * @param now The current time in milliseconds.
+	 */
 	@Override
-	public void render(GraphicsContext gc, ModelDTO modelDTO,
-			it.unibo.pss.view.handlers.PanZoomHandler camera, GeometryRenderer renderer, long now) {
+	public void render(GraphicsContext gc, ModelDTO modelDTO, it.unibo.pss.view.handlers.PanZoomHandler camera, GeometryRenderer renderer, long now) {
 		World grid = modelDTO.getGrid();
 		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(
 				renderer, camera, gc.getCanvas().getWidth(), gc.getCanvas().getHeight(),
@@ -53,12 +63,21 @@ public class WorldView implements StackView.Renderable, SpriteCache {
 		}
 	}
 
+	/**
+	 * The reloadSprites method is called by the view manager to reload the sprites
+	 * (useful when the sprites are changed at runtime).
+	 */
 	@Override
 	public void reloadSprites() {
 		spriteLoader.reload();
 	}
 
-	// Setter to update the highlighted tile.
+	/**
+	 * Set tile to be highlighted (with a colored outline).
+	 *
+	 * @param x The x-coordinate of the tile to highlight.
+	 * @param y The y-coordinate of the tile to highlight.
+	 */
 	public void setHighlightedTile(int x, int y) {
 		this.highlightedTileX = x;
 		this.highlightedTileY = y;

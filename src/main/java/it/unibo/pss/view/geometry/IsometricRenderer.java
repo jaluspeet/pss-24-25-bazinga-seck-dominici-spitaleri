@@ -26,7 +26,6 @@ public class IsometricRenderer implements GeometryRenderer {
 				);
 	}
 
-	// Updated to accept a scale parameter.
 	@Override
 	public Point2D computeCenterOffset(double canvasWidth, double canvasHeight, int gridCols, int gridRows, double scale) {
 		double centerTileX = (gridCols - 1) / 2.0;

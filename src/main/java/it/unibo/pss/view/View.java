@@ -28,8 +28,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import java.util.List;
 
+/**
+ * Main view class responsible for creating the application window,
+ * registering renderable views, and handling user input.
+ */
 public class View {
 	private ModelDTO modelDTO;
 	private final StackView viewport;
@@ -37,9 +40,17 @@ public class View {
 	private final Label plantCounter;
 	private final Label sheepCounter;
 	private final Label wolfCounter;
-	// Keep a reference to WorldView to update the highlighted tile.
 	private WorldView worldView;
 
+	/**
+	 * Constructor for View
+	 *
+	 * @param stage        The primary stage of the application.
+	 * @param title        The title of the application window.
+	 * @param width        The width of the application window.
+	 * @param height       The height of the application window.
+	 * @param viewObserver The observer handling view events.
+	 */
 	public View(Stage stage, String title, int width, int height, ViewObserver viewObserver) {
 		this.viewport = new StackView(width, height, true);
 		this.actionLabel = new Label("Actions: ");
@@ -53,14 +64,24 @@ public class View {
 		startRenderingLoop();
 	}
 
-	// Register renderable components.
+	/**
+	 * Initializes and registers renderable views.
+	 */
 	private void initializeViewport() {
-		// Create a WorldView instance and keep a reference for highlighting.
 		worldView = new WorldView();
 		viewport.registerRenderable(worldView);
 		viewport.registerRenderable(new EntityView());
 	}
 
+	/**
+	 * Initializes the user interface components.
+	 *
+	 * @param stage        The primary stage.
+	 * @param title        The title of the window.
+	 * @param width        The width of the window.
+	 * @param height       The height of the window.
+	 * @param viewObserver The observer for handling user interactions.
+	 */
 	private void initializeUI(Stage stage, String title, int width, int height, ViewObserver viewObserver) {
 		FlowPane topBar = createControlBar(viewObserver);
 		BorderPane root = new BorderPane();
@@ -72,64 +93,94 @@ public class View {
 		stage.show();
 	}
 
-	// Create the control bar with fixed controls and a scrollable action list.
+	/**
+	 * Creates the control bar with UI elements for interaction.
+	 *
+	 * @param viewObserver The observer handling user actions.
+	 * @return A FlowPane containing the control bar elements.
+	 */
 	private FlowPane createControlBar(ViewObserver viewObserver) {
 		Button speedUpButton = createSpeedButton("+", -100, viewObserver);
 		Button speedDownButton = createSpeedButton("-", 100, viewObserver);
 		Button toggleViewButton = createToggleViewButton();
 
-		// Wrap the action label in a ScrollPane for horizontal scrolling.
 		ScrollPane actionScrollPane = new ScrollPane(actionLabel);
 		actionScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 		actionScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-		double actionPaneWidth = 200;
-		double actionPaneHeight = 30;
-		actionScrollPane.setPrefSize(actionPaneWidth, actionPaneHeight);
-		actionScrollPane.setMinSize(actionPaneWidth, actionPaneHeight);
-		actionScrollPane.setMaxSize(actionPaneWidth, actionPaneHeight);
+		actionScrollPane.setPrefSize(200, 30);
+		actionScrollPane.setMinSize(200, 30);
+		actionScrollPane.setMaxSize(200, 30);
 
 		FlowPane topBar = new FlowPane(10, 10);
 		topBar.setPadding(new Insets(10));
 		topBar.getChildren().addAll(
-				plantCounter, 
-				sheepCounter, 
-				wolfCounter, 
-				speedUpButton, 
-				speedDownButton, 
-				toggleViewButton, 
+				plantCounter,
+				sheepCounter,
+				wolfCounter,
+				speedUpButton,
+				speedDownButton,
+				toggleViewButton,
 				actionScrollPane
 				);
-		double fixedPanelHeight = 50;
-		topBar.setPrefHeight(fixedPanelHeight);
-		topBar.setMinHeight(fixedPanelHeight);
-		topBar.setMaxHeight(fixedPanelHeight);
+		topBar.setPrefHeight(50);
+		topBar.setMinHeight(50);
+		topBar.setMaxHeight(50);
 
 		return topBar;
 	}
 
-	// Create a speed button.
+	/**
+	 * Creates a button to control simulation speed.
+	 *
+	 * @param label        The label of the button.
+	 * @param speedChange  The speed adjustment value.
+	 * @param viewObserver The observer handling user actions.
+	 * @return A Button instance.
+	 */
 	private Button createSpeedButton(String label, int speedChange, ViewObserver viewObserver) {
 		Button button = new Button(label);
-		button.setOnAction(e -> viewObserver.onViewAction(new ViewDTO(new ViewDTO.SpeedCommand(speedChange))));
+		button.setOnAction(_ -> viewObserver.onViewAction(new ViewDTO(new ViewDTO.SpeedCommand(speedChange))));
 		return button;
 	}
 
-	// Create the toggle view button.
+	/**
+	 * Creates a button to toggle between different view modes.
+	 *
+	 * @return A Button instance.
+	 */
 	private Button createToggleViewButton() {
 		Button toggleViewButton = new Button("Toggle View");
-		toggleViewButton.setOnAction(e -> toggleViewMode());
+		toggleViewButton.setOnAction(_ -> toggleViewMode());
 		return toggleViewButton;
 	}
 
+	/**
+	 * Sets up event handlers for mouse clicks.
+	 *
+	 * @param viewObserver The observer handling user actions.
+	 */
 	private void setupEventHandlers(ViewObserver viewObserver) {
 		setupMouseClickHandler(viewObserver);
 	}
 
-	// Handle mouse clicks using the geometry renderer to convert screen to grid coordinates.
+	/**
+	 * Handle mouse clicks using the geometry renderer to convert screen to grid coordinates.
+	 *
+	 * @param viewObserver The observer handling user actions.
+	 */
 	private void setupMouseClickHandler(ViewObserver viewObserver) {
 		viewport.setOnMouseClicked(e -> handleMouseClick(e.getSceneX(), e.getSceneY(), viewObserver));
 	}
 
+	/**
+	 * Handles mouse clicks by converting screen coordinates to grid coordinates and
+	 * sending a command to the observer.
+	 *
+	 * @param sceneX       The x-coordinate of the mouse click.
+	 * @param sceneY       The y-coordinate of the mouse click.
+	 * @param viewObserver The observer handling user actions.
+	 * @param viewObserver The observer handling user actions.
+	 */
 	private void handleMouseClick(double sceneX, double sceneY, ViewObserver viewObserver) {
 		Point2D localPoint = viewport.sceneToLocal(sceneX, sceneY);
 		double scale = viewport.getCamera().getScale();
@@ -147,12 +198,14 @@ public class View {
 		int tileY = (int) gridCoords.getY();
 
 		if (tileX >= 0 && tileY >= 0 && tileX < grid.getWidth() && tileY < grid.getHeight()) {
-			// Update the highlighted tile in WorldView.
 			worldView.setHighlightedTile(tileX, tileY);
 			viewObserver.onViewAction(new ViewDTO(new ViewDTO.EntityTileClickCommand(tileX, tileY)));
 		}
 	}
 
+	/**
+	 * Toggles between isometric and top-down view modes.
+	 */
 	private void toggleViewMode() {
 		GeometryRenderer current = viewport.getGeometryRenderer();
 		if (current instanceof it.unibo.pss.view.geometry.IsometricRenderer) {
@@ -165,7 +218,9 @@ public class View {
 		viewport.clearSpriteCaches();
 	}
 
-	// Start a single AnimationTimer and pass its timestamp to all renderables.
+	/**
+	 * Starts the rendering loop using an AnimationTimer.
+	 */
 	private void startRenderingLoop() {
 		new AnimationTimer() {
 			@Override
@@ -176,14 +231,20 @@ public class View {
 		initializeCountersUpdater();
 	}
 
+	/**
+	 * Initializes a periodic counter update every 500ms.
+	 */
 	private void initializeCountersUpdater() {
 		Timeline counterTimeline = new Timeline(
-				new KeyFrame(Duration.millis(500), e -> updateCounters())
+				new KeyFrame(Duration.millis(500), _ -> updateCounters())
 				);
 		counterTimeline.setCycleCount(Timeline.INDEFINITE);
 		counterTimeline.play();
 	}
 
+	/**
+	 * Updates entity counters (plants, sheep, wolves) displayed in the UI.
+	 */
 	private void updateCounters() {
 		new Thread(() -> {
 			int plants = 0;
@@ -213,20 +274,23 @@ public class View {
 		}).start();
 	}
 
-	// Update the model and re-render with the current timestamp.
+	/**
+	 * Updates the model and re-renders the viewport.
+	 *
+	 * @param newModelDTO The updated model data.
+	 */
 	public void updateModel(ModelDTO newModelDTO) {
 		this.modelDTO = newModelDTO;
 		viewport.render(modelDTO, System.nanoTime());
 	}
 
-	// Set the actions text in the scrollable area.
+	/**
+	 * Sets the action text displayed in the UI.
+	 *
+	 * @param text The text to display.
+	 */
 	public void setActionText(String text) {
 		actionLabel.setText(text);
 	}
-
-	// Alternatively, to display a list of actions separated by commas.
-	public void setActions(List<String> actions) {
-		String joinedActions = String.join(", ", actions);
-		actionLabel.setText("Actions: " + joinedActions);
-	}
 }
+

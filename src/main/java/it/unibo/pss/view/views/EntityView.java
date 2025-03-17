@@ -19,22 +19,41 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
+/**
+ * The EntityView class is responsible for rendering all entities in the game world.
+ */
 public class EntityView implements Renderable, SpriteCache {
 	private final EntitySpriteLoader spriteLoader = new EntitySpriteLoader("/entity");
 	private final Map<Integer, InterpolationData> interpolationMap = new HashMap<>();
 	private static final long INTERP_DURATION_NANO = 100_000_000L;
 
+	/**
+	 * The InterpolationData class is used to store the previous and current grid positions of an entity,
+	 * as well as the last update time.
+	 */
 	private static class InterpolationData {
 		Point2D previous;
 		Point2D current;
 		long lastUpdateTime;
 
+		/**
+		 * Constructor for InterpolationData.
+		 *
+		 * @param pos the initial position.
+		 * @param time the initial time.
+		 */
 		InterpolationData(Point2D pos, long time) {
 			this.previous = pos;
 			this.current = pos;
 			this.lastUpdateTime = time;
 		}
 
+		/**
+		 * Update the current position and time.
+		 *
+		 * @param newPos the new position.
+		 * @param time the new time.
+		 */
 		void update(Point2D newPos, long time) {
 			if (!this.current.equals(newPos)) {
 				this.previous = this.current;
@@ -44,16 +63,23 @@ public class EntityView implements Renderable, SpriteCache {
 		}
 	}
 
+	/** 
+	 * Override the render method to render all entities in the world grid.
+	 *
+	 * @param gc the graphics context.
+	 * @param modelDTO the model data transfer object.
+	 * @param camera the pan-zoom handler.
+	 * @param renderer the geometry renderer.
+	 * @param now the current timestamp.
+	 */
 	@Override
 	public void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer, long now) {
 		World grid = modelDTO.getGrid();
 		double canvasWidth = gc.getCanvas().getWidth();
 		double canvasHeight = gc.getCanvas().getHeight();
-		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(
-				renderer, camera, canvasWidth, canvasHeight,
-				grid.getWidth(), grid.getHeight()
-				);
+		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(renderer, camera, canvasWidth, canvasHeight, grid.getWidth(), grid.getHeight());
 
+		// Collect all entities in the grid.
 		List<BasicEntity> allEntities = new ArrayList<>();
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
@@ -67,7 +93,7 @@ public class EntityView implements Renderable, SpriteCache {
 			}
 		}
 
-		// Batch render entities by z-index.
+		// batch render entities by z-index.
 		for (int currentZ = 0; currentZ <= 2; currentZ++) {
 			for (BasicEntity entity : allEntities) {
 				if (entity.getZIndex() != currentZ)
@@ -103,11 +129,13 @@ public class EntityView implements Renderable, SpriteCache {
 				double interpMinY = prevRect.getMinY() + fraction * (currRect.getMinY() - prevRect.getMinY());
 				Rectangle2D interpolatedRect = new Rectangle2D(interpMinX, interpMinY, currRect.getWidth(), currRect.getHeight());
 
+				// Skip rendering if the entity is not visible.
 				if (!CullingHandler.isRectVisible(interpolatedRect.getMinX(), interpolatedRect.getMinY(),
 							interpolatedRect.getWidth(), interpolatedRect.getHeight(),
 							canvasWidth, canvasHeight))
 					continue;
 
+				// Render the entity sprite.
 				String actionKey = modelDTO.getEntityActions().getOrDefault(entity.getId(), "IDLE");
 				Image sprite = spriteLoader.getEntitySprite(entity, actionKey);
 				if (sprite != null) {
@@ -121,6 +149,9 @@ public class EntityView implements Renderable, SpriteCache {
 		}
 	}
 
+	/**
+	 * override the reloadSprites method to reload all entity sprites.
+	 */
 	@Override
 	public void reloadSprites() {
 		spriteLoader.reload();

@@ -99,7 +99,7 @@ public class Model {
 		return req.toActionString(e, this::findEntityById);
 	}
 
-	public String getTileActions(int tileX, int tileY) {
+public String getTileActions(int tileX, int tileY) {
 		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
 			return "Invalid tile";
 		}

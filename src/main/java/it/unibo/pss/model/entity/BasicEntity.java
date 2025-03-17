@@ -1,6 +1,7 @@
 package it.unibo.pss.model.entity;
 
 import java.util.function.Function;
+
 import it.unibo.pss.model.world.World;
 
 public abstract class BasicEntity {
