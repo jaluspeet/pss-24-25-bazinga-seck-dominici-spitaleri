@@ -31,9 +31,7 @@ public class WolfEntity extends BasicEntity {
 	 * initializes the state
 	 */
 	@Override
-	protected State initialState() {
-		return new WolfState();
-	}
+	protected State initialState() { return new WolfState(); }
 
 	/**
 	 * Returns the next request for the wolf entity, effectively implementing the wolf's behavior.
@@ -49,16 +47,12 @@ public class WolfEntity extends BasicEntity {
 
 		// If the wolf is hungry, it will try to find and eat a sheep
 		BasicEntity prey = findNearestEntity(getPreyType(), getSightRange());
-		if (prey != null) {
-			return moveOrInteract(prey);
-		}
+		if (prey != null) { return moveOrInteract(prey); }
 
 		// If the wolf has enough energy, it will try to find a mate
 		if (getEnergy() >= getEnergyBazinga()) {
 			BasicEntity mate = findNearestEntity(this.getClass(), getSightRange());
-			if (mate != null) {
-				return moveOrInteract(mate);
-			}
+			if (mate != null) { return moveOrInteract(mate); }
 		}
 
 		return new Request(ActionType.MOVE, randomDirection());
@@ -69,11 +63,8 @@ public class WolfEntity extends BasicEntity {
 	 */
 	@Override
 	public void transitionState(boolean actionSuccess) {
-		if (actionSuccess) {
-			failCount = 0;
-		} else {
-			failCount++;
-		}
+		if (actionSuccess) { failCount = 0;
+		} else { failCount++; }
 	}
 
 	@Override

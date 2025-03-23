@@ -145,20 +145,17 @@ public abstract class BasicEntity {
 		int minDist = Integer.MAX_VALUE;
 		for (int dx = -range; dx <= range; dx++) {
 			for (int dy = -range; dy <= range; dy++) {
+				
 				int nx = x + dx, ny = y + dy;
 				World.Tile tile = grid.getTile(nx, ny);
-				if (tile == null) {
-					continue;
-				}
+				
+				if (tile == null) { continue; }
+
 				for (BasicEntity other : tile.getEntities()) {
-					if (other == this || !type.isInstance(other) || !other.isAlive()) {
-						continue;
-					}
+					if (other == this || !type.isInstance(other) || !other.isAlive()) { continue; }
 					int dist = Math.abs(dx) + Math.abs(dy);
-					if (dist < minDist) {
-						minDist = dist;
-						nearest = other;
-					}
+
+					if (dist < minDist) { minDist = dist; nearest = other; }
 				}
 			}
 		}
@@ -202,24 +199,15 @@ public abstract class BasicEntity {
 		// Method that converts the request to a string (used in view)
 		public String toActionString(BasicEntity self, Function<Integer, BasicEntity> entityLookup) {
 			if (type == ActionType.MOVE) {
-				if (direction == null) {
-					return "IDLE";
-				}
+				if (direction == null) { return "IDLE"; }
 				return "MOVE_" + direction.name();
+
 			} else if (type == ActionType.INTERACT) {
 				BasicEntity target = entityLookup.apply(targetId);
-				if (target == null || !target.isAlive()) {
-					return "IDLE";
-				}
-				if (self.getPreyType() != null && self.getPreyType().isInstance(target)) {
-					return "EAT";
-				}
-				if (self.getClass().equals(target.getClass()) &&
-						self.getEnergy() >= self.getEnergyBazinga() &&
-						!self.hasBazinged &&
-						!target.hasBazinged()) {
-					return "BAZINGA";
-						}
+				if (target == null || !target.isAlive()) { return "IDLE"; }
+				if (self.getPreyType() != null && self.getPreyType().isInstance(target)) { return "EAT"; }
+				if (self.getClass().equals(target.getClass()) && self.getEnergy() >= self.getEnergyBazinga() && !self.hasBazinged && !target.hasBazinged()) { return "BAZINGA"; }
+
 				return "IDLE";
 			}
 			return "IDLE";

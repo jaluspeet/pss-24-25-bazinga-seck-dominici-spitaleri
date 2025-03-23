@@ -61,8 +61,7 @@ public class EntitySpriteLoader {
 		Image chosen = getPreviouslyChosen(entity.getId(), baseKey);
 		if (chosen != null) return chosen;
 
-		List<Image> variants = variantCache.computeIfAbsent(baseKey,
-				k -> Collections.synchronizedList(loadAllVariants(config.getSubFolder(), k)));
+		List<Image> variants = variantCache.computeIfAbsent(baseKey, k -> Collections.synchronizedList(loadAllVariants(config.getSubFolder(), k)));
 		if (!variants.isEmpty()) {
 			chosen = pickRandom(variants);
 			storeChoice(entity.getId(), baseKey, chosen);
@@ -74,8 +73,7 @@ public class EntitySpriteLoader {
 		chosen = getPreviouslyChosen(entity.getId(), fallbackKey);
 		if (chosen != null) return chosen;
 
-		List<Image> idleVariants = variantCache.computeIfAbsent(fallbackKey,
-				k -> Collections.synchronizedList(loadAllVariants(config.getSubFolder(), k)));
+		List<Image> idleVariants = variantCache.computeIfAbsent(fallbackKey, k -> Collections.synchronizedList(loadAllVariants(config.getSubFolder(), k)));
 		if (!idleVariants.isEmpty()) {
 			chosen = pickRandom(idleVariants);
 			storeChoice(entity.getId(), fallbackKey, chosen);

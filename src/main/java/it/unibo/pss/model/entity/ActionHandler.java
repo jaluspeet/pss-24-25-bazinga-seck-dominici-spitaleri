@@ -38,9 +38,8 @@ public class ActionHandler {
 				e.incrementMoveCounter();
 				if (e.isTimeToMove()) {
 					BasicEntity.Request req = e.getNextRequest();
-					if (req != null) {
-						requests.add(new RequestWrapper(e, req));
-					}
+					
+					if (req != null) { requests.add(new RequestWrapper(e, req)); }
 					e.resetMoveCounter();
 				}
 			}
@@ -61,11 +60,8 @@ public class ActionHandler {
 				case INTERACT -> validateInteract(rw.entity, rw.request.targetId);
 			};
 
-			if (validated) {
-				approvedActions.add(new Action(rw.entity, rw.request));
-			} else {
-				rw.entity.transitionState(false);
-			}
+			if (validated) { approvedActions.add(new Action(rw.entity, rw.request)); } 
+			else { rw.entity.transitionState(false); }
 		}
 		return approvedActions;
 	}
@@ -108,13 +104,8 @@ public class ActionHandler {
 		}
 
 		Tile tile = world.getTile(newX, newY);
-		if (tile == null || entity.getEnergy() <= 0) {
-			return false;
-		}
-
-		if (!(entity instanceof WolfEntity) && tile.getType() == Tile.TileType.WATER) {
-			return false;
-		}
+		if (tile == null || entity.getEnergy() <= 0) { return false; }
+		if (!(entity instanceof WolfEntity) && tile.getType() == Tile.TileType.WATER) { return false; }
 
 		boolean isBlocked = tile.getEntities().stream().anyMatch(e -> !(e instanceof PlantEntity) && e.isAlive());
 		return !isBlocked;
@@ -129,9 +120,7 @@ public class ActionHandler {
 	 */
 	private boolean validateInteract(BasicEntity entity, int targetId) {
 		BasicEntity target = entityManager.getEntityById(targetId);
-		if (target == null || !target.isAlive()) {
-			return false;
-		}
+		if (target == null || !target.isAlive()) { return false; }
 		List<Tile> adjacent = getAdjacentTiles(entity.getX(), entity.getY());
 		return adjacent.stream().anyMatch(t -> t.getEntities().contains(target));
 	}
@@ -175,9 +164,7 @@ public class ActionHandler {
 	 */
 	private void processInteract(BasicEntity entity, int targetId) {
 		BasicEntity target = entityManager.getEntityById(targetId);
-		if (target == null || !target.isAlive()) {
-			return;
-		}
+		if (target == null || !target.isAlive()) { return; }
 
 		// EAT
 		if (entity.getPreyType() != null && entity.getPreyType().isInstance(target)) {
@@ -187,13 +174,9 @@ public class ActionHandler {
 		}
 
 		// BAZINGA
-		if (entity.getClass().equals(target.getClass()) &&
-				entity.getEnergy() >= entity.getEnergyBazinga() &&
-				target.getEnergy() >= target.getEnergyBazinga() &&
-				!entity.hasBazinged() &&
-				!target.hasBazinged()) {
+		if (entity.getClass().equals(target.getClass()) && entity.getEnergy() >= entity.getEnergyBazinga() && target.getEnergy() >= target.getEnergyBazinga() && !entity.hasBazinged() && !target.hasBazinged()) { 
 			spawnOffspring(entity, target);
-				}
+		}
 	}
 
 	/**
@@ -228,11 +211,7 @@ public class ActionHandler {
 	 * @return the free adjacent tile, or null if none is found
 	 */
 	private Tile findFreeAdjacentTile(int x, int y) {
-		for (Tile t : getAdjacentTiles(x, y)) {
-			if (t.getEntities().isEmpty()) {
-				return t;
-			}
-		}
+		for (Tile t : getAdjacentTiles(x, y)) { if (t.getEntities().isEmpty()) { return t; } }
 		return null;
 	}
 
@@ -244,12 +223,7 @@ public class ActionHandler {
 	 * @return the list of adjacent tiles
 	 */
 	private List<Tile> getAdjacentTiles(int x, int y) {
-		List<Tile> tiles = new ArrayList<>(Arrays.asList(
-					world.getTile(x, y - 1),
-					world.getTile(x, y + 1),
-					world.getTile(x - 1, y),
-					world.getTile(x + 1, y)
-					));
+		List<Tile> tiles = new ArrayList<>(Arrays.asList( world.getTile(x, y - 1), world.getTile(x, y + 1), world.getTile(x - 1, y), world.getTile(x + 1, y)));
 		tiles.removeIf(Objects::isNull);
 		return tiles;
 	}

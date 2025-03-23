@@ -67,7 +67,7 @@ public final class WorldManager {
 	private static void initializeLand(World grid) {
 		IntStream.range(0, grid.getWidth())
 			.forEach(x -> IntStream.range(0, grid.getHeight())
-				.forEach(y -> setTile(grid, x, y, World.Tile.TileType.LAND)));
+			.forEach(y -> setTile(grid, x, y, World.Tile.TileType.LAND)));
 	}
 
 	// create a lake using a flood-fill expansion from (centerX, centerY) until targetSize is reached
@@ -76,12 +76,14 @@ public final class WorldManager {
 		queue.add(grid.getTile(centerX, centerY));
 		Set<World.Tile> lakeTiles = new HashSet<>();
 		while (!queue.isEmpty() && lakeTiles.size() < targetSize) {
+			
 			World.Tile tile = queue.poll();
-			if (tile == null || lakeTiles.contains(tile))
-				continue;
+			if (tile == null || lakeTiles.contains(tile)) continue;
+			
 			setTile(grid, tile.getX(), tile.getY(), World.Tile.TileType.WATER);
 			lakeTiles.add(tile);
 			List<int[]> directions = List.of(new int[]{1, 0}, new int[]{-1, 0}, new int[]{0, 1}, new int[]{0, -1});
+			
 			directions.stream()
 				.filter(dir -> random.nextDouble() < 0.8)
 				.map(dir -> grid.getTile(tile.getX() + dir[0], tile.getY() + dir[1]))
@@ -95,14 +97,16 @@ public final class WorldManager {
 		int added = 0;
 		int x = startX, y = startY;
 		while ((x != endX || y != endY) && added < targetSize) {
-			if (x < 0 || x >= grid.getWidth() || y < 0 || y >= grid.getHeight())
-				break;
+			if (x < 0 || x >= grid.getWidth() || y < 0 || y >= grid.getHeight()) break;
+			
 			setTile(grid, x, y, World.Tile.TileType.WATER);
 			added++;
+			
 			if (random.nextBoolean()) {
 				if (x < endX) x++;
 				else if (x > endX) x--;
 			}
+
 			if (random.nextBoolean()) {
 				if (y < endY) y++;
 				else if (y > endY) y--;

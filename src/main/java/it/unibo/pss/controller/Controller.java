@@ -61,6 +61,7 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 				int newInterval = (speedCmd.getDelta() < 0)
 					? Math.max(100, current - 100)
 					: Math.min(1500, current + 100);
+				
 				model.setUpdateInterval(newInterval);
 			}
 			case TILE_CLICK -> {

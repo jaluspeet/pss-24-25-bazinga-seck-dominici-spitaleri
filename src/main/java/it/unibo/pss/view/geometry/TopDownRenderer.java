@@ -20,12 +20,7 @@ public class TopDownRenderer implements GeometryRenderer {
 	 */
 	@Override
 	public Rectangle2D computeTileRect(int gridX, int gridY, double offsetX, double offsetY, double scale) {
-		return new Rectangle2D(
-				offsetX + gridX * SharedConstants.TILE_WIDTH * scale,
-				offsetY + gridY * SharedConstants.TILE_HEIGHT * 2 * scale,
-				SharedConstants.TILE_WIDTH * scale,
-				SharedConstants.TILE_HEIGHT * 2 * scale
-				);
+		return new Rectangle2D(offsetX + gridX * SharedConstants.TILE_WIDTH * scale, offsetY + gridY * SharedConstants.TILE_HEIGHT * 2 * scale, SharedConstants.TILE_WIDTH * scale, SharedConstants.TILE_HEIGHT * 2 * scale);
 	}
 
 	/**
@@ -41,10 +36,7 @@ public class TopDownRenderer implements GeometryRenderer {
 	public Point2D computeCenterOffset(double canvasWidth, double canvasHeight, int gridCols, int gridRows, double scale) {
 		double gridWidth = gridCols * SharedConstants.TILE_WIDTH * scale;
 		double gridHeight = gridRows * SharedConstants.TILE_HEIGHT * 2 * scale;
-		return new Point2D(
-				(canvasWidth - gridWidth) / 2.0,
-				(canvasHeight - gridHeight) / 2.0
-				);
+		return new Point2D((canvasWidth - gridWidth) / 2.0, (canvasHeight - gridHeight) / 2.0);
 	}
 
 	/**
@@ -61,29 +53,13 @@ public class TopDownRenderer implements GeometryRenderer {
 		return new Point2D(Math.floor(gridX), Math.floor(gridY));
 	}
 
-	/**
-	 * Converts a screen position to a grid position.
-	 *
-	 * @param screenPoint the screen position
-	 * @param scale the scale factor
-	 * @param cameraOffset the offset of the camera
-	 */
 	@Override
 	public double[][] computeTileOutline(int gridX, int gridY, double offsetX, double offsetY, double scale) {
 		Rectangle2D rect = computeTileRect(gridX, gridY, offsetX, offsetY, scale);
-		double inset = 2 * scale;
-		double[] xs = { 
-			rect.getMinX() + inset, 
-			rect.getMinX() + rect.getWidth() - inset, 
-			rect.getMinX() + rect.getWidth() - inset, 
-			rect.getMinX() + inset 
-		};
-		double[] ys = { 
-			rect.getMinY() + inset, 
-			rect.getMinY() + inset, 
-			rect.getMinY() + rect.getHeight() - inset, 
-			rect.getMinY() + rect.getHeight() - inset 
-		};
+		double[] xs = { rect.getMinX(), rect.getMinX() + rect.getWidth(), rect.getMinX() + rect.getWidth(), rect.getMinX() };
+		double[] ys = { rect.getMinY(), rect.getMinY(), rect.getMinY() + rect.getHeight(), rect.getMinY() + rect.getHeight() };
 		return new double[][] { xs, ys };
 	}
+
+
 }

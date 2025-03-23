@@ -61,9 +61,7 @@ public class EntityManager {
 	 */
 	private void removeEntity(BasicEntity entity) {
 		var tile = world.getTile(entity.getX(), entity.getY());
-		if (tile != null) {
-			tile.removeEntity(entity);
-		}
+		if (tile != null) { tile.removeEntity(entity); }
 		entityMap.remove(entity.getId());
 	}
 
@@ -87,9 +85,7 @@ public class EntityManager {
 	 */
 	private void reduceEnergy() {
 		for (BasicEntity entity : new ArrayList<>(entities)) {
-			if (!(entity instanceof PlantEntity)) {
-				entity.subtractEnergy(1);
-			}
+			if (!(entity instanceof PlantEntity)) { entity.subtractEnergy(1); }
 		}
 	}
 
@@ -113,9 +109,7 @@ public class EntityManager {
 	 * Resets the bazinged flags of all entities in the world.
 	 */
 	private void resetBazingedFlags() {
-		for (BasicEntity e : entities) {
-			e.resetBazinged();
-		}
+		for (BasicEntity e : entities) { e.resetBazinged(); }
 	}
 
 	/**

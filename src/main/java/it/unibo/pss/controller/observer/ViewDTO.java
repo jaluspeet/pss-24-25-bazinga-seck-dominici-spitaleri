@@ -14,17 +14,10 @@ public class ViewDTO {
 	 * Represents a view's command for the model (speed, tile click, ... ).
 	 */
 	public static abstract class Command {
-		public enum Type {
-			SPEED,
-			TILE_CLICK
-		}
+		public enum Type { SPEED, TILE_CLICK }
 		private final Type type;
-		protected Command(Type type) {
-			this.type = type;
-		}
-		public Type getType() {
-			return type;
-		}
+		protected Command(Type type) { this.type = type; }
+		public Type getType() { return type; }
 	}
 
 	/**
@@ -32,13 +25,8 @@ public class ViewDTO {
 	 */
 	public static class SpeedCommand extends Command {
 		private final int delta;
-		public SpeedCommand(int delta) {
-			super(Type.SPEED);
-			this.delta = delta;
-		}
-		public int getDelta() {
-			return delta;
-		}
+		public SpeedCommand(int delta) { super(Type.SPEED); this.delta = delta; }
+		public int getDelta() { return delta; }
 	}
 
 	/**
@@ -52,11 +40,8 @@ public class ViewDTO {
 			this.tileX = tileX;
 			this.tileY = tileY;
 		}
-		public int getTileX() {
-			return tileX;
-		}
-		public int getTileY() {
-			return tileY;
-		}
+
+		public int getTileX() { return tileX; }
+		public int getTileY() { return tileY; }
 	}
 }

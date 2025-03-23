@@ -19,10 +19,7 @@ public class IsometricRenderer implements GeometryRenderer {
 	 * @return The isometric coordinates of the given grid coordinates.
 	 */
 	private Point2D getIsometricCoordinates(int gridX, int gridY, double offsetX, double offsetY) {
-		return new Point2D(
-				(gridX - gridY) * (SharedConstants.TILE_WIDTH / 2.0) + offsetX,
-				(gridX + gridY) * (SharedConstants.TILE_HEIGHT / 2.0) + offsetY - SharedConstants.TILE_HEIGHT
-				);
+		return new Point2D((gridX - gridY) * (SharedConstants.TILE_WIDTH / 2.0) + offsetX, (gridX + gridY) * (SharedConstants.TILE_HEIGHT / 2.0) + offsetY - SharedConstants.TILE_HEIGHT);
 	}
 
 	/**
@@ -39,12 +36,7 @@ public class IsometricRenderer implements GeometryRenderer {
 		Point2D isoCoords = getIsometricCoordinates(gridX, gridY, offsetX, offsetY);
 		double width = SharedConstants.SPRITE_WIDTH * scale;
 		double height = SharedConstants.SPRITE_HEIGHT * scale;
-		return new Rectangle2D(
-				isoCoords.getX() * scale - width / 2,
-				isoCoords.getY() * scale - height + (SharedConstants.SPRITE_HEIGHT / 2 * scale),
-				width,
-				height
-				);
+		return new Rectangle2D(isoCoords.getX() * scale - width / 2, isoCoords.getY() * scale - height + (SharedConstants.SPRITE_HEIGHT / 2 * scale), width, height);
 	}
 
 	/**
@@ -61,10 +53,7 @@ public class IsometricRenderer implements GeometryRenderer {
 	public Point2D computeCenterOffset(double canvasWidth, double canvasHeight, int gridCols, int gridRows, double scale) {
 		double centerTileX = (gridCols - 1) / 2.0;
 		double centerTileY = (gridRows - 1) / 2.0;
-		return new Point2D(
-				canvasWidth / 2.0 - (centerTileX - centerTileY) * (SharedConstants.TILE_WIDTH / 2.0) * scale,
-				canvasHeight / 2.0 - (centerTileX + centerTileY) * (SharedConstants.TILE_HEIGHT / 2.0) * scale
-				);
+		return new Point2D(canvasWidth / 2.0 - (centerTileX - centerTileY) * (SharedConstants.TILE_WIDTH / 2.0) * scale, canvasHeight / 2.0 - (centerTileX + centerTileY) * (SharedConstants.TILE_HEIGHT / 2.0) * scale);
 	}
 
 	/**
@@ -86,17 +75,8 @@ public class IsometricRenderer implements GeometryRenderer {
 		return new Point2D(gridX, gridY);
 	}
 
-	/**
-	 * Returns the screen coordinates of the given grid coordinates.
-	 *
-	 * @param gridPoint The grid coordinates.
-	 * @param scale The scale of the grid.
-	 * @param cameraOffset The offset of the camera.
-	 * @return The screen coordinates of the given grid coordinates.
-	 */
 	@Override
 	public double[][] computeTileOutline(int gridX, int gridY, double offsetX, double offsetY, double scale) {
-		// Compute a diamond outline for isometric tiles.
 		Point2D iso = getIsometricCoordinates(gridX, gridY, offsetX, offsetY);
 		double x = iso.getX() * scale;
 		double y = iso.getY() * scale;

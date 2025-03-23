@@ -33,18 +33,13 @@ public class WorldView implements StackView.Renderable, SpriteCache {
 	@Override
 	public void render(GraphicsContext gc, ModelDTO modelDTO, it.unibo.pss.view.handlers.PanZoomHandler camera, GeometryRenderer renderer, long now) {
 		World grid = modelDTO.getGrid();
-		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(
-				renderer, camera, gc.getCanvas().getWidth(), gc.getCanvas().getHeight(),
-				grid.getWidth(), grid.getHeight()
-				);
+		Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(renderer, camera, gc.getCanvas().getWidth(), gc.getCanvas().getHeight(), grid.getWidth(), grid.getHeight());
 
 		// Render all tiles.
 		for (int x = 0; x < grid.getWidth(); x++) {
 			for (int y = 0; y < grid.getHeight(); y++) {
 				Rectangle2D rect = renderer.computeTileRect(x, y, cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
-				if (!CullingHandler.isRectVisible(rect.getMinX(), rect.getMinY(),
-							rect.getWidth(), rect.getHeight(),
-							gc.getCanvas().getWidth(), gc.getCanvas().getHeight()))
+				if (!CullingHandler.isRectVisible(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight(), gc.getCanvas().getWidth(), gc.getCanvas().getHeight()))
 					continue;
 
 				Image sprite = spriteLoader.getTileSprite(grid.getTile(x, y), now);
@@ -54,12 +49,10 @@ public class WorldView implements StackView.Renderable, SpriteCache {
 			}
 		}
 
-		// Draw the highlight on top.
 		if (highlightedTileX >= 0 && highlightedTileY >= 0 && highlightedTileX < grid.getWidth() && highlightedTileY < grid.getHeight()) {
-			gc.setStroke(Color.YELLOW);
-			gc.setLineWidth(3);
-			double[][] outline = renderer.computeTileOutline(highlightedTileX, highlightedTileY, cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
-			gc.strokePolygon(outline[0], outline[1], outline[0].length);
+			gc.setFill(Color.rgb(255, 255, 0, 0.3)); // semi-transparent yellow
+			double[][] tileShape = renderer.computeTileOutline(highlightedTileX, highlightedTileY, cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
+			gc.fillPolygon(tileShape[0], tileShape[1], tileShape[0].length);
 		}
 	}
 

@@ -8,17 +8,16 @@ public final class SharedConstants {
 	private static final Properties PROPERTIES = new Properties();
 
 	static {
-		// Look for an external config file; if not found, load from the bundled resource.
 		File externalConfig = new File("config.properties");
 		try (InputStream input = externalConfig.exists()
 				? new FileInputStream(externalConfig)
 				: SharedConstants.class.getResourceAsStream("/config.properties")) {
-			if (input != null) {
-				PROPERTIES.load(input);
-			} else {
-				System.err.println("No configuration file found. Using defaults.");
-			}
-		} catch (IOException e) {
+			
+			if (input != null) { PROPERTIES.load(input); } 
+			else { System.err.println("No configuration file found. Using defaults."); }
+		} 
+
+		catch (IOException e) {
 			throw new ExceptionInInitializerError(e);
 		}
 	}

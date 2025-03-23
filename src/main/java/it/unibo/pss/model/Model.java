@@ -60,9 +60,7 @@ public class Model {
 	 * Notifies all observers that the model has been updated.
 	 */
 	private void notifyObservers() {
-		for (ModelObserver observer : observers) {
-			observer.onModelUpdated();
-		}
+		for (ModelObserver observer : observers) { observer.onModelUpdated(); }
 	}
 
 	/**
@@ -72,10 +70,7 @@ public class Model {
 		new AnimationTimer() {
 			@Override
 			public void handle(long now) {
-				if (now - lastUpdate >= updateInterval * 1_000_000) {
-					updateSimulation();
-					lastUpdate = now;
-				}
+				if (now - lastUpdate >= updateInterval * 1_000_000) { updateSimulation(); lastUpdate = now; }
 			}
 		}.start();
 	}
@@ -95,47 +90,34 @@ public class Model {
 	public ModelDTO getLatestModelDTO() {
 		Map<Integer,String> entityActions = new HashMap<>();
 		for (BasicEntity e : entityManager.getEntities()) {
-			if (e.isAlive()) {
-				entityActions.put(e.getId(), getActionString(e));
-			}
+			if (e.isAlive()) { entityActions.put(e.getId(), getActionString(e)); }
 		}
 		return new ModelDTO(grid, entityActions);
 	}
 
 	private BasicEntity findEntityById(int id) {
-		for (BasicEntity e : entityManager.getEntities()) {
-			if (e.getId() == id) {
-				return e;
-			}
-		}
+		for (BasicEntity e : entityManager.getEntities()) { if (e.getId() == id) { return e; } }
 		return null;
 	}
 
 	private String getActionString(BasicEntity e) {
 		BasicEntity.Request req = e.getNextRequest();
-		if (req == null) {
-			return "IDLE";
-		}
+		if (req == null) { return "IDLE"; }
 		return req.toActionString(e, this::findEntityById);
 	}
 
 	public String getTileActions(int tileX, int tileY) {
-		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) {
-			return "Invalid tile";
-		}
+		if (tileX < 0 || tileY < 0 || tileX >= grid.getWidth() || tileY >= grid.getHeight()) { return "Invalid tile"; }
 		World.Tile tile = grid.getTile(tileX, tileY);
-		if (tile.getEntities().isEmpty()) {
-			return "no actions";
-		}
+		if (tile.getEntities().isEmpty()) { return "no actions"; }
 
 		StringBuilder sb = new StringBuilder();
 		for (BasicEntity entity : tile.getEntities()) {
-			if (!entity.isAlive()) {
-				continue;
-			}
+			if (!entity.isAlive()) { continue; }
 			String entityName = getEntityName(entity);
 			int energy = entity.getEnergy();
 			String actionKey = getActionString(entity);
+
 			sb.append(entityName)
 				.append("(").append(energy).append("): ")
 				.append(actionKey)
@@ -146,14 +128,9 @@ public class Model {
 	}
 
 	private String getEntityName(BasicEntity e) {
-		if (e instanceof it.unibo.pss.model.entity.SheepEntity) {
-			return "sheep" + e.getId();
-		} else if (e instanceof it.unibo.pss.model.entity.WolfEntity) {
-			return "wolf" + e.getId();
-		} else if (e instanceof it.unibo.pss.model.entity.PlantEntity) {
-			return "plant" + e.getId();
-		} else {
-			return "entity" + e.getId();
-		}
+		if (e instanceof it.unibo.pss.model.entity.SheepEntity) { return "sheep" + e.getId(); } 
+		else if (e instanceof it.unibo.pss.model.entity.WolfEntity) { return "wolf" + e.getId(); } 
+		else if (e instanceof it.unibo.pss.model.entity.PlantEntity) { return "plant" + e.getId(); } 
+		else { return "entity" + e.getId(); }
 	}
 }

@@ -26,8 +26,8 @@ public class StartupMenu extends Application {
 	
 	private static final int[] zeroTen = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	private static final int[] powersOfTwo = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
-	private static final int[] winWidths = {800, 1024, 1280, 1280, 1366, 1440, 1600, 1920, 2560, 3840};
-	private static final int[] winHeights = {600, 768, 720, 800, 768, 900, 900, 1080, 1440, 2160};
+	private static final int[] winWidths = {600, 800, 1024, 1280, 1366, 1400, 1650, 1920, 2560, 3840};
+	private static final int[] winHeights = {600, 720, 768, 800, 768, 900, 1050, 1080, 1440, 2160};
 	private static final int[] refreshRates = {5, 10, 15, 30, 60, 75, 90, 120, 144, 240 };
 
 

@@ -82,18 +82,11 @@ public class EntityFactory {
 			Tile tile = world.getTile(x, y);
 
 			// Skip if the tile is not land or already has an entity of the same type
-			if (tile == null || tile.getType() != Tile.TileType.LAND) {
-				continue;
-			}
-			if (hasEntityOfType(tile, type)) {
-				continue;
-			}
+			if (tile == null || tile.getType() != Tile.TileType.LAND) { continue; }
+			if (hasEntityOfType(tile, type)) { continue; }
 
 			BasicEntity entity = createEntity(type, x, y);
-			if (entity != null) {
-				entityManager.addEntity(entity);
-				placed++;
-			}
+			if (entity != null) { entityManager.addEntity(entity); placed++; }
 		}
 	}
 
@@ -117,13 +110,9 @@ public class EntityFactory {
 	 * @return the newly created entity
 	 */
 	private BasicEntity createEntity(Class<? extends BasicEntity> type, int x, int y) {
-		if (type == PlantEntity.class) {
-			return new PlantEntity(world, x, y, 1);
-		} else if (type == SheepEntity.class) {
-			return new SheepEntity(world, x, y, SharedConstants.SHEEP_ENERGY_DEFAULT);
-		} else if (type == WolfEntity.class) {
-			return new WolfEntity(world, x, y, SharedConstants.WOLF_ENERGY_DEFAULT);
-		}
+		if (type == PlantEntity.class) { return new PlantEntity(world, x, y, 1); } 
+		else if (type == SheepEntity.class) { return new SheepEntity(world, x, y, SharedConstants.SHEEP_ENERGY_DEFAULT); } 
+		else if (type == WolfEntity.class) { return new WolfEntity(world, x, y, SharedConstants.WOLF_ENERGY_DEFAULT); }
 		return null;
 	}
 }

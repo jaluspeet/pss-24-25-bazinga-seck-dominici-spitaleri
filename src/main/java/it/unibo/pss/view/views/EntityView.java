@@ -115,14 +115,8 @@ public class EntityView implements Renderable, SpriteCache {
 				double fraction = Math.min(1.0, (double) (now - interpData.lastUpdateTime) / INTERP_DURATION_NANO);
 
 				// Get the pixel rectangles for the previous and current grid positions.
-				Rectangle2D prevRect = renderer.computeTileRect(
-						(int) interpData.previous.getX(), (int) interpData.previous.getY(),
-						cameraOffset.getX(), cameraOffset.getY(), camera.getScale()
-						);
-				Rectangle2D currRect = renderer.computeTileRect(
-						(int) interpData.current.getX(), (int) interpData.current.getY(),
-						cameraOffset.getX(), cameraOffset.getY(), camera.getScale()
-						);
+				Rectangle2D prevRect = renderer.computeTileRect((int) interpData.previous.getX(), (int) interpData.previous.getY(), cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
+				Rectangle2D currRect = renderer.computeTileRect((int) interpData.current.getX(), (int) interpData.current.getY(), cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
 
 				// Linearly interpolate the top-left coordinates.
 				double interpMinX = prevRect.getMinX() + fraction * (currRect.getMinX() - prevRect.getMinX());
@@ -130,9 +124,7 @@ public class EntityView implements Renderable, SpriteCache {
 				Rectangle2D interpolatedRect = new Rectangle2D(interpMinX, interpMinY, currRect.getWidth(), currRect.getHeight());
 
 				// Skip rendering if the entity is not visible.
-				if (!CullingHandler.isRectVisible(interpolatedRect.getMinX(), interpolatedRect.getMinY(),
-							interpolatedRect.getWidth(), interpolatedRect.getHeight(),
-							canvasWidth, canvasHeight))
+				if (!CullingHandler.isRectVisible(interpolatedRect.getMinX(), interpolatedRect.getMinY(), interpolatedRect.getWidth(), interpolatedRect.getHeight(), canvasWidth, canvasHeight))
 					continue;
 
 				// Render the entity sprite.

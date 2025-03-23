@@ -45,9 +45,7 @@ public class World {
 	 * @return the tile at the specified coordinates, or null if the coordinates are out of bounds
 	 */
 	public Tile getTile(int x, int y) {
-		if (x >= 0 && x < width && y >= 0 && y < height) {
-			return tiles[x][y];
-		}
+		if (x >= 0 && x < width && y >= 0 && y < height) { return tiles[x][y]; }
 		return null;
 	}
 
@@ -58,9 +56,7 @@ public class World {
 	 * @param tile the new tile to set
 	 */
 	public void setTile(int x, int y, Tile tile) {
-		if (x >= 0 && x < width && y >= 0 && y < height) {
-			tiles[x][y] = tile;
-		}
+		if (x >= 0 && x < width && y >= 0 && y < height) { tiles[x][y] = tile; }
 	}
 
 	public int getWidth() { return width; }
@@ -72,9 +68,7 @@ public class World {
 	 */
 	public void forEachTile(Consumer<Tile> action) {
 		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				action.accept(tiles[x][y]);
-			}
+			for (int y = 0; y < height; y++) { action.accept(tiles[x][y]); }
 		}
 	}
 
@@ -85,14 +79,15 @@ public class World {
 	public List<Tile> getTilesInRange(int x, int y, int range) {
 		List<Tile> nearbyTiles = new ArrayList<>();
 		for (int dx = -range; dx <= range; dx++) {
+			
 			for (int dy = -range; dy <= range; dy++) {
 				if (dx == 0 && dy == 0) continue;
 				Tile tile = getTile(x + dx, y + dy);
-				if (tile != null) {
-					nearbyTiles.add(tile);
-				}
+
+				if (tile != null) { nearbyTiles.add(tile); }
 			}
 		}
+
 		return nearbyTiles;
 	}
 
@@ -104,11 +99,10 @@ public class World {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				sb.append(tiles[x][y]);
-			}
+			for (int x = 0; x < width; x++) { sb.append(tiles[x][y]); }
 			sb.append("\n");
 		}
+
 		return sb.toString();
 	}
 
@@ -167,12 +161,11 @@ public class World {
 			if (needsSorting) {
 				sortedEntities.sort((a, b) -> {
 
-					// First, sort by zIndex in descending order (higher values last)
+					// sort by zIndex in descending order (higher values last)
 					int zComparison = Integer.compare(a.getZIndex(), b.getZIndex());
-					if (zComparison != 0) {
-						return zComparison; // Ensure higher zIndex appears later
-					}
-					// If zIndex is the same, sort by ID for consistent ordering
+					if (zComparison != 0) { return zComparison; }
+
+					// If zIndex is the same, sort by ID
 					return Integer.compare(a.getId(), b.getId());
 				});
 				needsSorting = false;

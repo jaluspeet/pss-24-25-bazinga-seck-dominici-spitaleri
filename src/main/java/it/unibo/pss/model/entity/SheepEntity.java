@@ -49,24 +49,18 @@ public class SheepEntity extends BasicEntity {
 		// If there is a predator in sight, the sheep will try to flee
 		int fleeRange = Math.max(1, getSightRange());
 		BasicEntity predator = findNearestEntity(getPredatorType(), fleeRange);
-		if (predator != null) {
-			return moveAway(predator);
-		}
+		if (predator != null) { return moveAway(predator); }
 
 		// If the sheep is hungry, it will try to find and eat plants
 		if (getEnergy() < getEnergyHungry()) {
 			BasicEntity prey = findNearestEntity(getPreyType(), getSightRange());
-			if (prey != null && prey.isAlive()) {
-				return moveOrInteract(prey);
-			}
+			if (prey != null && prey.isAlive()) { return moveOrInteract(prey); }
 		}
 
 		// If the sheep has enough energy, it will try to find a mate
 		if (getEnergy() >= getEnergyBazinga()) {
 			BasicEntity mate = findNearestEntity(this.getClass(), getSightRange());
-			if (mate != null) {
-				return moveOrInteract(mate);
-			}
+			if (mate != null) { return moveOrInteract(mate); }
 		}
 
 		return new Request(ActionType.MOVE, randomDirection());
@@ -77,11 +71,8 @@ public class SheepEntity extends BasicEntity {
 	 */
 	@Override
 	public void transitionState(boolean actionSuccess) {
-		if (actionSuccess) {
-			failCount = 0;
-		} else {
-			failCount++;
-		}
+		if (actionSuccess) { failCount = 0; }
+		else { failCount++; }
 	}
 
 	@Override
