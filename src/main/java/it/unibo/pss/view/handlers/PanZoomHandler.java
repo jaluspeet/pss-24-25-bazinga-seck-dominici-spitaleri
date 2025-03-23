@@ -39,8 +39,8 @@ public class PanZoomHandler {
 		});
 		target.setOnMouseDragged(e -> {
 			if (e.getButton() == MouseButton.MIDDLE) {
-				panX += (e.getX() - lastMouseX) / scale * SharedConstants.CAMERA_SENSITIVITY;
-				panY += (e.getY() - lastMouseY) / scale * SharedConstants.CAMERA_SENSITIVITY;
+				panX += (e.getX() - lastMouseX) / scale * SharedConstants.CAMERA_SENSITIVITY * 0.1;
+				panY += (e.getY() - lastMouseY) / scale * SharedConstants.CAMERA_SENSITIVITY * 0.1;
 				lastMouseX = e.getX();
 				lastMouseY = e.getY();
 				updateCallback.run();
@@ -57,13 +57,13 @@ public class PanZoomHandler {
 		
 		// zooming
 		if (e.isControlDown()) { 
-			double zoomFactor = e.getDeltaY() > 0 ? SharedConstants.CAMERA_ZOOM_BASE : 1 / SharedConstants.CAMERA_ZOOM_BASE;
-			scale = Math.max(SharedConstants.CAMERA_MIN_SCALE, Math.min(scale * zoomFactor, SharedConstants.CAMERA_MAX_SCALE));
+			double zoomFactor = e.getDeltaY() > 0 ? 1.01 : 1 / 1.01;
+			scale = Math.max(SharedConstants.CAMERA_MIN_SCALE * 0.1, Math.min(scale * zoomFactor, SharedConstants.CAMERA_MAX_SCALE));
 		
 		// panning
 		} else {
-			panX += e.getDeltaX() / scale * SharedConstants.CAMERA_SENSITIVITY;
-			panY += e.getDeltaY() / scale * SharedConstants.CAMERA_SENSITIVITY;
+			panX += e.getDeltaX() / scale * SharedConstants.CAMERA_SENSITIVITY * 0.1;
+			panY += e.getDeltaY() / scale * SharedConstants.CAMERA_SENSITIVITY * 0.1;
 		}
 		
 		updateCallback.run();

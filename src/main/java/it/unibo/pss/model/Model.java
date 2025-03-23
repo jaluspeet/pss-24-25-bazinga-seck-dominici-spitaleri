@@ -125,7 +125,7 @@ public class Model {
 		}
 		World.Tile tile = grid.getTile(tileX, tileY);
 		if (tile.getEntities().isEmpty()) {
-			return "No actions";
+			return "no actions";
 		}
 
 		StringBuilder sb = new StringBuilder();

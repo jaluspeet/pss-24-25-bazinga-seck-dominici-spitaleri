@@ -34,8 +34,8 @@ public final class WorldManager {
 		
 		// calculate target number of water tiles, lakes, and rivers
 		int totalTiles = width * height;
-		int targetWaterTiles = (int) (totalTiles * SharedConstants.WORLD_WATER_RATIO);
-		int targetLakeTiles = (int) (targetWaterTiles * SharedConstants.WORLD_LAKE_RATIO);
+		int targetWaterTiles = (int) (totalTiles * SharedConstants.WORLD_WATER_RATIO * 0.1);
+		int targetLakeTiles = (int) (targetWaterTiles * SharedConstants.WORLD_LAKE_RATIO * 0.1);
 		int targetRiverTiles = targetWaterTiles - targetLakeTiles;
 		
 		// generate lakes and rivers

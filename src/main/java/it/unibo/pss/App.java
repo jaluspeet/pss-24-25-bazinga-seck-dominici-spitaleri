@@ -1,12 +1,13 @@
 package it.unibo.pss;
 
-import it.unibo.pss.controller.Controller;
+import it.unibo.pss.common.StartupMenu;
 import javafx.application.Application;
 
 public final class App {
-	private App() { }
-
 	public static void main(final String[] args) {
-		Application.launch(Controller.class, args);
+		Application.launch(StartupMenu.class, args);
 	}
+
+	private App() { }
 }
+

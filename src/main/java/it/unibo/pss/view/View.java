@@ -53,7 +53,7 @@ public class View {
 	 */
 	public View(Stage stage, String title, int width, int height, ViewObserver viewObserver) {
 		this.viewport = new StackView(width, height, true);
-		this.actionLabel = new Label("Actions: ");
+		this.actionLabel = new Label("actions: ");
 		this.plantCounter = new Label("plant: 0");
 		this.sheepCounter = new Label("sheep: 0");
 		this.wolfCounter = new Label("wolf: 0");
