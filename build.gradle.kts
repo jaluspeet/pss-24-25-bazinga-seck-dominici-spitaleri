@@ -38,5 +38,5 @@ tasks.withType<Test> {
 }
 
 application {
-	mainClass.set("it.unibo.pss.App")
+	mainClass.set("it.unibo.bazinga.App")
 }
