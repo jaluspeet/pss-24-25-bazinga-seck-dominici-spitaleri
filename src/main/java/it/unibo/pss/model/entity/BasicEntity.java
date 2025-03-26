@@ -127,7 +127,7 @@ public abstract class BasicEntity {
 	/**
 	 * Method that moves the entity in a random direction.
 	 */
-	protected Direction randomDirection() {
+	public Direction randomDirection() {
 		Direction[] dirs = Direction.values();
 		return dirs[(int) (Math.random() * dirs.length)];
 	}

@@ -524,6 +524,174 @@ classDiagram
     ViewDTO.Command --> ViewDTO~Command.Type~
 ```
 
+## Testing automatizzato
+
+Abbiamo rimandato i test al momento in cui la struttura del codice è diventata definitiva, in modo da poter aggiornare il progetto 
+(che è stato pensato in un ottica di modularità e futura espansione) garantendo il corretto funzionamento dell'architettura di base e 
+lasciando a un futuro collaboratore il compito di espandere su una base solida.
+
+Qui vengono riportati alcuni test della simulazione:
+
+```java
+	// Processing a MOVE action should update the entity's position and reduce its energy.
+	@Test
+	public void testProcessMoveAction() {
+		World world = createWorld(10, 10);
+	
+		world.setTile(2, 2, world.new Tile(2, 2, World.Tile.TileType.LAND));
+		world.setTile(3, 2, world.new Tile(3, 2, World.Tile.TileType.LAND));
+		SheepEntity sheep = new SheepEntity(world, 2, 2, SharedConstants.SHEEP_ENERGY_DEFAULT);
+		world.getTile(2, 2).addEntity(sheep);
+
+		EntityManager em = new EntityManager(world);
+		em.addEntity(sheep);
+		ActionHandler handler = new ActionHandler(world, em);
+
+		// Create a move right request.
+		BasicEntity.Request moveRequest = new BasicEntity.Request(BasicEntity.ActionType.MOVE, BasicEntity.Direction.RIGHT);
+		ActionHandler.RequestWrapper wrapper = new ActionHandler.RequestWrapper(sheep, moveRequest);
+		List<ActionHandler.Action> actions = handler.validateRequests(List.of(wrapper));
+		assertFalse(actions.isEmpty(), "Move request should be valid");
+		handler.processActions(actions);
+
+		assertEquals(3, sheep.getX(), "Sheep's X coordinate should update after moving right");
+		assertEquals(2, sheep.getY(), "Sheep's Y coordinate should remain the same");
+		assertEquals(SharedConstants.SHEEP_ENERGY_DEFAULT - 1, sheep.getEnergy(), "Energy should be reduced by 1 after moving");
+	}
+```
+
+```java
+	// Entities that reach 0 energy should be removed from the simulation.
+	@Test
+	public void testEntityRemovalOnDeath() {
+		World world = createWorld(10, 10);
+		EntityManager em = new EntityManager(world);
+		
+		// Create a sheep with energy 1 so that it dies after energy reduction.
+		SheepEntity sheep = new SheepEntity(world, 1, 1, 1);
+		em.addEntity(sheep);
+
+		em.updateCycle();
+		assertNull(em.getEntityById(sheep.getId()), "A dead sheep should be removed from the entity map");
+		assertFalse(em.getEntities().contains(sheep), "The entities list should not include a dead sheep");
+	}
+```
+
+```java
+	// Sheep should flee when a wolf is nearby.
+	@Test
+	public void testSheepFleesFromWolf() {
+		World world = createWorld(10, 10);
+		
+		SheepEntity sheep = new SheepEntity(world, 5, 5, SharedConstants.SHEEP_ENERGY_DEFAULT);
+		WolfEntity wolf = new WolfEntity(world, 5, 4, SharedConstants.WOLF_ENERGY_DEFAULT);
+		world.getTile(5, 5).addEntity(sheep);
+		world.getTile(5, 4).addEntity(wolf);
+
+		BasicEntity.Request request = sheep.getNextRequest();
+		assertNotNull(request, "Sheep request should not be null");
+		assertEquals(BasicEntity.ActionType.MOVE, request.type, "Sheep should move to flee from a nearby wolf");
+		assertNotNull(request.direction, "Fleeing move should have a direction");
+	}
+```
+
+```java
+	// Wolf should detect an adjacent sheep and attempt to interact (eat it)
+	@Test
+	public void testWolfSeeksSheep() {
+		World world = createWorld(10, 10);
+		WolfEntity wolf = new WolfEntity(world, 5, 5, SharedConstants.WOLF_ENERGY_DEFAULT);
+		SheepEntity sheep = new SheepEntity(world, 5, 6, SharedConstants.SHEEP_ENERGY_DEFAULT);
+		world.getTile(5, 5).addEntity(wolf);
+		world.getTile(5, 6).addEntity(sheep);
+
+		// Wolf should see the sheep and, since it is adjacent, return an INTERACT request.
+		BasicEntity.Request request = wolf.getNextRequest();
+		assertNotNull(request, "Wolf request should not be null");
+		assertEquals(BasicEntity.ActionType.INTERACT, request.type, "Wolf should interact when a sheep is adjacent");
+		assertEquals(sheep.getId(), request.targetId, "Wolf should target the sheep's id");
+	}
+```
+
+Qui invece vengono riportati alcuni test della parte di rendering e javaFX:
+
+```java
+	// rectangle completely outside the canvas is not visible.
+	@Test
+	public void testCullingNonVisibleRect() {
+		boolean visible = CullingHandler.isRectVisible(-200, -200, 50, 50, 500, 500);
+		assertFalse(visible, "Rectangle outside canvas should not be visible");
+	}
+```
+
+```java
+	// TopDownRenderer.computeCenterOffset returns the proper centered offset.
+	@Test
+	public void testTopDownRendererComputeCenterOffset() {
+		TopDownRenderer renderer = new TopDownRenderer();
+		double canvasWidth = 800;
+		double canvasHeight = 600;
+		int gridCols = 10;
+		int gridRows = 10;
+		double scale = 1.0;
+		double tileWidth = SharedConstants.TILE_WIDTH;
+		double tileHeight = SharedConstants.TILE_HEIGHT;
+		double gridWidth = gridCols * tileWidth * scale;
+		double gridHeight = gridRows * tileHeight * 2 * scale;
+		Point2D expected = new Point2D((canvasWidth - gridWidth) / 2.0, (canvasHeight - gridHeight) / 2.0);
+		Point2D actual = renderer.computeCenterOffset(canvasWidth, canvasHeight, gridCols, gridRows, scale);
+		assertEquals(expected.getX(), actual.getX(), 0.0001, "Center offset X should match");
+		assertEquals(expected.getY(), actual.getY(), 0.0001, "Center offset Y should match");
+	}
+```
+
+```java
+	// Validate toggle view mode in ViewControlsHandler.
+	@Test
+	public void testToggleViewMode() {
+		
+		// Create a dummy StackView with an initial isometric renderer.
+		StackView<StackView.Renderable> stackView = new StackView<>(800, 600, true);
+		
+		// Ensure the initial renderer is isometric.
+		stackView.setGeometryRenderer(new IsometricRenderer());
+		ViewControlsHandler controlsHandler = new ViewControlsHandler(stackView);
+		
+		// Initially, the geometry renderer should be an instance of IsometricRenderer.
+		assertTrue(stackView.getGeometryRenderer() instanceof IsometricRenderer, "Initial geometry renderer should be IsometricRenderer");
+		
+		// Toggle view mode: IsometricRenderer --> TopDownRenderer.
+		controlsHandler.toggleViewMode();
+		assertTrue(stackView.getGeometryRenderer() instanceof it.unibo.pss.view.geometry.TopDownRenderer, "After toggling, geometry renderer should be TopDownRenderer");
+		
+		// TopDownRenderer --> IsometricRenderer
+		controlsHandler.toggleViewMode();
+		assertTrue(stackView.getGeometryRenderer() instanceof IsometricRenderer, "After second toggle, geometry renderer should be IsometricRenderer again");
+	}
+```
+
+```java
+	// Verify that TopDownRenderer.screenToGrid converts a screen point to the correct grid coordinates.
+	@Test
+	public void testTopDownRendererScreenToGrid() {
+		TopDownRenderer renderer = new TopDownRenderer();
+		double scale = 1.0;
+		
+		// Assume camera offset is (0,0) for simplicity.
+		Point2D cameraOffset = new Point2D(0, 0);
+		double tileWidth = SharedConstants.TILE_WIDTH;
+		double tileHeight = SharedConstants.TILE_HEIGHT;
+		
+		// Pick a point inside the tile at grid (2,3)
+		double screenX = 2 * tileWidth * scale + 5;
+		double screenY = 3 * (tileHeight * 2 * scale) + 10;
+		Point2D screenPoint = new Point2D(screenX, screenY);
+		Point2D gridPoint = renderer.screenToGrid(screenPoint, scale, cameraOffset);
+		assertEquals(2, gridPoint.getX(), "Screen point should map to grid X coordinate 2");
+		assertEquals(3, gridPoint.getY(), "Screen point should map to grid Y coordinate 3");
+	}
+```
+
 ## Note di sviluppo
 
 ### Seck
