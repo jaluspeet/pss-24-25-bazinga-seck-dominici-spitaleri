@@ -533,163 +533,163 @@ lasciando a un futuro collaboratore il compito di espandere su una base solida.
 Qui vengono riportati alcuni test della simulazione:
 
 ```java
-	// Processing a MOVE action should update the entity's position and reduce its energy.
-	@Test
-	public void testProcessMoveAction() {
-		World world = createWorld(10, 10);
+// Processing a MOVE action should update the entity's position and reduce its energy.
+@Test
+public void testProcessMoveAction() {
+	World world = createWorld(10, 10);
+
+	world.setTile(2, 2, world.new Tile(2, 2, World.Tile.TileType.LAND));
+	world.setTile(3, 2, world.new Tile(3, 2, World.Tile.TileType.LAND));
+	SheepEntity sheep = new SheepEntity(world, 2, 2, SharedConstants.SHEEP_ENERGY_DEFAULT);
+	world.getTile(2, 2).addEntity(sheep);
+
+	EntityManager em = new EntityManager(world);
+	em.addEntity(sheep);
+	ActionHandler handler = new ActionHandler(world, em);
+
+	// Create a move right request.
+	BasicEntity.Request moveRequest = new BasicEntity.Request(BasicEntity.ActionType.MOVE, BasicEntity.Direction.RIGHT);
+	ActionHandler.RequestWrapper wrapper = new ActionHandler.RequestWrapper(sheep, moveRequest);
+	List<ActionHandler.Action> actions = handler.validateRequests(List.of(wrapper));
+	assertFalse(actions.isEmpty(), "Move request should be valid");
+	handler.processActions(actions);
+
+	assertEquals(3, sheep.getX(), "Sheep's X coordinate should update after moving right");
+	assertEquals(2, sheep.getY(), "Sheep's Y coordinate should remain the same");
+	assertEquals(SharedConstants.SHEEP_ENERGY_DEFAULT - 1, sheep.getEnergy(), "Energy should be reduced by 1 after moving");
+}
+```
+
+```java
+// Entities that reach 0 energy should be removed from the simulation.
+@Test
+public void testEntityRemovalOnDeath() {
+	World world = createWorld(10, 10);
+	EntityManager em = new EntityManager(world);
 	
-		world.setTile(2, 2, world.new Tile(2, 2, World.Tile.TileType.LAND));
-		world.setTile(3, 2, world.new Tile(3, 2, World.Tile.TileType.LAND));
-		SheepEntity sheep = new SheepEntity(world, 2, 2, SharedConstants.SHEEP_ENERGY_DEFAULT);
-		world.getTile(2, 2).addEntity(sheep);
+	// Create a sheep with energy 1 so that it dies after energy reduction.
+	SheepEntity sheep = new SheepEntity(world, 1, 1, 1);
+	em.addEntity(sheep);
 
-		EntityManager em = new EntityManager(world);
-		em.addEntity(sheep);
-		ActionHandler handler = new ActionHandler(world, em);
-
-		// Create a move right request.
-		BasicEntity.Request moveRequest = new BasicEntity.Request(BasicEntity.ActionType.MOVE, BasicEntity.Direction.RIGHT);
-		ActionHandler.RequestWrapper wrapper = new ActionHandler.RequestWrapper(sheep, moveRequest);
-		List<ActionHandler.Action> actions = handler.validateRequests(List.of(wrapper));
-		assertFalse(actions.isEmpty(), "Move request should be valid");
-		handler.processActions(actions);
-
-		assertEquals(3, sheep.getX(), "Sheep's X coordinate should update after moving right");
-		assertEquals(2, sheep.getY(), "Sheep's Y coordinate should remain the same");
-		assertEquals(SharedConstants.SHEEP_ENERGY_DEFAULT - 1, sheep.getEnergy(), "Energy should be reduced by 1 after moving");
-	}
+	em.updateCycle();
+	assertNull(em.getEntityById(sheep.getId()), "A dead sheep should be removed from the entity map");
+	assertFalse(em.getEntities().contains(sheep), "The entities list should not include a dead sheep");
+}
 ```
 
 ```java
-	// Entities that reach 0 energy should be removed from the simulation.
-	@Test
-	public void testEntityRemovalOnDeath() {
-		World world = createWorld(10, 10);
-		EntityManager em = new EntityManager(world);
-		
-		// Create a sheep with energy 1 so that it dies after energy reduction.
-		SheepEntity sheep = new SheepEntity(world, 1, 1, 1);
-		em.addEntity(sheep);
+// Sheep should flee when a wolf is nearby.
+@Test
+public void testSheepFleesFromWolf() {
+	World world = createWorld(10, 10);
+	
+	SheepEntity sheep = new SheepEntity(world, 5, 5, SharedConstants.SHEEP_ENERGY_DEFAULT);
+	WolfEntity wolf = new WolfEntity(world, 5, 4, SharedConstants.WOLF_ENERGY_DEFAULT);
+	world.getTile(5, 5).addEntity(sheep);
+	world.getTile(5, 4).addEntity(wolf);
 
-		em.updateCycle();
-		assertNull(em.getEntityById(sheep.getId()), "A dead sheep should be removed from the entity map");
-		assertFalse(em.getEntities().contains(sheep), "The entities list should not include a dead sheep");
-	}
+	BasicEntity.Request request = sheep.getNextRequest();
+	assertNotNull(request, "Sheep request should not be null");
+	assertEquals(BasicEntity.ActionType.MOVE, request.type, "Sheep should move to flee from a nearby wolf");
+	assertNotNull(request.direction, "Fleeing move should have a direction");
+}
 ```
 
 ```java
-	// Sheep should flee when a wolf is nearby.
-	@Test
-	public void testSheepFleesFromWolf() {
-		World world = createWorld(10, 10);
-		
-		SheepEntity sheep = new SheepEntity(world, 5, 5, SharedConstants.SHEEP_ENERGY_DEFAULT);
-		WolfEntity wolf = new WolfEntity(world, 5, 4, SharedConstants.WOLF_ENERGY_DEFAULT);
-		world.getTile(5, 5).addEntity(sheep);
-		world.getTile(5, 4).addEntity(wolf);
+// Wolf should detect an adjacent sheep and attempt to interact (eat it)
+@Test
+public void testWolfSeeksSheep() {
+	World world = createWorld(10, 10);
+	WolfEntity wolf = new WolfEntity(world, 5, 5, SharedConstants.WOLF_ENERGY_DEFAULT);
+	SheepEntity sheep = new SheepEntity(world, 5, 6, SharedConstants.SHEEP_ENERGY_DEFAULT);
+	world.getTile(5, 5).addEntity(wolf);
+	world.getTile(5, 6).addEntity(sheep);
 
-		BasicEntity.Request request = sheep.getNextRequest();
-		assertNotNull(request, "Sheep request should not be null");
-		assertEquals(BasicEntity.ActionType.MOVE, request.type, "Sheep should move to flee from a nearby wolf");
-		assertNotNull(request.direction, "Fleeing move should have a direction");
-	}
-```
-
-```java
-	// Wolf should detect an adjacent sheep and attempt to interact (eat it)
-	@Test
-	public void testWolfSeeksSheep() {
-		World world = createWorld(10, 10);
-		WolfEntity wolf = new WolfEntity(world, 5, 5, SharedConstants.WOLF_ENERGY_DEFAULT);
-		SheepEntity sheep = new SheepEntity(world, 5, 6, SharedConstants.SHEEP_ENERGY_DEFAULT);
-		world.getTile(5, 5).addEntity(wolf);
-		world.getTile(5, 6).addEntity(sheep);
-
-		// Wolf should see the sheep and, since it is adjacent, return an INTERACT request.
-		BasicEntity.Request request = wolf.getNextRequest();
-		assertNotNull(request, "Wolf request should not be null");
-		assertEquals(BasicEntity.ActionType.INTERACT, request.type, "Wolf should interact when a sheep is adjacent");
-		assertEquals(sheep.getId(), request.targetId, "Wolf should target the sheep's id");
-	}
+	// Wolf should see the sheep and, since it is adjacent, return an INTERACT request.
+	BasicEntity.Request request = wolf.getNextRequest();
+	assertNotNull(request, "Wolf request should not be null");
+	assertEquals(BasicEntity.ActionType.INTERACT, request.type, "Wolf should interact when a sheep is adjacent");
+	assertEquals(sheep.getId(), request.targetId, "Wolf should target the sheep's id");
+}
 ```
 
 Qui invece vengono riportati alcuni test della parte di rendering e javaFX:
 
 ```java
-	// rectangle completely outside the canvas is not visible.
-	@Test
-	public void testCullingNonVisibleRect() {
-		boolean visible = CullingHandler.isRectVisible(-200, -200, 50, 50, 500, 500);
-		assertFalse(visible, "Rectangle outside canvas should not be visible");
-	}
+// rectangle completely outside the canvas is not visible.
+@Test
+public void testCullingNonVisibleRect() {
+	boolean visible = CullingHandler.isRectVisible(-200, -200, 50, 50, 500, 500);
+	assertFalse(visible, "Rectangle outside canvas should not be visible");
+}
 ```
 
 ```java
-	// TopDownRenderer.computeCenterOffset returns the proper centered offset.
-	@Test
-	public void testTopDownRendererComputeCenterOffset() {
-		TopDownRenderer renderer = new TopDownRenderer();
-		double canvasWidth = 800;
-		double canvasHeight = 600;
-		int gridCols = 10;
-		int gridRows = 10;
-		double scale = 1.0;
-		double tileWidth = SharedConstants.TILE_WIDTH;
-		double tileHeight = SharedConstants.TILE_HEIGHT;
-		double gridWidth = gridCols * tileWidth * scale;
-		double gridHeight = gridRows * tileHeight * 2 * scale;
-		Point2D expected = new Point2D((canvasWidth - gridWidth) / 2.0, (canvasHeight - gridHeight) / 2.0);
-		Point2D actual = renderer.computeCenterOffset(canvasWidth, canvasHeight, gridCols, gridRows, scale);
-		assertEquals(expected.getX(), actual.getX(), 0.0001, "Center offset X should match");
-		assertEquals(expected.getY(), actual.getY(), 0.0001, "Center offset Y should match");
-	}
+// TopDownRenderer.computeCenterOffset returns the proper centered offset.
+@Test
+public void testTopDownRendererComputeCenterOffset() {
+	TopDownRenderer renderer = new TopDownRenderer();
+	double canvasWidth = 800;
+	double canvasHeight = 600;
+	int gridCols = 10;
+	int gridRows = 10;
+	double scale = 1.0;
+	double tileWidth = SharedConstants.TILE_WIDTH;
+	double tileHeight = SharedConstants.TILE_HEIGHT;
+	double gridWidth = gridCols * tileWidth * scale;
+	double gridHeight = gridRows * tileHeight * 2 * scale;
+	Point2D expected = new Point2D((canvasWidth - gridWidth) / 2.0, (canvasHeight - gridHeight) / 2.0);
+	Point2D actual = renderer.computeCenterOffset(canvasWidth, canvasHeight, gridCols, gridRows, scale);
+	assertEquals(expected.getX(), actual.getX(), 0.0001, "Center offset X should match");
+	assertEquals(expected.getY(), actual.getY(), 0.0001, "Center offset Y should match");
+}
 ```
 
 ```java
-	// Validate toggle view mode in ViewControlsHandler.
-	@Test
-	public void testToggleViewMode() {
-		
-		// Create a dummy StackView with an initial isometric renderer.
-		StackView<StackView.Renderable> stackView = new StackView<>(800, 600, true);
-		
-		// Ensure the initial renderer is isometric.
-		stackView.setGeometryRenderer(new IsometricRenderer());
-		ViewControlsHandler controlsHandler = new ViewControlsHandler(stackView);
-		
-		// Initially, the geometry renderer should be an instance of IsometricRenderer.
-		assertTrue(stackView.getGeometryRenderer() instanceof IsometricRenderer, "Initial geometry renderer should be IsometricRenderer");
-		
-		// Toggle view mode: IsometricRenderer --> TopDownRenderer.
-		controlsHandler.toggleViewMode();
-		assertTrue(stackView.getGeometryRenderer() instanceof it.unibo.pss.view.geometry.TopDownRenderer, "After toggling, geometry renderer should be TopDownRenderer");
-		
-		// TopDownRenderer --> IsometricRenderer
-		controlsHandler.toggleViewMode();
-		assertTrue(stackView.getGeometryRenderer() instanceof IsometricRenderer, "After second toggle, geometry renderer should be IsometricRenderer again");
-	}
+// Validate toggle view mode in ViewControlsHandler.
+@Test
+public void testToggleViewMode() {
+	
+	// Create a dummy StackView with an initial isometric renderer.
+	StackView<StackView.Renderable> stackView = new StackView<>(800, 600, true);
+	
+	// Ensure the initial renderer is isometric.
+	stackView.setGeometryRenderer(new IsometricRenderer());
+	ViewControlsHandler controlsHandler = new ViewControlsHandler(stackView);
+	
+	// Initially, the geometry renderer should be an instance of IsometricRenderer.
+	assertTrue(stackView.getGeometryRenderer() instanceof IsometricRenderer, "Initial geometry renderer should be IsometricRenderer");
+	
+	// Toggle view mode: IsometricRenderer --> TopDownRenderer.
+	controlsHandler.toggleViewMode();
+	assertTrue(stackView.getGeometryRenderer() instanceof it.unibo.pss.view.geometry.TopDownRenderer, "After toggling, geometry renderer should be TopDownRenderer");
+	
+	// TopDownRenderer --> IsometricRenderer
+	controlsHandler.toggleViewMode();
+	assertTrue(stackView.getGeometryRenderer() instanceof IsometricRenderer, "After second toggle, geometry renderer should be IsometricRenderer again");
+}
 ```
 
 ```java
-	// Verify that TopDownRenderer.screenToGrid converts a screen point to the correct grid coordinates.
-	@Test
-	public void testTopDownRendererScreenToGrid() {
-		TopDownRenderer renderer = new TopDownRenderer();
-		double scale = 1.0;
-		
-		// Assume camera offset is (0,0) for simplicity.
-		Point2D cameraOffset = new Point2D(0, 0);
-		double tileWidth = SharedConstants.TILE_WIDTH;
-		double tileHeight = SharedConstants.TILE_HEIGHT;
-		
-		// Pick a point inside the tile at grid (2,3)
-		double screenX = 2 * tileWidth * scale + 5;
-		double screenY = 3 * (tileHeight * 2 * scale) + 10;
-		Point2D screenPoint = new Point2D(screenX, screenY);
-		Point2D gridPoint = renderer.screenToGrid(screenPoint, scale, cameraOffset);
-		assertEquals(2, gridPoint.getX(), "Screen point should map to grid X coordinate 2");
-		assertEquals(3, gridPoint.getY(), "Screen point should map to grid Y coordinate 3");
-	}
+// Verify that TopDownRenderer.screenToGrid converts a screen point to the correct grid coordinates.
+@Test
+public void testTopDownRendererScreenToGrid() {
+	TopDownRenderer renderer = new TopDownRenderer();
+	double scale = 1.0;
+	
+	// Assume camera offset is (0,0) for simplicity.
+	Point2D cameraOffset = new Point2D(0, 0);
+	double tileWidth = SharedConstants.TILE_WIDTH;
+	double tileHeight = SharedConstants.TILE_HEIGHT;
+	
+	// Pick a point inside the tile at grid (2,3)
+	double screenX = 2 * tileWidth * scale + 5;
+	double screenY = 3 * (tileHeight * 2 * scale) + 10;
+	Point2D screenPoint = new Point2D(screenX, screenY);
+	Point2D gridPoint = renderer.screenToGrid(screenPoint, scale, cameraOffset);
+	assertEquals(2, gridPoint.getX(), "Screen point should map to grid X coordinate 2");
+	assertEquals(3, gridPoint.getY(), "Screen point should map to grid Y coordinate 3");
+}
 ```
 
 ## Note di sviluppo
@@ -727,25 +727,25 @@ Qui viene usata l'espansione flood-fill (anche detta seed fill) per la generazio
 
 ```java
 private static int createLake(World grid, int centerX, int centerY, int targetSize) {
-		Queue<World.Tile> queue = new LinkedList<>();
-		queue.add(grid.getTile(centerX, centerY));
-		Set<World.Tile> lakeTiles = new HashSet<>();
-		while (!queue.isEmpty() && lakeTiles.size() < targetSize) {
-			
-			World.Tile tile = queue.poll();
-			if (tile == null || lakeTiles.contains(tile)) continue;
-			
-			setTile(grid, tile.getX(), tile.getY(), World.Tile.TileType.WATER);
-			lakeTiles.add(tile);
-			List<int[]> directions = List.of(new int[]{1, 0}, new int[]{-1, 0}, new int[]{0, 1}, new int[]{0, -1});
-			
-			directions.stream()
-				.filter(dir -> random.nextDouble() < 0.8)
-				.map(dir -> grid.getTile(tile.getX() + dir[0], tile.getY() + dir[1]))
-				.forEach(queue::add);
-		}
-		return lakeTiles.size();
+	Queue<World.Tile> queue = new LinkedList<>();
+	queue.add(grid.getTile(centerX, centerY));
+	Set<World.Tile> lakeTiles = new HashSet<>();
+	while (!queue.isEmpty() && lakeTiles.size() < targetSize) {
+		
+		World.Tile tile = queue.poll();
+		if (tile == null || lakeTiles.contains(tile)) continue;
+		
+		setTile(grid, tile.getX(), tile.getY(), World.Tile.TileType.WATER);
+		lakeTiles.add(tile);
+		List<int[]> directions = List.of(new int[]{1, 0}, new int[]{-1, 0}, new int[]{0, 1}, new int[]{0, -1});
+		
+		directions.stream()
+			.filter(dir -> random.nextDouble() < 0.8)
+			.map(dir -> grid.getTile(tile.getX() + dir[0], tile.getY() + dir[1]))
+			.forEach(queue::add);
 	}
+	return lakeTiles.size();
+}
 ```
 Qui viene usato un semplice algoritmo di pathfinding per collegare tra loro i laghi con dei fiumi non perfettamente dritti
 
@@ -864,6 +864,149 @@ private void attachMouseHandler() {
 L'Handler del mouse si occupa di gestire i click del mouse, mandando un DTO al click di un tile e chiamando il metodo di highlight del tile in WorldView.
 
 ### Spitaleri
+
+![Conversione da coordinate isometriche a coordinate sulla griglia](https://github.com/jaluspeet/pss-24-25-bazinga-seck-dominici-spitaleri/blob/3476b7c641666872e985d0ebb2b3fd11d22a3fb6/src/main/java/it/unibo/pss/view/geometry/IsometricRenderer.java#L35)
+
+```java
+/**
+ * Returns the grid coordinates of the given isometric coordinates.
+ *
+ * @param isoX The x-coordinate of the isometric coordinates.
+ * @param isoY The y-coordinate of the isometric coordinates.
+ * @param offsetX The x-offset of the grid.
+ * @param offsetY The y-offset of the grid.
+ * @return The grid coordinates of the given isometric coordinates.
+ */
+@Override
+public Rectangle2D computeTileRect(int gridX, int gridY, double offsetX, double offsetY, double scale) {
+	Point2D isoCoords = getIsometricCoordinates(gridX, gridY, offsetX, offsetY);
+	double width = SharedConstants.SPRITE_WIDTH * scale;
+	double height = SharedConstants.SPRITE_HEIGHT * scale;
+	return new Rectangle2D(isoCoords.getX() * scale - width / 2, isoCoords.getY() * scale - height + (SharedConstants.SPRITE_HEIGHT / 2 * scale), width, height);
+}
+```
+
+![Interpolazione dei frame per le entità e rendering in batch](https://github.com/jaluspeet/pss-24-25-bazinga-seck-dominici-spitaleri/blob/3476b7c641666872e985d0ebb2b3fd11d22a3fb6/src/main/java/it/unibo/pss/view/views/EntityView.java#L96)
+
+```java
+/** 
+ * Override the render method to render all entities in the world grid.
+ *
+ * @param gc the graphics context.
+ * @param modelDTO the model data transfer object.
+ * @param camera the pan-zoom handler.
+ * @param renderer the geometry renderer.
+ * @param now the current timestamp.
+ */
+@Override
+public void render(GraphicsContext gc, ModelDTO modelDTO, PanZoomHandler camera, GeometryRenderer renderer, long now) {
+	World grid = modelDTO.getGrid();
+	double canvasWidth = gc.getCanvas().getWidth();
+	double canvasHeight = gc.getCanvas().getHeight();
+	Point2D cameraOffset = CameraOffsetHandler.computeCameraOffset(renderer, camera, canvasWidth, canvasHeight, grid.getWidth(), grid.getHeight());
+
+	// Collect all entities in the grid.
+	List<BasicEntity> allEntities = new ArrayList<>();
+	for (int x = 0; x < grid.getWidth(); x++) {
+		for (int y = 0; y < grid.getHeight(); y++) {
+			for (BasicEntity entity : grid.getTile(x, y).getEntities()) {
+				if (entity.isAlive()) {
+					allEntities.add(entity);
+				} else {
+					interpolationMap.remove(entity.getId());
+				}
+			}
+		}
+	}
+
+	// batch render entities by z-index.
+	for (int currentZ = 0; currentZ <= 2; currentZ++) {
+		for (BasicEntity entity : allEntities) {
+			if (entity.getZIndex() != currentZ)
+				continue;
+
+			// Compute the current grid position.
+			Point2D currentGridPos = new Point2D(entity.getX(), entity.getY());
+
+			// Retrieve or initialize interpolation data.
+			InterpolationData interpData = interpolationMap.get(entity.getId());
+			if (interpData == null) {
+				interpData = new InterpolationData(currentGridPos, now);
+				interpolationMap.put(entity.getId(), interpData);
+			} else {
+				interpData.update(currentGridPos, now);
+			}
+
+			// Compute the interpolation fraction using the passed timestamp.
+			double fraction = Math.min(1.0, (double) (now - interpData.lastUpdateTime) / INTERP_DURATION_NANO);
+
+			// Get the pixel rectangles for the previous and current grid positions.
+			Rectangle2D prevRect = renderer.computeTileRect((int) interpData.previous.getX(), (int) interpData.previous.getY(), cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
+			Rectangle2D currRect = renderer.computeTileRect((int) interpData.current.getX(), (int) interpData.current.getY(), cameraOffset.getX(), cameraOffset.getY(), camera.getScale());
+
+			// Linearly interpolate the top-left coordinates.
+			double interpMinX = prevRect.getMinX() + fraction * (currRect.getMinX() - prevRect.getMinX());
+			double interpMinY = prevRect.getMinY() + fraction * (currRect.getMinY() - prevRect.getMinY());
+			Rectangle2D interpolatedRect = new Rectangle2D(interpMinX, interpMinY, currRect.getWidth(), currRect.getHeight());
+
+			// Skip rendering if the entity is not visible.
+			if (!CullingHandler.isRectVisible(interpolatedRect.getMinX(), interpolatedRect.getMinY(), interpolatedRect.getWidth(), interpolatedRect.getHeight(), canvasWidth, canvasHeight))
+				continue;
+
+			// Render the entity sprite.
+			String actionKey = modelDTO.getEntityActions().getOrDefault(entity.getId(), "IDLE");
+			Image sprite = spriteLoader.getEntitySprite(entity, actionKey);
+			if (sprite != null) {
+				double spriteSizeX = sprite.getWidth() * camera.getScale();
+				double spriteSizeY = sprite.getHeight() * camera.getScale();
+				double drawX = interpolatedRect.getMinX() + interpolatedRect.getWidth() / 2 - spriteSizeX / 2;
+				double drawY = interpolatedRect.getMinY() + interpolatedRect.getHeight() - spriteSizeY;
+				gc.drawImage(sprite, drawX, drawY, spriteSizeX, spriteSizeY);
+			}
+		}
+	}
+}
+```
+
+![Caricamento degli sprite per le entità, con creazione e caching per ID di varianti della stessa tipologia (pecora nera, pecora bianca, ...)](https://github.com/jaluspeet/pss-24-25-bazinga-seck-dominici-spitaleri/blob/3476b7c641666872e985d0ebb2b3fd11d22a3fb6/src/main/java/it/unibo/pss/view/sprites/EntitySpriteLoader.java#L57)
+
+```java
+/**
+ * Returns the sprite for the given entity and action.
+ *
+ * @param entity    the entity.
+ * @param actionKey the action key.
+ * @return the sprite image.
+ */
+public Image getEntitySprite(BasicEntity entity, String actionKey) {
+	SpriteConfig config = getSpriteConfigForEntity(entity);
+	String baseKey = (config.getPrefix() + actionKey).toLowerCase(Locale.ROOT);
+
+	Image chosen = getPreviouslyChosen(entity.getId(), baseKey);
+	if (chosen != null) return chosen;
+
+	List<Image> variants = variantCache.computeIfAbsent(baseKey, k -> Collections.synchronizedList(loadAllVariants(config.getSubFolder(), k)));
+	if (!variants.isEmpty()) {
+		chosen = pickRandom(variants);
+		storeChoice(entity.getId(), baseKey, chosen);
+		return chosen;
+	}
+
+	// Fallback to idle image if no action variants are found.
+	String fallbackKey = (config.getPrefix() + "idle").toLowerCase(Locale.ROOT);
+	chosen = getPreviouslyChosen(entity.getId(), fallbackKey);
+	if (chosen != null) return chosen;
+
+	List<Image> idleVariants = variantCache.computeIfAbsent(fallbackKey, k -> Collections.synchronizedList(loadAllVariants(config.getSubFolder(), k)));
+	if (!idleVariants.isEmpty()) {
+		chosen = pickRandom(idleVariants);
+		storeChoice(entity.getId(), fallbackKey, chosen);
+		return chosen;
+	}
+
+	return null;
+}
+```
 
 ## Commenti finali
 ### Spitaleri
