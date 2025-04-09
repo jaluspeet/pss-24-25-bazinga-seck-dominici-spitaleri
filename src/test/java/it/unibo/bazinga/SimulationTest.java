@@ -91,8 +91,8 @@ public class SimulationTest {
 	public void testInvalidMoveIntoWaterForSheep() {
 		World world = createWorld(10, 10);
 
-		world.setTile(5, 5, world.new Tile(5, 5, World.Tile.TileType.LAND));
-		world.setTile(6, 5, world.new Tile(6, 5, World.Tile.TileType.WATER));
+		world.setTile(5, 5, new World.Tile(5, 5, World.Tile.TileType.LAND));
+		world.setTile(6, 5, new World.Tile(6, 5, World.Tile.TileType.WATER));
 		SheepEntity sheep = new SheepEntity(world, 5, 5, SharedConstants.SHEEP_ENERGY_DEFAULT);
 		world.getTile(5, 5).addEntity(sheep);
 
@@ -112,8 +112,8 @@ public class SimulationTest {
 	public void testProcessMoveAction() {
 		World world = createWorld(10, 10);
 	
-		world.setTile(2, 2, world.new Tile(2, 2, World.Tile.TileType.LAND));
-		world.setTile(3, 2, world.new Tile(3, 2, World.Tile.TileType.LAND));
+		world.setTile(2, 2, new World.Tile(2, 2, World.Tile.TileType.LAND));
+		world.setTile(3, 2, new World.Tile(3, 2, World.Tile.TileType.LAND));
 		SheepEntity sheep = new SheepEntity(world, 2, 2, SharedConstants.SHEEP_ENERGY_DEFAULT);
 		world.getTile(2, 2).addEntity(sheep);
 
@@ -138,9 +138,9 @@ public class SimulationTest {
 	public void testBazingaOffspringCreation() {
 		World world = createWorld(10, 10);
 	
-		world.setTile(4, 4, world.new Tile(4, 4, World.Tile.TileType.LAND));
-		world.setTile(5, 4, world.new Tile(5, 4, World.Tile.TileType.LAND));
-		world.setTile(4, 5, world.new Tile(4, 5, World.Tile.TileType.LAND));
+		world.setTile(4, 4, new World.Tile(4, 4, World.Tile.TileType.LAND));
+		world.setTile(5, 4, new World.Tile(5, 4, World.Tile.TileType.LAND));
+		world.setTile(4, 5, new World.Tile(4, 5, World.Tile.TileType.LAND));
 
 		// Create two sheep with energy above the bazinga threshold.
 		SheepEntity sheep1 = new SheepEntity(world, 4, 4, SharedConstants.SHEEP_ENERGY_DEFAULT + SharedConstants.SHEEP_ENERGY_BAZINGA);

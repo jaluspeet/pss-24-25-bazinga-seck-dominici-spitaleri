@@ -109,10 +109,18 @@ public abstract class BasicEntity {
 		for (Direction dir : Direction.values()) {
 			int newX = x, newY = y;
 			switch (dir) {
-				case UP -> newY--;
-				case DOWN -> newY++;
-				case LEFT -> newX--;
-				case RIGHT -> newX++;
+				case UP:
+					newY--;
+					break;
+				case DOWN:
+					newY++;
+					break;
+				case LEFT:
+					newX--;
+					break;
+				case RIGHT:
+					newX++;
+					break;
 			}
 			int newDist = Math.abs(newX - entity.getX()) + Math.abs(newY - entity.getY());
 			if (newDist > maxDist) {

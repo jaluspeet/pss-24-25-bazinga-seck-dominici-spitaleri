@@ -55,22 +55,19 @@ public class Controller extends Application implements ModelObserver, ViewObserv
 	@Override
 	public void onViewAction(ViewDTO viewDTO) {
 		switch (viewDTO.getCommand().getType()) {
-			case SPEED -> {
+			case SPEED:
 				ViewDTO.SpeedCommand speedCmd = (ViewDTO.SpeedCommand) viewDTO.getCommand();
 				int current = model.getUpdateInterval();
-				int newInterval = (speedCmd.getDelta() < 0)
-					? Math.max(100, current - 100)
-					: Math.min(1500, current + 100);
-				
+				int newInterval = (speedCmd.getDelta() < 0) ? Math.max(100, current - 100) : Math.min(1500, current + 100);
 				model.setUpdateInterval(newInterval);
-			}
-			case TILE_CLICK -> {
+				break;
+			case TILE_CLICK:
 				ViewDTO.EntityTileClickCommand clickCmd = (ViewDTO.EntityTileClickCommand) viewDTO.getCommand();
 				String actions = model.getTileActions(clickCmd.getTileX(), clickCmd.getTileY());
 				view.setActionText(actions);
-			}
-			default -> {
-			}
+				break;
+			default:
+				break;
 		}
 	}
 

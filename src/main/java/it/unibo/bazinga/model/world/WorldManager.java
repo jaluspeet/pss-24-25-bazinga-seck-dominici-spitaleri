@@ -23,7 +23,8 @@ public final class WorldManager {
 
 	// set a tile at (x, y) to the given type
 	private static void setTile(World grid, int x, int y, World.Tile.TileType type) {
-		grid.setTile(x, y, grid.new Tile(x, y, type));
+		grid.setTile(x, y, new World.Tile(x, y, type));
+		// grid.setTile(x, y, grid.new Tile(x, y, type));
 	}
 
 	// generate a new world grid with terrain generation

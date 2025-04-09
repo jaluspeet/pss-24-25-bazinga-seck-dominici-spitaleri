@@ -96,7 +96,8 @@ public class EntityManager {
 		for (BasicEntity entity : new ArrayList<>(entities)) {
 			if (!entity.isAlive()) {
 				removeEntity(entity);
-				if (entity instanceof PlantEntity plant) {
+				if (entity instanceof PlantEntity) {
+					PlantEntity plant = (PlantEntity) entity;
 					plant.setResurrectionDelay(SharedConstants.PLANT_RESURRECTION_TIME);
 					deadPlants.add(plant);
 				}

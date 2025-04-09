@@ -63,7 +63,7 @@ public class WorldSpriteLoader {
 	 */
 	public Image getTileSprite(World.Tile tile, long now) {
 		if (tile.getType() == World.Tile.TileType.LAND) {
-			return cache.computeIfAbsent(tile, _ -> getRandomSprite(landSprites));
+			return cache.computeIfAbsent(tile, e -> getRandomSprite(landSprites));
 		}
 		if (waterSprites.isEmpty()) return null;
 		long currentMillis = now / 1_000_000;

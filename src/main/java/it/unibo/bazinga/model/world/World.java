@@ -109,7 +109,7 @@ public class World {
 	/**
 	 * Represents a tile in the world map.
 	 */
-	public class Tile {
+	public static class Tile {
 		private final int x;
 		private final int y;
 		private final TileType type;

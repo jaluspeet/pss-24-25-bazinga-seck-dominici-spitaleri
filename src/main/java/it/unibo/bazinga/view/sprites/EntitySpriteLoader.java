@@ -155,7 +155,7 @@ public class EntitySpriteLoader {
 	}
 
 	private void storeChoice(int entityId, String baseKey, Image chosen) {
-		chosenCache.computeIfAbsent(entityId, _ -> new ConcurrentHashMap<>()).put(baseKey, chosen);
+		chosenCache.computeIfAbsent(entityId, e -> new ConcurrentHashMap<>()).put(baseKey, chosen);
 	}
 }
 

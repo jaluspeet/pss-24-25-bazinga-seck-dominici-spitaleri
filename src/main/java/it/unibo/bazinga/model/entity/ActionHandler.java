@@ -55,9 +55,17 @@ public class ActionHandler {
 	public List<Action> validateRequests(List<RequestWrapper> requests) {
 		List<Action> approvedActions = new ArrayList<>();
 		for (RequestWrapper rw : requests) {
-			boolean validated = switch (rw.request.type) {
-				case MOVE -> validateMove(rw.entity, rw.request.direction);
-				case INTERACT -> validateInteract(rw.entity, rw.request.targetId);
+			boolean validated;
+			switch (rw.request.type) {
+				case MOVE:
+					validated = validateMove(rw.entity, rw.request.direction);
+					break;
+				case INTERACT:
+					validated = validateInteract(rw.entity, rw.request.targetId);
+					break;
+				default:
+					validated = false;
+					break;
 			};
 
 			if (validated) { approvedActions.add(new Action(rw.entity, rw.request)); } 
@@ -75,8 +83,12 @@ public class ActionHandler {
 		for (Action action : actions) {
 			BasicEntity.Request req = action.request;
 			switch (req.type) {
-				case MOVE -> processMove(action.entity, req.direction);
-				case INTERACT -> processInteract(action.entity, req.targetId);
+				case MOVE:
+					processMove(action.entity, req.direction);
+					break;
+				case INTERACT:
+					processInteract(action.entity, req.targetId);
+					break;
 			}
 			action.entity.transitionState(true);
 		}
@@ -97,10 +109,18 @@ public class ActionHandler {
 		int newX = entity.getX();
 		int newY = entity.getY();
 		switch (dir) {
-			case UP -> newY--;
-			case DOWN -> newY++;
-			case LEFT -> newX--;
-			case RIGHT -> newX++;
+			case UP: 
+				newY--;
+				break;
+			case DOWN: 
+				newY++;
+				break;
+			case LEFT: 
+				newX--;
+				break;
+			case RIGHT:
+				newX++;
+				break;
 		}
 
 		Tile tile = world.getTile(newX, newY);
@@ -140,10 +160,18 @@ public class ActionHandler {
 		int newX = entity.getX();
 		int newY = entity.getY();
 		switch (dir) {
-			case UP -> newY--;
-			case DOWN -> newY++;
-			case LEFT -> newX--;
-			case RIGHT -> newX++;
+			case UP:
+				newY--;
+				break;
+			case DOWN:
+				newY++;
+				break;
+			case LEFT:
+				newX--;
+				break;
+			case RIGHT: 
+				newX++;
+				break;
 		}
 		Tile currentTile = world.getTile(entity.getX(), entity.getY());
 		Tile targetTile  = world.getTile(newX, newY);
